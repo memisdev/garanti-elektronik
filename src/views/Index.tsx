@@ -117,14 +117,16 @@ const Index = () => {
                 >
                   <div className="aspect-[4/3] md:aspect-auto md:w-1/2 bg-muted/30 flex items-center justify-center p-12 md:p-20 overflow-hidden relative">
                     <div className="absolute inset-0 bg-gradient-to-br from-muted/30 to-transparent" />
-                    <Image
-                      src={heroProduct.images[0]}
-                      alt={heroProduct.name}
-                      width={490}
-                      height={490}
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      className="max-h-[280px] md:max-h-[380px] max-w-full object-contain hero-product-image relative z-10"
-                    />
+                    {heroProduct.images[0] && (
+                      <Image
+                        src={heroProduct.images[0]}
+                        alt={heroProduct.name}
+                        width={490}
+                        height={490}
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="max-h-[280px] md:max-h-[380px] max-w-full object-contain hero-product-image relative z-10"
+                      />
+                    )}
                   </div>
                   <div className="md:w-1/2 p-10 md:p-14 flex flex-col justify-center relative z-10">
                     <span className="text-[11px] font-bold text-accent uppercase tracking-[0.15em] mb-4">

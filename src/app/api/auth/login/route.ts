@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
   });
 
   if (error) {
-    console.warn(`Failed login attempt for ${email} from ${ip}`);
+    console.warn(`Failed login attempt from ${ip}`);
     return NextResponse.json(
       {
         error:
@@ -64,12 +64,19 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Check admin role
+  if (!data.user) {
+    return NextResponse.json(
+      { error: "Giriş başarısız. Lütfen tekrar deneyin." },
+      { status: 401 },
+    );
+  }
+
+  // Check admin/editor role
   const { data: roleData } = await supabase
     .from("user_roles")
     .select("role")
     .eq("user_id", data.user.id)
-    .eq("role", "admin")
+    .in("role", ["admin", "editor"])
     .maybeSingle();
 
   if (!roleData) {

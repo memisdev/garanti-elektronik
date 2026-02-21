@@ -11,8 +11,16 @@ import { ProductJsonLd } from "@/components/seo/JsonLd";
 
 const ProductPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { product } = useProduct(slug);
+  const { product, loading } = useProduct(slug);
   const contentRef = useRevealOnScroll();
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-6 py-32 text-center">
+        <div className="w-8 h-8 border-2 border-accent/30 border-t-accent rounded-full animate-spin mx-auto" />
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -30,8 +38,8 @@ const ProductPage = () => {
     <div>
       <ProductJsonLd
         name={product.name}
-        description={product.compatibility}
-        image={product.images[0]}
+        description={product.compatibility ?? ""}
+        image={product.images[0] ?? ""}
         sku={product.code}
         brand={product.brand}
         url={`${siteConfig.url}/urun/${product.slug}`}
@@ -54,7 +62,11 @@ const ProductPage = () => {
         <div className="container mx-auto px-6 py-16 md:py-24">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
             <div className="reveal-on-scroll aspect-square bg-card rounded-2xl relative overflow-hidden border border-border/40">
-              <Image src={product.images[0]} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-contain p-12" />
+              {product.images[0] ? (
+                <Image src={product.images[0]} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-contain p-12" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">Görsel yok</div>
+              )}
             </div>
 
             <div className="reveal-on-scroll delay-1">

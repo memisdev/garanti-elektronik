@@ -3,6 +3,37 @@ import { createServiceClient } from "@/lib/supabase/admin";
 import { getChatConfig } from "@/lib/ai/client";
 import { rateLimit } from "@/lib/rate-limit";
 
+// Cache product catalog in memory with 5-minute TTL
+let productCache: { data: string; timestamp: number } | null = null;
+const CACHE_TTL = 5 * 60 * 1000;
+
+async function getProductList(): Promise<string> {
+  if (productCache && Date.now() - productCache.timestamp < CACHE_TTL) {
+    return productCache.data;
+  }
+
+  const sb = createServiceClient();
+  const { data: products } = await sb
+    .from("products")
+    .select(
+      "id, name, slug, code, compatibility, brands(name), categories(name)",
+    );
+
+  const productList = (products ?? []).map((p: Record<string, unknown>) => ({
+    id: p.id,
+    name: p.name,
+    slug: p.slug,
+    code: p.code,
+    compatibility: p.compatibility,
+    brand: (p.brands as { name: string } | null)?.name ?? null,
+    category: (p.categories as { name: string } | null)?.name ?? null,
+  }));
+
+  const serialized = JSON.stringify(productList, null, 0);
+  productCache = { data: serialized, timestamp: Date.now() };
+  return serialized;
+}
+
 export async function POST(req: NextRequest) {
   // Rate limiting
   const ip =
@@ -19,33 +50,37 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { message, history } = await req.json();
+    const body = await req.json();
+    const message = typeof body.message === "string" ? body.message.trim() : "";
     if (!message) {
       return NextResponse.json(
         { error: "message is required" },
         { status: 400 },
       );
     }
-
-    const sb = createServiceClient();
-
-    // Fetch all products with brand/category info
-    const { data: products } = await sb
-      .from("products")
-      .select(
-        "id, name, slug, code, compatibility, images, brands(name), categories(name)",
+    if (message.length > 2000) {
+      return NextResponse.json(
+        { error: "Mesaj çok uzun (max 2000 karakter)." },
+        { status: 400 },
       );
+    }
 
-    const productList = (products ?? []).map((p: Record<string, unknown>) => ({
-      id: p.id,
-      name: p.name,
-      slug: p.slug,
-      code: p.code,
-      compatibility: p.compatibility,
-      brand: (p.brands as { name: string } | null)?.name ?? null,
-      category: (p.categories as { name: string } | null)?.name ?? null,
-      image: (p.images as string[] | null)?.[0] ?? null,
-    }));
+    // Validate and limit history
+    const rawHistory = Array.isArray(body.history) ? body.history : [];
+    const history = rawHistory
+      .filter((h: unknown): h is { role: string; content: string } =>
+        typeof h === "object" && h !== null &&
+        typeof (h as Record<string, unknown>).role === "string" &&
+        typeof (h as Record<string, unknown>).content === "string" &&
+        ["user", "assistant"].includes((h as Record<string, unknown>).role as string)
+      )
+      .slice(-20)
+      .map((h: { role: string; content: string }) => ({
+        role: h.role,
+        content: h.content.slice(0, 4000),
+      }));
+
+    const productListJson = await getProductList();
 
     const systemPrompt = `Sen Garanti Elektronik'in "TV Servis Triage + Yedek Parça Uyumluluk Asistanı"sın.
 
@@ -214,7 +249,7 @@ Bunlar gelmeden parça kodu verme.
 ═══════════════════════════════════════
 MEVCUT ÜRÜN KATALOĞU
 ═══════════════════════════════════════
-${JSON.stringify(productList, null, 0)}`;
+${productListJson}`;
 
     const messages = [
       { role: "system", content: systemPrompt },
@@ -264,7 +299,7 @@ ${JSON.stringify(productList, null, 0)}`;
   } catch (e) {
     console.error("part-finder-ai error:", e);
     return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Unknown error" },
+      { error: "Bir hata oluştu, lütfen tekrar deneyin." },
       { status: 500 },
     );
   }

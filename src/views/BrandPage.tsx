@@ -9,16 +9,23 @@ import { useProduct } from "@/hooks/useProduct";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
 import ProductCard from "@/components/ProductCard";
 import ProductDrawer from "@/components/ProductDrawer";
-import { ArrowLeft } from "lucide-react";
 
 const BrandPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { brands } = useBrands();
+  const { brands, loading: brandsLoading } = useBrands();
   const brand = brands.find((b) => b.slug === slug);
-  const { products } = useProducts({ brand: brand?.name });
+  const { products, loading: productsLoading } = useProducts({ brand: brand?.name });
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   const { product: selectedProduct } = useProduct(selectedSlug ?? undefined);
   const gridRef = useRevealOnScroll();
+
+  if (brandsLoading) {
+    return (
+      <div className="container mx-auto px-6 py-32 text-center">
+        <div className="w-8 h-8 border-2 border-accent/30 border-t-accent rounded-full animate-spin mx-auto" />
+      </div>
+    );
+  }
 
   if (!brand) {
     return (
@@ -45,7 +52,13 @@ const BrandPage = () => {
       {/* Content */}
       <section ref={gridRef} className="bg-background">
         <div className="container mx-auto px-6 py-16 md:py-24">
-          {products.length === 0 ? (
+          {productsLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-card rounded-2xl border border-border/40 h-80 animate-pulse" />
+              ))}
+            </div>
+          ) : products.length === 0 ? (
             <p className="text-muted-foreground py-20 text-center text-sm">Bu markaya ait ürün bulunamadı.</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">

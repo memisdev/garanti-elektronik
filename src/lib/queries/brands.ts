@@ -8,9 +8,10 @@ export interface Brand {
 }
 
 export async function fetchBrands(): Promise<Brand[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("brands")
     .select("*")
     .order("name");
+  if (error) throw error;
   return data ?? [];
 }

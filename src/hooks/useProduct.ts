@@ -6,16 +6,24 @@ import type { Product } from "@/types/product";
 
 export function useProduct(slug: string | undefined) {
   const [product, setProduct] = useState<Product | undefined>();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(!!slug);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!slug) { setProduct(undefined); return; }
+    if (!slug) { setProduct(undefined); setLoading(false); return; }
     setLoading(true);
-    fetchProduct(slug).then((data) => {
-      setProduct(data);
-      setLoading(false);
-    });
+    setError(null);
+    fetchProduct(slug)
+      .then((data) => {
+        setProduct(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch product:", err);
+        setError("Ürün yüklenemedi");
+        setLoading(false);
+      });
   }, [slug]);
 
-  return { product, loading };
+  return { product, loading, error };
 }

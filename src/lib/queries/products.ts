@@ -5,30 +5,33 @@ import { escapeIlike } from "@/lib/escapeIlike";
 const PRODUCT_SELECT = "*, brands(name, slug), categories(name, slug)" as const;
 
 export async function fetchFeaturedProducts(): Promise<Product[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("products")
     .select(PRODUCT_SELECT)
     .eq("is_featured", true)
     .order("featured_order")
     .limit(4);
+  if (error) throw error;
   return (data as unknown as ProductRow[] | null)?.map(normalizeProduct) ?? [];
 }
 
 export async function fetchRecentProducts(): Promise<Product[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("products")
     .select(PRODUCT_SELECT)
     .order("created_at", { ascending: false })
     .limit(4);
+  if (error) throw error;
   return (data as unknown as ProductRow[] | null)?.map(normalizeProduct) ?? [];
 }
 
 export async function fetchProduct(slug: string): Promise<Product | undefined> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("products")
     .select(PRODUCT_SELECT)
     .eq("slug", slug)
     .maybeSingle();
+  if (error) throw error;
   return data ? normalizeProduct(data as unknown as ProductRow) : undefined;
 }
 
@@ -68,7 +71,8 @@ export async function fetchProducts(options: FetchProductsOptions = {}): Promise
     q = q.or(`name.ilike.%${escaped}%,code.ilike.%${escaped}%`);
   }
 
-  const { data, count } = await q.order("created_at", { ascending: false });
+  const { data, count, error } = await q.order("created_at", { ascending: false });
+  if (error) throw error;
   return {
     products: (data as unknown as ProductRow[] | null)?.map(normalizeProduct) ?? [],
     total: count ?? 0,
@@ -77,10 +81,12 @@ export async function fetchProducts(options: FetchProductsOptions = {}): Promise
 
 export async function searchProducts(query: string): Promise<Product[]> {
   if (query.length < 2) return [];
-  const { data } = await supabase
+  const escaped = escapeIlike(query);
+  const { data, error } = await supabase
     .from("products")
     .select(PRODUCT_SELECT)
-    .or(`name.ilike.%${query}%,code.ilike.%${query}%`)
+    .or(`name.ilike.%${escaped}%,code.ilike.%${escaped}%`)
     .limit(8);
+  if (error) throw error;
   return (data as unknown as ProductRow[] | null)?.map(normalizeProduct) ?? [];
 }

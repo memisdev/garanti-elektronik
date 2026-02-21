@@ -13,8 +13,8 @@ export function useAdminAuth() {
     let mounted = true;
 
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
         if (mounted) router.replace("/admin");
         return;
       }
@@ -22,7 +22,7 @@ export function useAdminAuth() {
       const { data } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", session.user.id)
+        .eq("user_id", user.id)
         .in("role", ["admin", "editor"])
         .maybeSingle();
 
@@ -30,7 +30,7 @@ export function useAdminAuth() {
         if (data) {
           setIsAdmin(true);
           setRole(data.role as "admin" | "editor");
-          setUserId(session.user.id);
+          setUserId(user.id);
         } else {
           router.replace("/admin");
         }

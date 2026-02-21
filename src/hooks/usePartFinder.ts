@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { escapeIlike } from "@/lib/escapeIlike";
 
 interface TvModel {
   id: string;
@@ -41,7 +42,7 @@ export function useModelSearch(query: string) {
       const { data } = await supabase
         .from("tv_models")
         .select("id, model_number, brand_id, screen_size, year, brands(name)")
-        .ilike("model_number", `%${query}%`)
+        .ilike("model_number", `%${escapeIlike(query)}%`)
         .limit(10);
 
       if (data) {
@@ -86,19 +87,21 @@ export function useCompatibleProducts(modelId: string | null) {
 
       if (data) {
         setProducts(
-          data.map((d: any) => ({
-            id: d.products.id,
-            name: d.products.name,
-            slug: d.products.slug,
-            code: d.products.code,
-            images: d.products.images,
-            compatibility: d.products.compatibility,
-            specs: d.products.specs,
-            brand_name: d.products.brands?.name ?? null,
-            category_name: d.products.categories?.name ?? null,
-            category_slug: d.products.categories?.slug ?? null,
-            notes: d.notes,
-          }))
+          data
+            .filter((d: any) => d.products)
+            .map((d: any) => ({
+              id: d.products.id,
+              name: d.products.name,
+              slug: d.products.slug,
+              code: d.products.code,
+              images: d.products.images,
+              compatibility: d.products.compatibility,
+              specs: d.products.specs,
+              brand_name: d.products.brands?.name ?? null,
+              category_name: d.products.categories?.name ?? null,
+              category_slug: d.products.categories?.slug ?? null,
+              notes: d.notes,
+            }))
         );
       }
       setLoading(false);

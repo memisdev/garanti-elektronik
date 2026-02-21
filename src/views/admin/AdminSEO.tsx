@@ -33,16 +33,19 @@ const AdminSEO = () => {
 
   const handleSave = async () => {
     setSaving(true);
-    for (const [key, value] of [[page.titleKey, title], [page.descKey, desc]]) {
-      const { data: existing } = await supabase.from("site_settings").select("id").eq("key", key).maybeSingle();
-      if (existing) {
-        await supabase.from("site_settings").update({ value }).eq("key", key);
-      } else {
-        await supabase.from("site_settings").insert({ key, value });
-      }
-    }
+    const rows = [
+      { key: page.titleKey, value: title },
+      { key: page.descKey, value: desc },
+    ];
+    const { error } = await supabase
+      .from("site_settings")
+      .upsert(rows, { onConflict: "key" });
     setSaving(false);
-    toast({ title: "SEO ayarları kaydedildi." });
+    if (error) {
+      toast({ title: "Kaydetme hatası", description: "Lütfen tekrar deneyin.", variant: "destructive" });
+    } else {
+      toast({ title: "SEO ayarları kaydedildi." });
+    }
   };
 
   return (

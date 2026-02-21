@@ -117,7 +117,12 @@ const PartFinder = () => {
         return;
       }
 
-      const reader = resp.body!.getReader();
+      if (!resp.body) {
+        setMessages((prev) => [...prev, { role: "assistant", content: "Tarayıcınız streaming desteklemiyor." }]);
+        setIsStreaming(false);
+        return;
+      }
+      const reader = resp.body.getReader();
       const decoder = new TextDecoder();
       let textBuffer = "";
 

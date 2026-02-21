@@ -28,6 +28,9 @@ next-env.d.ts
 *.sln
 *.sw?
 
+# Environment
+.env
+
 # Secrets
 keys.txt
 .vercel

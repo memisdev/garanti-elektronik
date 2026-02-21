@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { searchProducts } from "@/lib/queries/products";
 import type { Product } from "@/types/product";
 
@@ -16,7 +16,9 @@ export function useSearch() {
 
   useEffect(() => {
     if (debouncedQuery.length < 2) { setSuggestions([]); return; }
-    searchProducts(debouncedQuery).then(setSuggestions);
+    searchProducts(debouncedQuery)
+      .then(setSuggestions)
+      .catch(() => setSuggestions([]));
   }, [debouncedQuery]);
 
   return { query, setQuery, suggestions, debouncedQuery };

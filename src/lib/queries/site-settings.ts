@@ -22,7 +22,8 @@ export const siteSettingsDefaults: SiteSettings = {
 };
 
 export async function fetchSiteSettings(): Promise<SiteSettings> {
-  const { data } = await supabase.from("site_settings").select("key, value");
+  const { data, error } = await supabase.from("site_settings").select("key, value");
+  if (error) throw error;
   const settings = { ...siteSettingsDefaults };
   if (data) {
     for (const row of data) {

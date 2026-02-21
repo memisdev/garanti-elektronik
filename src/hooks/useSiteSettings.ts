@@ -20,10 +20,16 @@ export function useSiteSettings(): { settings: SiteSettings; loading: boolean } 
     }
 
     if (!fetching) {
-      fetching = fetchSiteSettings().then((s) => {
-        cached = s;
-        return s;
-      });
+      fetching = fetchSiteSettings()
+        .then((s) => {
+          cached = s;
+          return s;
+        })
+        .catch((err) => {
+          console.error("Failed to fetch site settings:", err);
+          fetching = null; // Reset so next mount retries
+          return siteSettingsDefaults;
+        });
     }
 
     fetching.then((s) => {

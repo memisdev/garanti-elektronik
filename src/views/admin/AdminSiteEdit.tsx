@@ -32,17 +32,16 @@ const AdminSiteEdit = () => {
 
   const handleSave = async () => {
     setSaving(true);
-    for (const field of fields) {
-      const value = values[field.key] || "";
-      const { data: existing } = await supabase.from("site_settings").select("id").eq("key", field.key).maybeSingle();
-      if (existing) {
-        await supabase.from("site_settings").update({ value }).eq("key", field.key);
-      } else {
-        await supabase.from("site_settings").insert({ key: field.key, value });
-      }
-    }
+    const rows = fields.map((f) => ({ key: f.key, value: values[f.key] || "" }));
+    const { error } = await supabase
+      .from("site_settings")
+      .upsert(rows, { onConflict: "key" });
     setSaving(false);
-    toast({ title: "Değişiklikler kaydedildi." });
+    if (error) {
+      toast({ title: "Kaydetme hatası", description: "Lütfen tekrar deneyin.", variant: "destructive" });
+    } else {
+      toast({ title: "Değişiklikler kaydedildi." });
+    }
   };
 
   if (loading) return <div className="text-sm text-muted-foreground">Yükleniyor...</div>;

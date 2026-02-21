@@ -15,6 +15,7 @@ export async function fetchCategories(): Promise<Category[]> {
     supabase.from("products").select("category_id, images"),
   ]);
 
+  if (catRes.error) throw catRes.error;
   if (!catRes.data) return [];
 
   const products = prodRes.data ?? [];
