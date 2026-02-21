@@ -1,4 +1,5 @@
-import { Outlet, Link, useLocation } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { LayoutDashboard, Package, Tag, FolderTree, Search as SearchIcon, FileEdit, Image, Users, ScrollText, LogOut, Tv, MessageSquare, Menu, X, FileText } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useEffect, useState } from "react";
@@ -6,22 +7,22 @@ import { supabase } from "@/integrations/supabase/client";
 import SkeletonPage from "@/components/SkeletonPage";
 
 const sidebarItems = [
-  { label: "Dashboard", to: "/admin/dashboard", icon: LayoutDashboard },
-  { label: "Ürünler", to: "/admin/urunler", icon: Package },
-  { label: "Markalar", to: "/admin/markalar", icon: Tag },
-  { label: "Kategoriler", to: "/admin/kategoriler", icon: FolderTree },
-  { label: "Mesajlar", to: "/admin/mesajlar", icon: MessageSquare, badge: true },
-  { label: "SEO", to: "/admin/seo", icon: SearchIcon },
-  { label: "Site Düzenleme", to: "/admin/site-duzenle", icon: FileEdit },
-  { label: "Medya", to: "/admin/medya", icon: Image },
-  { label: "Kullanıcılar", to: "/admin/kullanicilar", icon: Users },
-  { label: "İşlem Kaydı", to: "/admin/islem-kaydi", icon: ScrollText },
-  { label: "TV Modelleri", to: "/admin/tv-modelleri", icon: Tv },
-  { label: "Sayfa İçerikleri", to: "/admin/sayfa-icerikleri", icon: FileText },
+  { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+  { label: "Ürünler", href: "/admin/urunler", icon: Package },
+  { label: "Markalar", href: "/admin/markalar", icon: Tag },
+  { label: "Kategoriler", href: "/admin/kategoriler", icon: FolderTree },
+  { label: "Mesajlar", href: "/admin/mesajlar", icon: MessageSquare, badge: true },
+  { label: "SEO", href: "/admin/seo", icon: SearchIcon },
+  { label: "Site Düzenleme", href: "/admin/site-duzenle", icon: FileEdit },
+  { label: "Medya", href: "/admin/medya", icon: Image },
+  { label: "Kullanıcılar", href: "/admin/kullanicilar", icon: Users },
+  { label: "İşlem Kaydı", href: "/admin/islem-kaydi", icon: ScrollText },
+  { label: "TV Modelleri", href: "/admin/tv-modelleri", icon: Tv },
+  { label: "Sayfa İçerikleri", href: "/admin/sayfa-icerikleri", icon: FileText },
 ];
 
-const AdminLayout = () => {
-  const location = useLocation();
+const AdminLayout = ({ children }: { children: React.ReactNode }) => {
+  const pathname = usePathname();
   const { loading, signOut } = useAdminAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -32,16 +33,16 @@ const AdminLayout = () => {
       .select("id", { count: "exact", head: true })
       .eq("is_read", false)
       .then(({ count }) => setUnreadCount(count || 0));
-  }, [location.pathname]);
+  }, [pathname]);
 
   if (loading) return <SkeletonPage />;
 
   const NavItems = () => (
     <>
       {sidebarItems.map((item) => {
-        const active = location.pathname === item.to;
+        const active = pathname === item.href;
         return (
-          <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)}
+          <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}
             className={`flex items-center gap-3 text-[13px] px-4 h-11 rounded-xl transition-all duration-200 relative ${active ? "bg-surface text-foreground font-medium" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`}>
             {active && <div className="absolute left-0 top-2 bottom-2 w-[3px] bg-accent-orange rounded-full" />}
             <item.icon className="w-4 h-4" />
@@ -60,7 +61,7 @@ const AdminLayout = () => {
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col w-64 bg-card border-r border-border/50 shrink-0">
         <div className="h-16 px-6 flex items-center border-b border-border/50">
-          <Link to="/admin/dashboard" className="flex items-center gap-2.5 font-semibold text-sm text-foreground">
+          <Link href="/admin/dashboard" className="flex items-center gap-2.5 font-semibold text-sm text-foreground">
             <span className="w-8 h-8 bg-foreground rounded-xl flex items-center justify-center text-background text-[10px] font-bold">GE</span>
             Admin Panel
           </Link>
@@ -109,7 +110,7 @@ const AdminLayout = () => {
           </div>
         </header>
         <main className="flex-1 p-5 lg:p-8 overflow-y-auto">
-          <Outlet />
+          {children}
         </main>
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
 import { useBrands } from "@/hooks/useBrands";
 import { useProducts } from "@/hooks/useProducts";
@@ -25,7 +26,7 @@ const BrandPage = () => {
     return (
       <div className="container mx-auto px-6 py-32 text-center">
         <p className="text-muted-foreground mb-4">Marka bulunamadı.</p>
-        <Link to="/" className="text-sm text-foreground hover:text-muted-foreground transition-colors">← Ana Sayfa</Link>
+        <Link href="/" className="text-sm text-foreground hover:text-muted-foreground transition-colors">← Ana Sayfa</Link>
       </div>
     );
   }

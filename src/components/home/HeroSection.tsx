@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
 import { usePageContent } from "@/hooks/usePageContent";
@@ -49,13 +49,13 @@ const HeroSection = () => {
 
           <div className="reveal-on-scroll delay-2 flex flex-row gap-3 items-center">
             <Link
-              to="/urunler"
+              href="/urunler"
               className="inline-flex items-center gap-2 bg-accent text-accent-foreground font-semibold px-6 sm:px-9 py-3 sm:py-4 rounded-lg hover:opacity-90 transition-all text-[13px] sm:text-[14px] tracking-wide focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-foreground">
               Ürünleri İncele
               <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </Link>
             <Link
-              to="/iletisim"
+              href="/iletisim"
               className="inline-flex items-center gap-2 border border-primary-foreground/25 text-primary-foreground/80 hover:text-primary-foreground hover:border-primary-foreground/40 font-semibold px-6 sm:px-9 py-3 sm:py-4 rounded-lg transition-all text-[13px] sm:text-[14px] focus:outline-none focus:ring-2 focus:ring-primary-foreground/30 focus:ring-offset-2 focus:ring-offset-foreground">
               Bize Ulaşın
             </Link>

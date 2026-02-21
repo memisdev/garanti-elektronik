@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { Search, MessageCircle, ChevronRight, Cpu, Bot, Send, Loader2, ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useModelSearch, useCompatibleProducts } from "@/hooks/usePartFinder";
@@ -37,7 +37,7 @@ function parseAIContent(content: string) {
   return parts;
 }
 
-function ProductInlineCard({ data, navigate }: {data: any;navigate: (path: string) => void;}) {
+function ProductInlineCard({ data, push }: {data: any;push: (path: string) => void;}) {
   const whatsappMsg = siteConfig.whatsapp.defaultMessage(data.name, data.code ?? undefined);
   return (
     <div className="my-3 bg-card rounded-xl border border-border/40 p-4 flex gap-4 items-start hover:border-accent/30 transition-colors">
@@ -52,7 +52,7 @@ function ProductInlineCard({ data, navigate }: {data: any;navigate: (path: strin
         {data.code && <p className="text-[11px] font-mono text-muted-foreground mt-0.5">{data.code}</p>}
         <div className="flex gap-2 mt-2">
           <button
-            onClick={() => navigate(`/urun/${data.slug}`)}
+            onClick={() => push(`/urun/${data.slug}`)}
             className="text-[11px] font-semibold px-3 py-1.5 rounded-lg border border-border/80 text-foreground hover:bg-foreground hover:text-primary-foreground transition-all">
 
             Detay
@@ -78,7 +78,7 @@ const PartFinder = () => {
   const [selectedModel, setSelectedModel] = useState<{id: string;model_number: string;brand_name?: string;} | null>(null);
   const { models, loading: searchLoading } = useModelSearch(selectedModel ? "" : query);
   const { products, loading: productsLoading } = useCompatibleProducts(selectedModel?.id ?? null);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   // AI chat state
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -241,7 +241,7 @@ const PartFinder = () => {
                       part.type === "text" ?
                       <span key={j} className="whitespace-pre-wrap">{part.value}</span> :
 
-                      <ProductInlineCard key={j} data={part.data} navigate={navigate} />
+                      <ProductInlineCard key={j} data={part.data} push={router.push} />
 
                       ) :
 
@@ -426,7 +426,7 @@ const PartFinder = () => {
                     }
                           <div className="flex gap-2 mt-auto pt-2">
                             <button
-                        onClick={() => navigate(`/urun/${product.slug}`)}
+                        onClick={() => router.push(`/urun/${product.slug}`)}
                         className="flex-1 text-[13px] font-semibold text-center py-2.5 text-foreground hover:bg-foreground hover:text-primary-foreground rounded-lg transition-all duration-300 border border-border/80">
 
                               Detay

@@ -9,7 +9,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { FAQPageJsonLd } from "@/components/seo/JsonLd";
 
@@ -77,7 +77,7 @@ const FAQ = () => {
           <div className="reveal-on-scroll mt-16 text-center">
             <p className="text-sm text-muted-foreground mb-4">Başka sorunuz mu var?</p>
             <Link
-              to="/iletisim"
+              href="/iletisim"
               className="inline-flex items-center gap-2 bg-foreground text-primary-foreground font-semibold px-6 py-3 rounded-full hover:opacity-90 transition-all text-sm"
             >
               İletişime Geçin

@@ -1,5 +1,4 @@
 import { Component, type ReactNode } from "react";
-import { Link } from "react-router-dom";
 
 interface Props {
   children: ReactNode;

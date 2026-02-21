@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useProducts } from "@/hooks/useProducts";
 import { useBrands } from "@/hooks/useBrands";
 import { useCategories } from "@/hooks/useCategories";
@@ -15,7 +15,9 @@ import { Filter, X } from "lucide-react";
 
 const Products = () => {
   usePageMeta({ title: "Ürünler | Garanti Elektronik", description: "TV yedek parça, anakart, power board, T-Con board ve daha fazlası. Tüm markalarda orijinal ve muadil parçalar." });
-  const [searchParams, setSearchParams] = useSearchParams();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const q = searchParams.get("q") ?? "";
   const cat = searchParams.get("category") ?? "";
   const br = searchParams.get("brand") ?? "";
@@ -33,10 +35,10 @@ const Products = () => {
   const handleCloseDrawer = () => setDrawerSlug(null);
 
   const setParam = (key: string, value: string) => {
-    const sp = new URLSearchParams(searchParams);
+    const sp = new URLSearchParams(searchParams.toString());
     if (value) sp.set(key, value);
     else sp.delete(key);
-    setSearchParams(sp);
+    router.push(`${pathname}?${sp.toString()}`, { scroll: false });
   };
 
   const hasFilters = q || cat || br;
@@ -107,7 +109,7 @@ const Products = () => {
                   </select>
                 </div>
                 {hasFilters && (
-                  <button onClick={() => setSearchParams(new URLSearchParams())}
+                  <button onClick={() => router.push(pathname, { scroll: false })}
                     className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors hover:underline focus:outline-none focus:underline">
                     <X className="w-3 h-3" aria-hidden="true" /> Filtreleri Temizle
                   </button>

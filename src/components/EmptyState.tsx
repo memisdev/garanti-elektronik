@@ -1,5 +1,5 @@
 import { SearchX } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 interface EmptyStateProps {
   title?: string;
@@ -22,7 +22,7 @@ const EmptyState = ({
     </p>
     {showCTA && (
       <Link
-        to="/urunler"
+        href="/urunler"
         className="inline-flex items-center bg-foreground text-primary-foreground font-semibold px-6 py-3 rounded-full hover:opacity-90 transition-all text-sm"
       >
         Tüm Ürünleri Gör

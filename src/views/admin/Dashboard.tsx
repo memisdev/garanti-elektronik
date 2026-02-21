@@ -1,5 +1,7 @@
+"use client";
+
 import { Package, Tag, FolderTree, Tv, MessageSquare, Plus, ArrowRight, Info } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -48,11 +50,11 @@ const Dashboard = () => {
   }, []);
 
   const statCards = [
-    { label: "Ürünler", value: stats.products, icon: Package, to: "/admin/urunler" },
-    { label: "Markalar", value: stats.brands, icon: Tag, to: "/admin/markalar" },
-    { label: "Kategoriler", value: stats.categories, icon: FolderTree, to: "/admin/kategoriler" },
-    { label: "TV Modelleri", value: stats.tvModels, icon: Tv, to: "/admin/tv-modelleri" },
-    { label: "Okunmamış Mesajlar", value: stats.unreadMessages, icon: MessageSquare, to: "/admin/mesajlar" },
+    { label: "Ürünler", value: stats.products, icon: Package, href: "/admin/urunler" },
+    { label: "Markalar", value: stats.brands, icon: Tag, href: "/admin/markalar" },
+    { label: "Kategoriler", value: stats.categories, icon: FolderTree, href: "/admin/kategoriler" },
+    { label: "TV Modelleri", value: stats.tvModels, icon: Tv, href: "/admin/tv-modelleri" },
+    { label: "Okunmamış Mesajlar", value: stats.unreadMessages, icon: MessageSquare, href: "/admin/mesajlar" },
   ];
 
   const total = stats.products + stats.brands + stats.categories;
@@ -82,7 +84,7 @@ const Dashboard = () => {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
         {statCards.map((s) => (
-          <Link key={s.label} to={s.to} className="bg-card border-l-4 border-l-accent-orange border border-border/30 rounded-2xl p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
+          <Link key={s.label} href={s.href} className="bg-card border-l-4 border-l-accent-orange border border-border/30 rounded-2xl p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
             <div className="w-10 h-10 bg-surface rounded-xl flex items-center justify-center text-foreground"><s.icon className="w-5 h-5" /></div>
             <div>
               <p className="text-2xl font-extrabold text-foreground leading-none">{loading ? "–" : s.value}</p>
@@ -100,15 +102,15 @@ const Dashboard = () => {
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${stats.brands > 0 ? "bg-green-500 text-white" : "bg-muted text-muted-foreground"}`}>1</span>
-              <span className="text-sm text-foreground">Önce <Link to="/admin/markalar" className="text-accent-orange font-medium underline">markaları</Link> ekleyin</span>
+              <span className="text-sm text-foreground">Önce <Link href="/admin/markalar" className="text-accent-orange font-medium underline">markaları</Link> ekleyin</span>
             </div>
             <div className="flex items-center gap-3">
               <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${stats.categories > 0 ? "bg-green-500 text-white" : "bg-muted text-muted-foreground"}`}>2</span>
-              <span className="text-sm text-foreground">Sonra <Link to="/admin/kategoriler" className="text-accent-orange font-medium underline">kategorileri</Link> oluşturun</span>
+              <span className="text-sm text-foreground">Sonra <Link href="/admin/kategoriler" className="text-accent-orange font-medium underline">kategorileri</Link> oluşturun</span>
             </div>
             <div className="flex items-center gap-3">
               <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${stats.products > 0 ? "bg-green-500 text-white" : "bg-muted text-muted-foreground"}`}>3</span>
-              <span className="text-sm text-foreground">Son olarak <Link to="/admin/urunler" className="text-accent-orange font-medium underline">ürünleri</Link> ekleyin</span>
+              <span className="text-sm text-foreground">Son olarak <Link href="/admin/urunler" className="text-accent-orange font-medium underline">ürünleri</Link> ekleyin</span>
             </div>
           </div>
         </div>
@@ -116,13 +118,13 @@ const Dashboard = () => {
 
       {/* Quick Actions */}
       <div className="flex flex-wrap gap-3 mb-10">
-        <Link to="/admin/urunler" className="flex items-center gap-2 bg-foreground text-background text-[13px] font-semibold px-5 h-10 rounded-full hover:bg-primary-hover transition-colors">
+        <Link href="/admin/urunler" className="flex items-center gap-2 bg-foreground text-background text-[13px] font-semibold px-5 h-10 rounded-full hover:bg-primary-hover transition-colors">
           <Plus className="w-4 h-4" /> Yeni Ürün Ekle
         </Link>
-        <Link to="/admin/markalar" className="flex items-center gap-2 bg-card border border-border/30 text-foreground text-[13px] font-medium px-5 h-10 rounded-full hover:bg-accent transition-colors">
+        <Link href="/admin/markalar" className="flex items-center gap-2 bg-card border border-border/30 text-foreground text-[13px] font-medium px-5 h-10 rounded-full hover:bg-accent transition-colors">
           <Plus className="w-4 h-4" /> Yeni Marka Ekle
         </Link>
-        <Link to="/admin/mesajlar" className="flex items-center gap-2 bg-card border border-border/30 text-foreground text-[13px] font-medium px-5 h-10 rounded-full hover:bg-accent transition-colors">
+        <Link href="/admin/mesajlar" className="flex items-center gap-2 bg-card border border-border/30 text-foreground text-[13px] font-medium px-5 h-10 rounded-full hover:bg-accent transition-colors">
           <MessageSquare className="w-4 h-4" /> Mesajları Gör <ArrowRight className="w-3 h-3" />
         </Link>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { useSearch } from "@/hooks/useSearch";
 
@@ -12,7 +12,7 @@ interface SearchBarProps {
 const SearchBar = ({ onNavigate }: SearchBarProps) => {
   const { query, setQuery, suggestions } = useSearch();
   const [isFocused, setIsFocused] = useState(false);
-  const navigate = useNavigate();
+  const router = useRouter();
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -28,14 +28,14 @@ const SearchBar = ({ onNavigate }: SearchBarProps) => {
   const showDropdown = isFocused && suggestions.length > 0;
 
   const handleSelect = (slug: string) => {
-    navigate(`/urun/${slug}`);
+    router.push(`/urun/${slug}`);
     setQuery("");
     setIsFocused(false);
     onNavigate?.();
   };
 
   const handleViewAll = () => {
-    navigate(`/urunler?q=${encodeURIComponent(query)}`);
+    router.push(`/urunler?q=${encodeURIComponent(query)}`);
     setQuery("");
     setIsFocused(false);
     onNavigate?.();

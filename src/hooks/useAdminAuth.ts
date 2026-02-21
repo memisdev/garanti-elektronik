@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/integrations/supabase/client";
 
 export function useAdminAuth() {
@@ -7,7 +7,7 @@ export function useAdminAuth() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [role, setRole] = useState<"admin" | "editor" | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     let mounted = true;
@@ -15,7 +15,7 @@ export function useAdminAuth() {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        if (mounted) navigate("/admin", { replace: true });
+        if (mounted) router.replace("/admin");
         return;
       }
 
@@ -32,7 +32,7 @@ export function useAdminAuth() {
           setRole(data.role as "admin" | "editor");
           setUserId(session.user.id);
         } else {
-          navigate("/admin", { replace: true });
+          router.replace("/admin");
         }
         setLoading(false);
       }
@@ -42,7 +42,7 @@ export function useAdminAuth() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") {
-        if (mounted) navigate("/admin", { replace: true });
+        if (mounted) router.replace("/admin");
       }
     });
 
@@ -50,11 +50,11 @@ export function useAdminAuth() {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [router]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    navigate("/admin", { replace: true });
+    router.replace("/admin");
   };
 
   return { loading, isAdmin, role, userId, signOut };

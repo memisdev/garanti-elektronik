@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { ArrowRight, MessageCircle } from "lucide-react";
 import { useState, lazy, Suspense } from "react";
 import { useBrands } from "@/hooks/useBrands";
@@ -68,7 +68,7 @@ const Index = () => {
               {categories.map((cat, i) => (
                 <Link
                   key={cat.id}
-                  to={`/urunler?category=${cat.slug}`}
+                  href={`/urunler?category=${cat.slug}`}
                   className={`reveal-on-scroll delay-${Math.min(i + 1, 4)} group flex flex-col items-center flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 rounded-xl`}
                 >
                   <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-border/40 group-hover:border-accent group-hover:scale-105 transition-all duration-300">
@@ -100,7 +100,7 @@ const Index = () => {
                 Öne Çıkan Ürünler
               </h2>
               <Link
-                to="/urunler"
+                href="/urunler"
                 className="inline-flex items-center gap-2 text-[13px] font-semibold text-muted-foreground hover:text-foreground transition-colors group"
               >
                 Tümünü Gör <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
@@ -194,7 +194,7 @@ const Index = () => {
               {ctaContent.subtitle}
             </p>
             <Link
-              to="/iletisim"
+              href="/iletisim"
               className="inline-flex items-center gap-2.5 bg-accent text-accent-foreground font-semibold px-9 py-4 rounded-lg hover:opacity-90 transition-all text-[14px] tracking-wide focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-foreground"
             >
               İletişime Geçin
@@ -214,7 +214,7 @@ const Index = () => {
                   Yeni Eklenenler
                 </h2>
                 <Link
-                  to="/urunler"
+                  href="/urunler"
                   className="inline-flex items-center gap-2 text-[13px] font-semibold text-muted-foreground hover:text-foreground transition-colors group"
                 >
                   Tümünü Gör <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />

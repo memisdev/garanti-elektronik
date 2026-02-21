@@ -1,6 +1,7 @@
 "use client";
 
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "next/navigation";
+import Link from "next/link";
 import { useProduct } from "@/hooks/useProduct";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -18,7 +19,7 @@ const ProductPage = () => {
     return (
       <div className="container mx-auto px-6 py-32 text-center">
         <p className="text-muted-foreground mb-4">Ürün bulunamadı.</p>
-        <Link to="/urunler" className="text-sm text-foreground hover:text-muted-foreground transition-colors">← Ürünlere Dön</Link>
+        <Link href="/urunler" className="text-sm text-foreground hover:text-muted-foreground transition-colors">← Ürünlere Dön</Link>
       </div>
     );
   }

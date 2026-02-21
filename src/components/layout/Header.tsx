@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Menu, Search, X, ArrowRight } from "lucide-react";
 import Logo from "@/components/Logo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -34,11 +34,11 @@ const Header = () => {
   }, []);
 
   const navLinks = [
-    { label: "Ürünler", to: "/urunler" },
+    { label: "Ürünler", href: "/urunler" },
     
-    { label: "Kargo Takip", to: "/kargo-takip" },
-    { label: "Hakkımızda", to: "/hakkimizda" },
-    { label: "İletişim", to: "/iletisim" },
+    { label: "Kargo Takip", href: "/kargo-takip" },
+    { label: "Hakkımızda", href: "/hakkimizda" },
+    { label: "İletişim", href: "/iletisim" },
   ];
 
   return (
@@ -54,7 +54,7 @@ const Header = () => {
       >
         <div className="container mx-auto flex items-center justify-between h-[72px] px-6">
           {/* Left: Logo */}
-          <Link to="/" className="flex items-center gap-2.5 group">
+          <Link href="/" className="flex items-center gap-2.5 group">
             <Logo className="w-8 h-8 text-foreground transition-transform duration-300 group-hover:scale-105" />
             <div className="hidden sm:flex flex-col leading-none">
               <span className="text-[15px] font-bold tracking-tight text-foreground">Garanti Elektronik</span>
@@ -67,7 +67,7 @@ const Header = () => {
             {navLinks.map((link) => (
               <Link
                 key={link.label}
-                to={link.to}
+                href={link.href}
                 className="text-[13px] font-medium text-muted-foreground hover:text-foreground px-3.5 py-2 transition-all duration-200"
               >
                 {link.label}
@@ -88,14 +88,14 @@ const Header = () => {
             <div className="hidden sm:block w-px h-5 bg-border/60 mx-1" />
 
             <Link
-              to="/parca-bulucu"
+              href="/parca-bulucu"
               className="hidden sm:inline-flex text-[13px] font-medium text-muted-foreground hover:text-foreground px-3 py-2 rounded-full hover:bg-muted/60 transition-all duration-200"
             >
               Parça Bulucu
             </Link>
 
             <Link
-              to="/urunler"
+              href="/urunler"
               className="hidden sm:inline-flex items-center gap-1.5 bg-foreground text-background text-[12px] font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-all duration-200"
             >
               Ürünleri İncele
@@ -111,7 +111,7 @@ const Header = () => {
               </SheetTrigger>
               <SheetContent side="left" className="w-[320px] p-0 border-r border-border/40">
                 <div className="p-8 pt-10">
-                  <Link to="/" className="flex items-center gap-2.5 mb-14" onClick={() => setMobileOpen(false)}>
+                  <Link href="/" className="flex items-center gap-2.5 mb-14" onClick={() => setMobileOpen(false)}>
                     <Logo className="w-8 h-8 text-foreground" />
                     <span className="text-[15px] font-bold tracking-tight">Garanti Elektronik</span>
                   </Link>
@@ -121,7 +121,7 @@ const Header = () => {
                     {navLinks.map((link) => (
                       <Link
                         key={link.label}
-                        to={link.to}
+                        href={link.href}
                         onClick={() => setMobileOpen(false)}
                         className="text-[15px] font-medium text-foreground/80 hover:text-foreground hover:bg-muted/60 px-3 py-3.5 rounded-xl transition-all duration-200"
                       >
@@ -132,7 +132,7 @@ const Header = () => {
 
                   <div className="mt-12 space-y-3">
                     <Link
-                      to="/urunler"
+                      href="/urunler"
                       onClick={() => setMobileOpen(false)}
                       className="flex items-center justify-center gap-2 w-full bg-foreground text-background text-[13px] font-semibold px-4 py-3.5 rounded-xl transition-all duration-200 hover:opacity-90"
                     >
@@ -140,7 +140,7 @@ const Header = () => {
                       <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                     <Link
-                      to="/iletisim"
+                      href="/iletisim"
                       onClick={() => setMobileOpen(false)}
                       className="flex items-center justify-center w-full border border-border text-foreground text-[13px] font-medium px-4 py-3.5 rounded-xl transition-all duration-200 hover:bg-muted/40"
                     >

@@ -3,7 +3,7 @@
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { usePageContent } from "@/hooks/usePageContent";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { ArrowRight, Shield, RotateCcw, AlertTriangle, CheckCircle } from "lucide-react";
 
 const icons = [Shield, RotateCcw, AlertTriangle, CheckCircle];
@@ -93,7 +93,7 @@ const WarrantyReturn = () => {
 
           <div className="reveal-on-scroll mt-16 text-center">
             <p className="text-sm text-muted-foreground mb-4">Sorularınız mı var?</p>
-            <Link to="/iletisim"
+            <Link href="/iletisim"
               className="inline-flex items-center gap-2 bg-foreground text-primary-foreground font-semibold px-6 py-3 rounded-full hover:opacity-90 transition-all text-sm">
               Bize Ulaşın
               <ArrowRight className="w-4 h-4" />
