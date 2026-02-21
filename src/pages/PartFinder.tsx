@@ -82,10 +82,12 @@ const PartFinder = () => {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = chatContainerRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [messages]);
 
   const sendMessage = async () => {
@@ -199,7 +201,7 @@ const PartFinder = () => {
             <TabsContent value="ai" className="text-left">
               <div className="bg-card border border-border/40 rounded-2xl overflow-hidden shadow-sm">
                 {/* Chat messages */}
-                <div className="h-[400px] overflow-y-auto p-6 space-y-4">
+                <div ref={chatContainerRef} className="h-[400px] overflow-y-auto p-6 space-y-4">
                   {messages.length === 0 &&
                   <div className="text-center py-12">
                       <Bot className="w-12 h-12 text-accent/40 mx-auto mb-4" />
@@ -254,18 +256,31 @@ const PartFinder = () => {
                       </div>
                     </div>
                   }
-                  <div ref={chatEndRef} />
+                  
                 </div>
 
                 {/* Input */}
-                <div className="border-t border-border/40 p-4 flex gap-2">
-                  <Input
+                <div className="border-t border-border/40 p-4 flex gap-2 items-end">
+                  <textarea
+                    ref={textareaRef}
                     value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                    onChange={(e) => {
+                      setChatInput(e.target.value);
+                      const el = e.target;
+                      el.style.height = "auto";
+                      el.style.height = Math.min(el.scrollHeight, 120) + "px";
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                        if (textareaRef.current) textareaRef.current.style.height = "auto";
+                      }
+                    }}
                     placeholder="Model kodu, semptom veya arızayı yazın..."
-                    className="flex-1 h-11 rounded-xl border-border/60"
-                    disabled={isStreaming} />
+                    className="flex-1 min-h-[44px] max-h-[120px] resize-none rounded-xl border border-border/60 bg-background px-3 py-2.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={isStreaming}
+                    rows={1} />
 
                   <button
                     onClick={sendMessage}
