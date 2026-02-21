@@ -26,7 +26,19 @@ export async function middleware(request: NextRequest) {
   );
 
   // Refresh the auth session so it doesn't expire
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { pathname } = request.nextUrl;
+
+  // Protect admin routes — redirect unauthenticated users to /admin (login)
+  if (!user && (pathname.startsWith("/admin/") || pathname.startsWith("/api/admin/"))) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/admin";
+    loginUrl.search = "";
+    return NextResponse.redirect(loginUrl);
+  }
 
   return supabaseResponse;
 }

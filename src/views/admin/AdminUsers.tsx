@@ -35,14 +35,19 @@ const AdminUsers = () => {
   const [form, setForm] = useState({ email: "", password: "", role: "editor" as "admin" | "editor" });
 
   const fetchUsers = async () => {
-    // Try edge function for emails, fall back to user_roles
-    const { data: fnData, error: fnError } = await supabase.functions.invoke("list-users");
-    if (!fnError && Array.isArray(fnData)) {
-      const { data: rolesData } = await supabase.from("user_roles").select("*");
-      const emailMap = new Map<string, string>();
-      (fnData as ListUserItem[]).forEach((u) => emailMap.set(u.user_id, u.email));
-      setUsers((rolesData || []).map((r) => ({ ...r, email: emailMap.get(r.user_id) || "" })));
-    } else {
+    try {
+      const res = await fetch("/api/admin/list-users");
+      if (res.ok) {
+        const list: ListUserItem[] = await res.json();
+        const { data: rolesData } = await supabase.from("user_roles").select("*");
+        const emailMap = new Map<string, string>();
+        list.forEach((u) => emailMap.set(u.user_id, u.email));
+        setUsers((rolesData || []).map((r) => ({ ...r, email: emailMap.get(r.user_id) || "" })));
+      } else {
+        const { data } = await supabase.from("user_roles").select("*");
+        setUsers(data || []);
+      }
+    } catch {
       const { data } = await supabase.from("user_roles").select("*");
       setUsers(data || []);
     }
@@ -55,13 +60,22 @@ const AdminUsers = () => {
     if (!form.email.trim()) { toast({ title: "E-posta zorunludur.", variant: "destructive" }); return; }
     setSaving(true);
 
-    const { data, error } = await supabase.functions.invoke("invite-user", {
-      body: { email: form.email, role: form.role, password: form.password || undefined },
-    });
+    try {
+      const res = await fetch("/api/admin/invite-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email, role: form.role, password: form.password || undefined }),
+      });
+      const data = await res.json();
 
-    setSaving(false);
-    if (error || data?.error) {
-      toast({ title: "Hata", description: data?.error || error?.message || "Bilinmeyen hata", variant: "destructive" });
+      setSaving(false);
+      if (!res.ok || data?.error) {
+        toast({ title: "Hata", description: data?.error || "Bilinmeyen hata", variant: "destructive" });
+        return;
+      }
+    } catch {
+      setSaving(false);
+      toast({ title: "Hata", description: "Bilinmeyen hata", variant: "destructive" });
       return;
     }
 

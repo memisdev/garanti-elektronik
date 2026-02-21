@@ -1,0 +1,46 @@
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
+import type { Database } from "@/integrations/supabase/types";
+
+/**
+ * Supabase client with service_role key — bypasses RLS.
+ * Server-only: never import this in client components.
+ */
+export function createServiceClient() {
+  return createSupabaseClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+}
+
+/**
+ * Verify the current request is from an authenticated admin user.
+ * Uses cookie-based auth from `@supabase/ssr` (same as middleware).
+ */
+export async function verifyAdminRole(): Promise<
+  { user: { id: string; email?: string } } | { error: string; status: number }
+> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return { error: "Unauthorized", status: 401 };
+  }
+
+  const { data: roleData } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", user.id)
+    .eq("role", "admin")
+    .maybeSingle();
+
+  if (!roleData) {
+    return { error: "Admin yetkisi gerekli", status: 403 };
+  }
+
+  return { user: { id: user.id, email: user.email } };
+}

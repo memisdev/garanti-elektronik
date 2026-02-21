@@ -9,6 +9,7 @@
 - [x] Phase 4: Page-by-page migration (server components, metadata, loading states)
 - [x] Phase 5: Image optimization (next/image), fonts (next/font), SEO
 - [x] Phase 6: Cleanup & production readiness
+- [x] Phase 7: Admin panel (API routes, middleware protection, error/loading states)
 
 ## Decisions Log
 
@@ -29,6 +30,9 @@
 | OG metadata on root + dynamic pages (Phase 5) | Root layout has `openGraph` + `twitter` defaults; product/brand pages include OG images |
 | `error.tsx` replaces class ErrorBoundary (Phase 6) | Next.js App Router convention; deleted unused `ErrorBoundary.tsx` class component |
 | `poweredByHeader: false` + `reactStrictMode: true` (Phase 6) | Production hardening — hide framework fingerprint, catch React issues early |
+| Admin API routes replace Edge Functions (Phase 7) | `list-users` + `invite-user` ported to `src/app/api/admin/`; service_role client in `src/lib/supabase/admin.ts` |
+| Middleware blocks unauthenticated `/admin/` + `/api/admin/` (Phase 7) | Session-only check (no DB query); role verification stays client-side via `useAdminAuth` |
+| Admin `loading.tsx` + `error.tsx` (Phase 7) | App Router conventions for skeleton loading and error boundary in admin panel route group |
 
 ## Key Directories
 
