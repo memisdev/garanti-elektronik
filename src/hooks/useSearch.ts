@@ -1,6 +1,8 @@
+"use client";
+
 import { useState, useMemo, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { normalizeProduct, type Product, type ProductRow } from "@/types/product";
+import { searchProducts } from "@/lib/queries/products";
+import type { Product } from "@/types/product";
 
 export function useSearch() {
   const [query, setQuery] = useState("");
@@ -14,14 +16,7 @@ export function useSearch() {
 
   useEffect(() => {
     if (debouncedQuery.length < 2) { setSuggestions([]); return; }
-    supabase
-      .from("products")
-      .select("*, brands(name, slug), categories(name, slug)")
-      .or(`name.ilike.%${debouncedQuery}%,code.ilike.%${debouncedQuery}%`)
-      .limit(8)
-      .then(({ data }) => {
-        setSuggestions((data as unknown as ProductRow[] | null)?.map(normalizeProduct) ?? []);
-      });
+    searchProducts(debouncedQuery).then(setSuggestions);
   }, [debouncedQuery]);
 
   return { query, setQuery, suggestions, debouncedQuery };

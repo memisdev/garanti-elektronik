@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Menu, Search, X, ArrowRight } from "lucide-react";

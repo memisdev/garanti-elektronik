@@ -1,3 +1,5 @@
+"use client";
+
 import { Link } from "react-router-dom";
 import { ArrowRight, MessageCircle } from "lucide-react";
 import { useState, lazy, Suspense } from "react";

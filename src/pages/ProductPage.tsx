@@ -1,3 +1,5 @@
+"use client";
+
 import { useParams, Link } from "react-router-dom";
 import { useProduct } from "@/hooks/useProduct";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";

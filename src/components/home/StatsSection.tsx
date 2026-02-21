@@ -1,3 +1,5 @@
+"use client";
+
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
 
 const stats = [

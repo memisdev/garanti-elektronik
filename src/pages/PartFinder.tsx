@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, MessageCircle, ChevronRight, Cpu, Bot, Send, Loader2, ArrowLeft } from "lucide-react";

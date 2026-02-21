@@ -1,3 +1,5 @@
+"use client";
+
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { usePageContent } from "@/hooks/usePageContent";
