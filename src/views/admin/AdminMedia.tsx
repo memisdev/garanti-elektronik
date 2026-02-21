@@ -67,19 +67,15 @@ const AdminMedia = () => {
   const processImage = async (fileName: string) => {
     setProcessingFiles((prev) => new Set(prev).add(fileName));
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast({ title: "Oturum bulunamadı", variant: "destructive" });
-        return;
-      }
-
-      const { data, error } = await supabase.functions.invoke("process-image", {
-        body: { imagePath: fileName },
+      const resp = await fetch("/api/admin/process-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imagePath: fileName }),
       });
+      const data = await resp.json();
 
-      if (error) {
-        console.error("Process image error:", error);
-        toast({ title: "Arka plan kaldırma başarısız", description: error.message, variant: "destructive" });
+      if (!resp.ok) {
+        toast({ title: "Arka plan kaldırma başarısız", description: data.error ?? "Processing failed", variant: "destructive" });
         return;
       }
 

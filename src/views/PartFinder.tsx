@@ -11,7 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 type Msg = {role: "user" | "assistant";content: string;};
 
-const CHAT_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/part-finder-ai`;
+const CHAT_URL = "/api/part-finder-ai";
 
 // Parse product cards from AI response
 function parseAIContent(content: string) {
@@ -106,10 +106,7 @@ const PartFinder = () => {
     try {
       const resp = await fetch(CHAT_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text, history })
       });
 

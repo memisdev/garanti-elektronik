@@ -61,9 +61,13 @@ const AdminProducts = () => {
 
     setProcessingImages((prev) => new Set(prev).add(index));
     try {
-      const { data, error } = await supabase.functions.invoke("process-image", {
-        body: { imagePath },
+      const resp = await fetch("/api/admin/process-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imagePath }),
       });
+      const data = await resp.json();
+      const error = resp.ok ? null : { message: data.error ?? "Processing failed" };
 
       if (error || data?.error) {
         toast({ title: "Arka plan kaldırma başarısız", description: error?.message || data?.error, variant: "destructive" });

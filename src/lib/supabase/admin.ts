@@ -17,7 +17,9 @@ export function createServiceClient() {
  * Verify the current request is from an authenticated admin user.
  * Uses cookie-based auth from `@supabase/ssr` (same as middleware).
  */
-export async function verifyAdminRole(): Promise<
+export async function verifyAdminRole(
+  allowedRoles: Database["public"]["Enums"]["app_role"][] = ["admin"],
+): Promise<
   { user: { id: string; email?: string } } | { error: string; status: number }
 > {
   const supabase = await createClient();
@@ -35,7 +37,7 @@ export async function verifyAdminRole(): Promise<
     .from("user_roles")
     .select("role")
     .eq("user_id", user.id)
-    .eq("role", "admin")
+    .in("role", allowedRoles)
     .maybeSingle();
 
   if (!roleData) {

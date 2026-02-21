@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
+import { submitContactForm } from "@/app/(public)/iletisim/actions";
 import { toast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
@@ -39,14 +39,15 @@ const Contact = () => {
 
   const onSubmit = async (data: ContactFormData) => {
     setSubmitting(true);
-    const { error } = await supabase.from("contact_messages").insert({
+    const result = await submitContactForm({
       name: data.name,
       email: data.email,
       message: data.message,
+      honeypot: "",
     });
     setSubmitting(false);
-    if (error) {
-      toast({ title: "Gönderilemedi", description: "Lütfen tekrar deneyin.", variant: "destructive" });
+    if (!result.success) {
+      toast({ title: "Gönderilemedi", description: result.error ?? "Lütfen tekrar deneyin.", variant: "destructive" });
       return;
     }
     toast({ title: "Mesajınız gönderildi!", description: "En kısa sürede size dönüş yapacağız." });
@@ -116,6 +117,7 @@ const Contact = () => {
               </div>
 
               <form onSubmit={handleSubmit(onSubmit)} className="reveal-on-scroll delay-1 bg-card rounded-2xl border border-border p-8 space-y-5" noValidate>
+                <input type="text" name="website" aria-hidden="true" tabIndex={-1} autoComplete="off" className="absolute opacity-0 h-0 w-0 pointer-events-none" />
                 <div>
                   <label htmlFor="name" className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em] block mb-3">Ad Soyad</label>
                   <input id="name" {...register("name")}
