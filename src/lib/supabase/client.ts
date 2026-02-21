@@ -1,6 +1,6 @@
 /**
- * Re-export the auto-generated Supabase browser client.
- * All app code should import from here instead of @/integrations/supabase/client.
- * During Next.js migration, this file will be updated to use createBrowserClient.
+ * Re-export the Supabase browser client.
+ * The underlying client now uses createBrowserClient from @supabase/ssr
+ * with cookie-based auth (Phase 2 migration).
  */
 export { supabase } from "@/integrations/supabase/client";

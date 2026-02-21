@@ -11,7 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 type Msg = {role: "user" | "assistant";content: string;};
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/part-finder-ai`;
+const CHAT_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/part-finder-ai`;
 
 // Parse product cards from AI response
 function parseAIContent(content: string) {
@@ -109,7 +109,7 @@ const PartFinder = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
         },
         body: JSON.stringify({ message: text, history })
       });
