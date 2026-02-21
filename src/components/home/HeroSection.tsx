@@ -1,6 +1,7 @@
 "use client";
 
-import { Link } from "react-router-dom";
+import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
 import { usePageContent } from "@/hooks/usePageContent";
@@ -18,18 +19,14 @@ const HeroSection = () => {
   return (
     <section ref={sectionRef} className="relative min-h-[90vh] bg-foreground overflow-hidden grain-overlay">
       <div className="absolute inset-0">
-        <picture>
-          <source srcSet="/images/hero-botika.jpg" type="image/webp" />
-          <img
-            src="/images/hero-botika.jpg"
-            alt="TV elektronik yedek parça ve anakart ürünleri"
-            className="w-full h-full object-cover hero-ken-burns opacity-25 object-right"
-            width={1920}
-            height={1080}
-            sizes="100vw"
-            decoding="async"
-            fetchPriority="high" />
-        </picture>
+        <Image
+          src="/images/hero-botika.jpg"
+          alt="TV elektronik yedek parça ve anakart ürünleri"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover hero-ken-burns opacity-25 object-right"
+        />
 
         <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/85 to-foreground/30" />
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-foreground/20" />
@@ -49,13 +46,13 @@ const HeroSection = () => {
 
           <div className="reveal-on-scroll delay-2 flex flex-row gap-3 items-center">
             <Link
-              to="/urunler"
+              href="/urunler"
               className="inline-flex items-center gap-2 bg-accent text-accent-foreground font-semibold px-6 sm:px-9 py-3 sm:py-4 rounded-lg hover:opacity-90 transition-all text-[13px] sm:text-[14px] tracking-wide focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-foreground">
               Ürünleri İncele
               <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </Link>
             <Link
-              to="/iletisim"
+              href="/iletisim"
               className="inline-flex items-center gap-2 border border-primary-foreground/25 text-primary-foreground/80 hover:text-primary-foreground hover:border-primary-foreground/40 font-semibold px-6 sm:px-9 py-3 sm:py-4 rounded-lg transition-all text-[13px] sm:text-[14px] focus:outline-none focus:ring-2 focus:ring-primary-foreground/30 focus:ring-offset-2 focus:ring-offset-foreground">
               Bize Ulaşın
             </Link>

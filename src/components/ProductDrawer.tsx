@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { MessageCircle } from "lucide-react";
 import type { Product } from "@/types/product";
@@ -23,7 +24,7 @@ const ProductDrawer = ({ product, open, onClose }: ProductDrawerProps) => {
         <div className="p-8 lg:p-10 pt-12">
           {/* Image */}
           <div className="aspect-square bg-card rounded-2xl flex items-center justify-center p-12 mb-8 border border-border/40">
-            <img src={product.images[0]} alt={product.name} className="max-h-full max-w-full object-contain" loading="lazy" width={400} height={400} />
+            <Image src={product.images[0]} alt={product.name} width={400} height={400} className="max-h-full max-w-full object-contain" />
           </div>
 
           {/* Info */}

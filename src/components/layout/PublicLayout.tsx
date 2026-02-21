@@ -1,8 +1,7 @@
-import { Outlet } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 
-const PublicLayout = () => {
+const PublicLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <a
@@ -13,7 +12,7 @@ const PublicLayout = () => {
       </a>
       <Header />
       <main id="main-content" className="flex-1">
-        <Outlet />
+        {children}
       </main>
       <Footer />
     </div>

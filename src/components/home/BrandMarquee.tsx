@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 interface Brand {
   id: string;
@@ -20,7 +20,7 @@ const BrandMarquee = ({ brands }: BrandMarqueeProps) => {
           {[...brands, ...brands, ...brands].map((brand, i) => (
             <Link
               key={`${brand.id}-${i}`}
-              to={`/marka/${brand.slug}`}
+              href={`/marka/${brand.slug}`}
               className="text-primary-foreground/40 hover:text-primary-foreground/70 text-sm sm:text-[15px] font-semibold uppercase tracking-[0.25em] transition-colors duration-300 shrink-0"
             >
               {brand.name}
