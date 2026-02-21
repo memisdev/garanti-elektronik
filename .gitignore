@@ -31,6 +31,12 @@ next-env.d.ts
 # Environment
 .env
 
+# Build cache
+tsconfig.tsbuildinfo
+
 # Secrets
 keys.txt
 .vercel
+
+# Lovable (legacy)
+.lovable/
