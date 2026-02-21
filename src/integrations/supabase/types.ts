@@ -158,6 +158,30 @@ export type Database = {
           },
         ]
       }
+      page_contents: {
+        Row: {
+          content: Json
+          id: string
+          page_key: string
+          section_key: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          id?: string
+          page_key: string
+          section_key: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          id?: string
+          page_key?: string
+          section_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           brand_id: string | null

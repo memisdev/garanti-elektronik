@@ -16,9 +16,15 @@ import { OrganizationJsonLd } from "@/components/seo/JsonLd";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { useLazyVisible } from "@/hooks/useLazyVisible";
+import { usePageContent } from "@/hooks/usePageContent";
 
 const FeaturesSection = lazy(() => import("@/components/home/FeaturesSection"));
 const StatsSection = lazy(() => import("@/components/home/StatsSection"));
+
+const ctaDefaults = {
+  title: "Doğru parçayı\nbirlikte bulalım.",
+  subtitle: "500+ ürün portföyümüzle aradığınız parçayı hızlıca temin ediyoruz.\nUzman ekibimiz her zaman yanınızda.",
+};
 
 const Index = () => {
   usePageMeta({ title: "Garanti Elektronik | Orijinal TV Yedek Parça ve Anakart Tedarikçisi", description: "Samsung, LG, Vestel ve daha fazlası için orijinal TV yedek parça ve anakart tedariki. 500+ ürün, aynı gün kargo, teknik destek." });
@@ -36,6 +42,7 @@ const Index = () => {
   const categoriesRef = useRevealOnScroll();
   const ctaRef = useRevealOnScroll();
   const recentRef = useRevealOnScroll();
+  const { content: ctaContent } = usePageContent("home_cta", ctaDefaults);
 
   const heroProduct = featuredProducts[0];
   const restProducts = featuredProducts.slice(1);
@@ -178,14 +185,11 @@ const Index = () => {
       <section ref={ctaRef} className="bg-foreground relative overflow-hidden grain-overlay">
         <div className="relative z-10 container mx-auto px-6 py-24 md:py-36">
           <div className="reveal-on-scroll max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl md:text-5xl lg:text-[3.5rem] font-black text-primary-foreground tracking-[-0.03em] mb-6 leading-[1.05]">
-              Doğru parçayı
-              <br />
-              birlikte bulalım.
+            <h2 className="text-3xl md:text-5xl lg:text-[3.5rem] font-black text-primary-foreground tracking-[-0.03em] mb-6 leading-[1.05] whitespace-pre-line">
+              {ctaContent.title}
             </h2>
-            <p className="text-[15px] text-primary-foreground/70 mb-10 max-w-lg mx-auto leading-relaxed">
-              500+ ürün portföyümüzle aradığınız parçayı hızlıca temin ediyoruz.
-              Uzman ekibimiz her zaman yanınızda.
+            <p className="text-[15px] text-primary-foreground/70 mb-10 max-w-lg mx-auto leading-relaxed whitespace-pre-line">
+              {ctaContent.subtitle}
             </p>
             <Link
               to="/iletisim"

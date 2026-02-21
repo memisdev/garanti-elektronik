@@ -34,6 +34,7 @@ const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminAuditLog = lazy(() => import("./pages/admin/AdminAuditLog"));
 const AdminTVModels = lazy(() => import("./pages/admin/AdminTVModels"));
 const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
+const AdminPageContents = lazy(() => import("./pages/admin/AdminPageContents"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -83,6 +84,7 @@ const App = () => (
                 <Route path="/admin/islem-kaydi" element={<AdminAuditLog />} />
                 <Route path="/admin/tv-modelleri" element={<AdminTVModels />} />
                 <Route path="/admin/mesajlar" element={<AdminMessages />} />
+                <Route path="/admin/sayfa-icerikleri" element={<AdminPageContents />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />
