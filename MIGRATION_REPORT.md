@@ -18,8 +18,9 @@
 7. [Tasarım Sistemi ve UI/UX](#7-tasarım-sistemi-ve-uiux)
 8. [SEO Yapısı](#8-seo-yapısı)
 9. [Özel Hook'lar ve Yardımcı Fonksiyonlar](#9-özel-hooklar-ve-yardımcı-fonksiyonlar)
-10. [Migration Checklist ve Dikkat Edilecekler](#10-migration-checklist)
-11. [Önerilen Next.js Dizin Yapısı](#11-önerilen-nextjs-dizin-yapısı)
+10. [✅ Tamamlanan Ön Hazırlık Çalışması](#10-tamamlanan-ön-hazırlık-çalışması)
+11. [Migration Checklist ve Dikkat Edilecekler](#11-migration-checklist)
+12. [Önerilen Next.js Dizin Yapısı](#12-önerilen-nextjs-dizin-yapısı)
 
 ---
 
@@ -153,25 +154,26 @@
 │   │   └── ...
 │   │
 │   ├── components/
+│   │   ├── AppLink.tsx              # ✅ [ÖN HAZIRLIK] Router Link soyutlaması (migration'da next/link'e çevrilecek)
 │   │   ├── EmptyState.tsx
 │   │   ├── ErrorBoundary.tsx
 │   │   ├── Logo.tsx                 # SVG Logo (GE chip ikonu)
 │   │   ├── NavLink.tsx
-│   │   ├── ProductCard.tsx          # Ürün kartı bileşeni
-│   │   ├── ProductDrawer.tsx        # Ürün detay çekmecesi (Sheet)
-│   │   ├── ScrollToTop.tsx          # Rota değişiminde scroll reset
-│   │   ├── SearchBar.tsx            # Arama çubuğu + autocomplete
+│   │   ├── ProductCard.tsx          # "use client" ✅ Ürün kartı bileşeni
+│   │   ├── ProductDrawer.tsx        # "use client" ✅ Ürün detay çekmecesi (Sheet)
+│   │   ├── ScrollToTop.tsx          # "use client" ✅ Rota değişiminde scroll reset
+│   │   ├── SearchBar.tsx            # "use client" ✅ Arama çubuğu + autocomplete
 │   │   ├── SkeletonPage.tsx         # Suspense fallback
 │   │   │
 │   │   ├── home/
-│   │   │   ├── HeroSection.tsx      # Hero banner (ken-burns, CMS içerik)
-│   │   │   ├── BrandMarquee.tsx     # Marka kaydırma bandı
-│   │   │   ├── FeaturesSection.tsx  # 4 özellik kartı (CMS içerik)
-│   │   │   └── StatsSection.tsx     # İstatistik sayıları
+│   │   │   ├── HeroSection.tsx      # "use client" ✅ Hero banner (ken-burns, CMS içerik)
+│   │   │   ├── BrandMarquee.tsx     # "use client" ✅ Marka kaydırma bandı
+│   │   │   ├── FeaturesSection.tsx  # "use client" ✅ 4 özellik kartı (CMS içerik)
+│   │   │   └── StatsSection.tsx     # "use client" ✅ İstatistik sayıları
 │   │   │
 │   │   ├── layout/
-│   │   │   ├── Header.tsx           # Sticky header, arama, mobil menü
-│   │   │   ├── Footer.tsx           # 4 sütun footer
+│   │   │   ├── Header.tsx           # "use client" ✅ Sticky header, arama, mobil menü
+│   │   │   ├── Footer.tsx           # "use client" ✅ 4 sütun footer
 │   │   │   ├── PublicLayout.tsx     # Header + Outlet + Footer
 │   │   │   └── AdminLayout.tsx      # Sidebar + Outlet
 │   │   │
@@ -204,19 +206,19 @@
 │   ├── hooks/
 │   │   ├── useAdminAuth.ts          # Admin oturum doğrulama
 │   │   ├── useAuditLog.ts           # İşlem kaydı ekleme
-│   │   ├── useBrands.ts             # Marka listesi (Supabase)
-│   │   ├── useCategories.ts         # Kategori + ürün sayısı + ilk görsel
-│   │   ├── useFeaturedProducts.ts   # Öne çıkan ürünler
-│   │   ├── useLazyVisible.ts        # IntersectionObserver lazy yükleme
-│   │   ├── usePageContent.ts        # CMS sayfa içerikleri (page_contents)
-│   │   ├── usePageMeta.ts           # document.title + meta description
-│   │   ├── usePartFinder.ts         # TV model arama + uyumlu parçalar
-│   │   ├── useProduct.ts            # Tekil ürün (slug ile)
-│   │   ├── useProducts.ts           # Ürün listesi (filtre, arama)
-│   │   ├── useRecentProducts.ts     # Son eklenen ürünler
-│   │   ├── useRevealOnScroll.ts     # Scroll-triggered reveal animasyonu
-│   │   ├── useSearch.ts             # Debounced arama + öneriler
-│   │   ├── useSiteSettings.ts       # Site ayarları (DB'den)
+│   │   ├── useBrands.ts             # ✅ DAL refactored → fetchBrands() kullanır
+│   │   ├── useCategories.ts         # ✅ DAL refactored → fetchCategories() kullanır
+│   │   ├── useFeaturedProducts.ts   # ✅ DAL refactored → fetchFeaturedProducts() kullanır
+│   │   ├── useLazyVisible.ts        # "use client" ✅ IntersectionObserver lazy yükleme
+│   │   ├── usePageContent.ts        # ✅ DAL refactored → fetchPageContent() kullanır
+│   │   ├── usePageMeta.ts           # "use client" ✅ document.title + meta description
+│   │   ├── usePartFinder.ts         # "use client" ✅ TV model arama + uyumlu parçalar
+│   │   ├── useProduct.ts            # ✅ DAL refactored → fetchProduct() kullanır
+│   │   ├── useProducts.ts           # ✅ DAL refactored → fetchProducts() kullanır
+│   │   ├── useRecentProducts.ts     # ✅ DAL refactored → fetchRecentProducts() kullanır
+│   │   ├── useRevealOnScroll.ts     # "use client" ✅ Scroll-triggered reveal animasyonu
+│   │   ├── useSearch.ts             # "use client" ✅ DAL refactored → searchProducts() kullanır
+│   │   ├── useSiteSettings.ts       # ✅ DAL refactored → fetchSiteSettings() kullanır
 │   │   ├── use-mobile.tsx           # Mobil breakpoint hook
 │   │   └── use-toast.ts             # Toast hook
 │   │
@@ -228,7 +230,19 @@
 │   ├── lib/
 │   │   ├── utils.ts                 # cn() — clsx + tailwind-merge
 │   │   ├── imageUtils.ts            # Supabase Storage görsel optimizasyonu
-│   │   └── escapeIlike.ts           # PostgREST ilike kaçış fonksiyonu
+│   │   ├── escapeIlike.ts           # PostgREST ilike kaçış fonksiyonu
+│   │   ├── metadata.ts              # ✅ [ÖN HAZIRLIK] SEO meta fonksiyonları (generateMetadata'ya hazır)
+│   │   │
+│   │   ├── queries/                 # ✅ [ÖN HAZIRLIK] Data Access Layer (React'tan bağımsız)
+│   │   │   ├── products.ts          # fetchProducts(), fetchProduct(), fetchFeaturedProducts(), fetchRecentProducts(), searchProducts()
+│   │   │   ├── brands.ts            # fetchBrands()
+│   │   │   ├── categories.ts        # fetchCategories()
+│   │   │   ├── page-contents.ts     # fetchPageContent()
+│   │   │   └── site-settings.ts     # fetchSiteSettings()
+│   │   │
+│   │   └── supabase/                # ✅ [ÖN HAZIRLIK] Supabase client soyutlaması
+│   │       ├── client.ts            # Browser client re-export
+│   │       └── server.ts            # Placeholder (migration'da createServerClient)
 │   │
 │   ├── pages/
 │   │   ├── Index.tsx                # Ana Sayfa
@@ -699,9 +713,47 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 ---
 
-## 10. Migration Checklist
+## 10. ✅ Tamamlanan Ön Hazırlık Çalışması
 
-### 10.1 Next.js App Router Geçiş Stratejisi
+> **Tarih:** 2026-02-21 — Aşağıdaki hazırlıklar mevcut Vite uygulamasını bozmadan, tamamen geriye uyumlu şekilde uygulanmıştır.
+
+### 10.1 Data Access Layer (DAL) Ayrıştırması
+Tüm veri çekme mantığı React hook'larından ayrılarak `src/lib/queries/` altında saf async fonksiyonlara çıkarıldı. Hook'lar artık bu fonksiyonları import ederek kullanıyor. Migration sırasında Next.js Server Component'leri doğrudan `fetchProducts()`, `fetchBrands()` vb. çağırabilecek.
+
+| Query Dosyası | Fonksiyonlar | Kullanan Hook |
+|---------------|-------------|---------------|
+| `products.ts` | `fetchProducts()`, `fetchProduct()`, `fetchFeaturedProducts()`, `fetchRecentProducts()`, `searchProducts()` | `useProducts`, `useProduct`, `useFeaturedProducts`, `useRecentProducts`, `useSearch` |
+| `brands.ts` | `fetchBrands()` | `useBrands` |
+| `categories.ts` | `fetchCategories()` | `useCategories` |
+| `page-contents.ts` | `fetchPageContent()` | `usePageContent` |
+| `site-settings.ts` | `fetchSiteSettings()` | `useSiteSettings` |
+
+### 10.2 Link Soyutlaması
+`src/components/AppLink.tsx` oluşturuldu — `react-router-dom`'un `Link`'ini sarar. Migration sırasında sadece bu dosyadaki import `next/link`'e çevrilecek.
+
+### 10.3 SEO Metadata Ayrıştırması
+`src/lib/metadata.ts` oluşturuldu — Her sayfanın meta bilgisini döndüren saf fonksiyonlar: `getIndexMeta()`, `getProductsMeta()`, `getProductMeta()`, `getBrandMeta()`, `getAboutMeta()`, `getContactMeta()`, `getFAQMeta()`. Migration sırasında `generateMetadata()` bu fonksiyonları doğrudan çağıracak.
+
+### 10.4 Supabase Client Soyutlaması
+- `src/lib/supabase/client.ts` — Mevcut browser client'ı re-export eder
+- `src/lib/supabase/server.ts` — Placeholder, migration'da `createServerClient` ile doldurulacak
+
+### 10.5 "use client" Direktifleri
+24 interaktif dosyaya `"use client"` eklendi (Vite'ta etkisiz string literal, Next.js'te client component işaretçisi):
+- **Bileşenler:** Header, Footer, SearchBar, ProductCard, ProductDrawer, ScrollToTop, HeroSection, BrandMarquee, FeaturesSection, StatsSection
+- **Hook'lar:** useSearch, useRevealOnScroll, useLazyVisible, usePageMeta, usePartFinder
+- **Sayfalar:** Index, Products, ProductPage, About, Contact, FAQ, BrandPage, CargoTracking, PartFinder, WarrantyReturn, PrivacyKVKK, CookiePolicy
+
+### 10.6 Kalan İşler (Migration Sırasında)
+- [ ] Admin sayfalarına ve bileşenlerine `"use client"` ekleme (zaten full client olacaklar)
+- [ ] `AppLink` kullanımını tüm dosyalara yaymak (şu an oluşturuldu ama henüz Link import'ları değiştirilmedi)
+- [ ] `@/integrations/supabase/client` import'larını `@/lib/supabase/client`'a taşıma (query dosyaları hariç)
+
+---
+
+## 11. Migration Checklist
+
+### 11.1 Next.js App Router Geçiş Stratejisi
 
 #### Rendering Stratejileri
 | Strateji | Sayfalar | Neden |
@@ -727,7 +779,7 @@ export async function generateStaticParams() {
 }
 ```
 
-### 10.2 Supabase Entegrasyonu
+### 11.2 Supabase Entegrasyonu
 
 #### Server-Side Client
 ```tsx
@@ -771,14 +823,14 @@ export async function middleware(request: NextRequest) {
 export const config = { matcher: ["/admin/:path((?!$).*)"] };
 ```
 
-### 10.3 Tailwind CSS ve shadcn/ui Geçişi
+### 11.3 Tailwind CSS ve shadcn/ui Geçişi
 - ✅ `tailwind.config.ts` → Aynen taşınır (content paths güncellenir)
 - ✅ `index.css` (CSS variables) → `app/globals.css` olarak taşınır
 - ✅ shadcn/ui bileşenleri → `components/ui/` klasörü aynen taşınır
 - ✅ `components.json` → shadcn CLI için güncellenir
 - ✅ `cn()` utility → `lib/utils.ts` aynen taşınır
 
-### 10.4 Edge Functions → Next.js API Routes
+### 11.4 Edge Functions → Next.js API Routes
 
 | Mevcut Edge Function | Next.js API Route | Not |
 |---------------------|-------------------|-----|
@@ -805,7 +857,7 @@ export async function POST(request: Request) {
 }
 ```
 
-### 10.5 SEO İyileştirmeleri
+### 11.5 SEO İyileştirmeleri
 - `usePageMeta` → `generateMetadata()` (her sayfa için)
 - `index.html` meta'ları → `app/layout.tsx` metadata export
 - `OrganizationJsonLd` → `app/(public)/layout.tsx` içinde
@@ -813,7 +865,7 @@ export async function POST(request: Request) {
 - Dinamik sitemap: `app/sitemap.ts` ile DB'den otomatik üretim
 - Dinamik robots: `app/robots.ts`
 
-### 10.6 Görsel Optimizasyonu
+### 11.6 Görsel Optimizasyonu
 ```tsx
 // Mevcut: <img src={optimizeImageUrl(url, 400)} loading="lazy" />
 // Hedef:
@@ -840,7 +892,7 @@ module.exports = {
 };
 ```
 
-### 10.7 Ortam Değişkenleri Eşleştirmesi
+### 11.7 Ortam Değişkenleri Eşleştirmesi
 
 | Vite (.env) | Next.js (.env.local) |
 |-------------|---------------------|
@@ -849,15 +901,15 @@ module.exports = {
 | — | `SUPABASE_SERVICE_ROLE_KEY` (server-only) |
 | — | `LOVABLE_API_KEY` (server-only, API routes için) |
 
-### 10.8 WhatsApp ve Harici Servis Entegrasyonları
+### 11.8 WhatsApp ve Harici Servis Entegrasyonları
 - **WhatsApp:** `siteConfig.social.whatsappUrl()` → Aynen taşınır (client-side link)
 - **Google Maps:** `<iframe>` embed → Aynen taşınır (lazy loading)
 - **AI Gateway:** `ai.gateway.lovable.dev` → API route'lardan çağrılır (server-side)
 - **Kargo Takip:** Kargo şirketi linklerine yönlendirme (statik)
 
-### 10.9 Dikkat Edilecek Kritik Noktalar
+### 11.9 Dikkat Edilecek Kritik Noktalar
 
-1. **`use client` Direktifi:** InterActive bileşenler (SearchBar, ProductDrawer, PartFinder chat, admin formları) `"use client"` olarak işaretlenmeli
+1. **`use client` Direktifi:** ✅ Public bileşen ve sayfalara eklendi. Admin sayfalarına migration sırasında eklenecek.
 2. **Router Geçişi:** `react-router-dom` → `next/navigation` (`useRouter`, `useParams`, `useSearchParams`, `Link`)
 3. **Dynamic Routes:** `/urun/:slug` → `/urun/[slug]`, `/marka/:slug` → `/marka/[slug]`
 4. **ScrollToTop:** Next.js App Router otomatik scroll reset yapar; `ScrollToTop.tsx` kaldırılabilir
@@ -870,7 +922,7 @@ module.exports = {
 
 ---
 
-## 11. Önerilen Next.js Dizin Yapısı
+## 12. Önerilen Next.js Dizin Yapısı
 
 ```
 ├── app/
