@@ -6,6 +6,7 @@ import { lazy, Suspense } from "react";
 import PublicLayout from "@/components/layout/PublicLayout";
 import AdminLayout from "@/components/layout/AdminLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import ScrollToTop from "@/components/ScrollToTop";
 import SkeletonPage from "@/components/SkeletonPage";
 import Index from "./pages/Index";
 const Products = lazy(() => import("./pages/Products"));
@@ -49,6 +50,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <BrowserRouter>
+          <ScrollToTop />
           <Suspense fallback={<SkeletonPage />}>
             <Routes>
               {/* Public routes */}
