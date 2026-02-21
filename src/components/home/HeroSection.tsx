@@ -1,3 +1,5 @@
+"use client";
+
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";

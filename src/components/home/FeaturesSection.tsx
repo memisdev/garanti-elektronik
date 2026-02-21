@@ -1,3 +1,5 @@
+"use client";
+
 import { Shield, Truck, Headphones, CheckCircle } from "lucide-react";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
 import { usePageContent } from "@/hooks/usePageContent";

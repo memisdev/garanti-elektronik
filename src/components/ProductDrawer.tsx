@@ -1,3 +1,5 @@
+"use client";
+
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { MessageCircle } from "lucide-react";
 import type { Product } from "@/types/product";

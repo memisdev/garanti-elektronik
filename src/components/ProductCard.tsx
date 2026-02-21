@@ -1,3 +1,5 @@
+"use client";
+
 import { MessageCircle } from "lucide-react";
 import type { Product } from "@/types/product";
 import { siteConfig } from "@/config/site";

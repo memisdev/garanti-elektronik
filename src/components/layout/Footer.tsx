@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+// Note: Footer is server-compatible (no state/effects). No "use client" needed.
 import { MessageCircle } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import Logo from "@/components/Logo";

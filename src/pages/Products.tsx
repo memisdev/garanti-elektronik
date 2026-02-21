@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useProducts } from "@/hooks/useProducts";

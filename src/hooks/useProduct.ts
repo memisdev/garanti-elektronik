@@ -1,6 +1,8 @@
+"use client";
+
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { normalizeProduct, type Product, type ProductRow } from "@/types/product";
+import { fetchProduct } from "@/lib/queries/products";
+import type { Product } from "@/types/product";
 
 export function useProduct(slug: string | undefined) {
   const [product, setProduct] = useState<Product | undefined>();
@@ -9,15 +11,10 @@ export function useProduct(slug: string | undefined) {
   useEffect(() => {
     if (!slug) { setProduct(undefined); return; }
     setLoading(true);
-    supabase
-      .from("products")
-      .select("*, brands(name, slug), categories(name, slug)")
-      .eq("slug", slug)
-      .maybeSingle()
-      .then(({ data }) => {
-        setProduct(data ? normalizeProduct(data as unknown as ProductRow) : undefined);
-        setLoading(false);
-      });
+    fetchProduct(slug).then((data) => {
+      setProduct(data);
+      setLoading(false);
+    });
   }, [slug]);
 
   return { product, loading };

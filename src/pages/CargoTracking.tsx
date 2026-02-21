@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { shippingCompanies } from "@/data/shipping-companies";
 import { ExternalLink, Package, Truck, MapPin } from "lucide-react";
