@@ -1,84 +1,165 @@
 
-# Garanti Elektronik - Next.js Migration Raporu
+# Next.js Migration Icin On Hazirlik
 
-Bu belgeyi `.md` dosyasi olarak projeye kaydedecegim. Asagida raporun tam icerigi yer almaktadir.
-
----
-
-## Yapilacak Is
-
-`MIGRATION_REPORT.md` adinda tek bir dosya olusturulacak. Dosya asagidaki tum bolum ve detaylari icerecek:
-
-### Raporun Icerigi
-
-**1. Proje Kimlik Karti**
-- Site adi, amaci, hedef kitlesi, URL, dil, teknoloji yigini
-
-**2. Mevcut Teknoloji Yigini**
-- React 18 + Vite + TypeScript + Tailwind CSS + Supabase
-- Tum npm bagimliliklari listesi
-- UI kit: shadcn/ui (Radix UI tabanli)
-
-**3. Dizin Yapisi (Tam Agac)**
-- src/ altindaki tum klasor ve dosyalar
-- supabase/functions altindaki edge function'lar
-- public/ altindaki statik dosyalar
-
-**4. Sayfa Envanteri (Public + Admin)**
-- Her sayfa icin: rota, dosya yolu, SEO meta bilgisi, veri kaynagi, SSR/SSG onerisi
-- Public: 12 sayfa (Ana Sayfa, Urunler, Urun Detay, Marka, Kargo Takip, Hakkimizda, Iletisim, SSS, Garanti/Iade, KVKK, Cerez, Parca Bulucu)
-- Admin: 12 sayfa (Login, Dashboard, Urunler, Markalar, Kategoriler, Mesajlar, SEO, Site Duzenleme, Medya, Kullanicilar, Islem Kaydi, TV Modelleri, Sayfa Icerikleri)
-
-**5. Veritabani Semasi**
-- 8 tablo: products, brands, categories, contact_messages, tv_models, model_product_compatibility, site_settings, page_contents, user_roles, audit_log
-- RLS politikalari ozeti
-- Enum: app_role
-- DB fonksiyonlari: has_role, update_updated_at_column
-
-**6. Edge Functions (Backend)**
-- part-finder-ai: AI tabanli TV parca bulucu (streaming SSE)
-- process-image: AI ile arka plan kaldirma
-- invite-user: Kullanici davet
-- list-users: Kullanici listeleme
-
-**7. Tasarim Sistemi ve UI/UX**
-- Renk paleti (CSS variables, light/dark)
-- Tipografi: Inter font ailesi
-- Bilesenler: ProductCard, ProductDrawer, HeroSection, BrandMarquee, FeaturesSection, StatsSection
-- Animasyonlar: reveal-on-scroll, card-hover-lift, marquee, ken-burns
-- Responsive breakpoint'ler
-- Erisilebilirlik ozellikleri
-
-**8. SEO Yapisi**
-- JSON-LD: Organization, Product, FAQPage
-- Meta tag yonetimi (usePageMeta hook)
-- sitemap.xml, robots.txt
-- Open Graph ve Twitter Card meta'lari
-
-**9. Ozel Hook'lar ve Yardimci Fonksiyonlar**
-- 17 custom hook'un amac ve kullanimlari
-- imageUtils, escapeIlike gibi yardimci fonksiyonlar
-
-**10. Migration Checklist ve Dikkat Edilecekler**
-- Next.js App Router'a gecis stratejisi (hangi sayfalar SSG, SSR, ISR)
-- Supabase entegrasyonunun korunmasi
-- Tailwind CSS ve shadcn/ui gecisi
-- Edge function'larin Next.js API Route'lara donusumu
-- SEO iyilestirmeleri (next/head, generateMetadata)
-- Resim optimizasyonu (next/image)
-- Ortam degiskenleri eslestirmesi
-- WhatsApp ve harici servis entegrasyonlari
-
-**11. Onerilen Next.js Dizin Yapisi**
-- app/ klasor yapisi onerisi
-- Route gruplari: (public), (admin)
-- components/, lib/, hooks/ organizasyonu
+Bu plan, mevcut React + Vite projesini Claude Code ile Next.js'e tasimadan once yapilacak **kod duzenleme ve ayristirma** calismasini kapsar. Amac: migration sirasinda en az surpriz, en temiz gecis.
 
 ---
 
-## Teknik Detay
+## 1. Veri Erisim Katmanini (Data Access Layer) Ayristirma
 
-- Tek dosya: `MIGRATION_REPORT.md`
-- Icerik: Yukaridaki 11 bolumun tamami, kod ornekleri, tablolar ve listelerle
-- Dil: Turkce
-- Tum mevcut sayfa icerikleri, bilesenler, hook'lar, veritabani tablosu detaylari, RLS politikalari, edge function'lar, tasarim tokenlari ve migration onerileri dahil
+Mevcut hook'lar (`useBrands`, `useCategories`, `useProducts`, `useProduct`, `useFeaturedProducts`, `useRecentProducts`, `useSearch`) dogrudan Supabase'i cagirir ve `useState`/`useEffect` ile yonetir. Next.js'te bu sorgular server component'lerde calisacak.
+
+**Yapilacak:**
+- `src/lib/queries/` klasoru olusturulacak
+- Her hook icin **saf async fonksiyon** cikarilacak (React'tan bagimsiz):
+  - `src/lib/queries/products.ts` -- `fetchProducts()`, `fetchProduct()`, `fetchFeaturedProducts()`, `fetchRecentProducts()`, `searchProducts()`
+  - `src/lib/queries/brands.ts` -- `fetchBrands()`
+  - `src/lib/queries/categories.ts` -- `fetchCategories()`
+  - `src/lib/queries/page-contents.ts` -- `fetchPageContent()`
+  - `src/lib/queries/site-settings.ts` -- `fetchSiteSettings()`
+- Mevcut hook'lar bu fonksiyonlari import edip kullanacak sekilde guncellenir (eski davranis korunur)
+
+Ornek:
+```typescript
+// src/lib/queries/products.ts
+import { supabase } from "@/integrations/supabase/client";
+import { normalizeProduct, type Product, type ProductRow } from "@/types/product";
+
+export async function fetchFeaturedProducts(): Promise<Product[]> {
+  const { data } = await supabase
+    .from("products")
+    .select("*, brands(name, slug), categories(name, slug)")
+    .eq("is_featured", true)
+    .order("featured_order")
+    .limit(4);
+  return (data as unknown as ProductRow[] | null)?.map(normalizeProduct) ?? [];
+}
+```
+
+Hook guncellemesi:
+```typescript
+// src/hooks/useFeaturedProducts.ts
+import { fetchFeaturedProducts } from "@/lib/queries/products";
+export function useFeaturedProducts() {
+  const [products, setProducts] = useState<Product[]>([]);
+  useEffect(() => { fetchFeaturedProducts().then(setProducts); }, []);
+  return { products };
+}
+```
+
+---
+
+## 2. Link Bilesenini Soyutlama
+
+Projede `react-router-dom`'dan `Link` ve `useNavigate` kullanan ~20+ dosya var. Migration sirasinda bunlarin hepsini `next/link` ve `next/navigation`'a degistirmek gerekecek.
+
+**Yapilacak:**
+- `src/components/AppLink.tsx` olusturulacak -- `react-router-dom`'un `Link`'ini sarar
+- Tum sayfa ve bilesen dosyalarinda `Link` import'u `AppLink`'e cevrilecek
+- Migration sirasinda sadece `AppLink.tsx` icindeki import degisecek
+
+```typescript
+// src/components/AppLink.tsx
+import { Link, type LinkProps } from "react-router-dom";
+export default function AppLink(props: LinkProps) {
+  return <Link {...props} />;
+}
+```
+
+---
+
+## 3. SEO Metadata'yi Ayristirma
+
+`usePageMeta` hook'u `document.title` ile calisir. Next.js'te `generateMetadata` kullanilacak.
+
+**Yapilacak:**
+- `src/lib/metadata.ts` olusturulacak -- her sayfanin meta bilgisini donduren saf fonksiyonlar
+- Ornek: `getProductMeta(product)`, `getIndexMeta()`, `getProductsMeta()`
+- Mevcut `usePageMeta` calismaya devam eder ama meta verileri bu fonksiyonlardan gelir
+
+```typescript
+// src/lib/metadata.ts
+export function getIndexMeta() {
+  return {
+    title: "Garanti Elektronik | Orijinal TV Yedek Parca",
+    description: "Samsung, LG, Vestel ve daha fazlasi icin..."
+  };
+}
+```
+
+---
+
+## 4. Bilesen Siniflandirmasi: Client vs Server
+
+Next.js'te hangi bilesenin client, hangisinin server olacagini onceden belirlemek migration'i hizlandirir.
+
+**Yapilacak:**
+- Interaktif bilesenlere (state, event handler, browser API kullananlar) `"use client"` yorumu eklenecek (su an zarar vermez, Vite bunu yorum olarak gorur):
+  - `Header.tsx`, `SearchBar.tsx`, `ProductDrawer.tsx`, `ProductCard.tsx` (onClick), `BrandMarquee.tsx`, `ScrollToTop.tsx`
+  - Tum admin sayfalari
+  - `useRevealOnScroll`, `useLazyVisible` kullanan bilesenler
+- Server-uyumlu bilesenler isaretlenmez: `Logo.tsx`, `Footer.tsx`, `JsonLd.tsx`, `EmptyState.tsx`
+
+---
+
+## 5. Statik Icerik Dosyalarini Organize Etme
+
+**Yapilacak:**
+- `src/data/` klasorundeki statik veriler (brands.ts, categories.ts, products.ts, shipping-companies.ts) icerikleri kontrol edilecek -- eger bunlar sadece fallback/seed ise "data" klasorunde kalabilir
+- `src/config/site.ts` degisiklik gerektirmez, Next.js'te de aynen kullanilabilir
+
+---
+
+## 6. Supabase Client Yapisini Hazirla
+
+Next.js'te iki farkli Supabase client gerekecek (browser + server). Buna hazirlik olarak:
+
+**Yapilacak:**
+- `src/lib/supabase/` klasoru olusturulacak
+- `src/lib/supabase/client.ts` -- mevcut browser client'i re-export eder
+- `src/lib/supabase/server.ts` -- su an icin placeholder, migration'da `createServerClient` ile doldurulacak
+- Tum import'lar `@/integrations/supabase/client` yerine `@/lib/supabase/client` kullanacak sekilde guncellenir
+
+**Not:** `src/integrations/supabase/client.ts` dosyasina dokunulmaz (otomatik uretiliyor). Sadece bir ara katman eklenir.
+
+---
+
+## 7. CSS ve Tailwind Hazirlik
+
+**Yapilacak:**
+- `src/index.css` icindeki `@tailwind` direktifleri ve custom CSS, Next.js'e birebir tasinabilir durumda -- degisiklik gerekmez
+- `tailwind.config.ts` icerigi kontrol edilip Next.js uyumlu `content` path'leri icin not birakilacak (yorum olarak)
+
+---
+
+## Dosya Degisiklik Ozeti
+
+| Islem | Dosya |
+|-------|-------|
+| Yeni | `src/lib/queries/products.ts` |
+| Yeni | `src/lib/queries/brands.ts` |
+| Yeni | `src/lib/queries/categories.ts` |
+| Yeni | `src/lib/queries/page-contents.ts` |
+| Yeni | `src/lib/queries/site-settings.ts` |
+| Yeni | `src/lib/metadata.ts` |
+| Yeni | `src/lib/supabase/client.ts` (re-export) |
+| Yeni | `src/lib/supabase/server.ts` (placeholder) |
+| Yeni | `src/components/AppLink.tsx` |
+| Guncelleme | `src/hooks/useBrands.ts` (query fonksiyonunu import et) |
+| Guncelleme | `src/hooks/useCategories.ts` (query fonksiyonunu import et) |
+| Guncelleme | `src/hooks/useProducts.ts` (query fonksiyonunu import et) |
+| Guncelleme | `src/hooks/useProduct.ts` (query fonksiyonunu import et) |
+| Guncelleme | `src/hooks/useFeaturedProducts.ts` (query fonksiyonunu import et) |
+| Guncelleme | `src/hooks/useRecentProducts.ts` (query fonksiyonunu import et) |
+| Guncelleme | `src/hooks/useSearch.ts` (query fonksiyonunu import et) |
+| Guncelleme | `src/hooks/usePageContent.ts` (query fonksiyonunu import et) |
+| Guncelleme | ~15 bilesen dosyasi (`"use client"` yorumu ekleme) |
+
+---
+
+## Onemli Notlar
+
+- Bu degisiklikler mevcut uygulamayi **bozmaz** -- tamamen geriye uyumlu
+- `"use client"` ifadesi Vite'ta sadece bir string literal olarak gorulur, hicbir etkisi yoktur
+- Data access layer ayristirmasi, Next.js server component'lerinde dogrudan `fetchProducts()` cagirmayi mumkun kilar
+- AppLink soyutlamasi sayesinde migration'da tek dosya degisikligi yeterli olur
