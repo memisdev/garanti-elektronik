@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { toast } from "@/hooks/use-toast";
+import { slugify } from "@/lib/slugify";
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -27,14 +28,13 @@ const AdminBrands = () => {
   const { log } = useAuditLog();
 
   const fetchBrands = async () => {
-    const { data } = await supabase.from("brands").select("*").order("name");
+    const { data, error } = await supabase.from("brands").select("*").order("name");
+    if (error) { toast({ title: "Hata", description: "Markalar yüklenemedi.", variant: "destructive" }); }
     setBrands(data || []);
     setLoading(false);
   };
 
   useEffect(() => { fetchBrands(); }, []);
-
-  const slugify = (text: string) => text.toLowerCase().replace(/ğ/g, "g").replace(/ü/g, "u").replace(/ş/g, "s").replace(/ı/g, "i").replace(/ö/g, "o").replace(/ç/g, "c").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
   const openCreate = () => {
     setEditing(null);

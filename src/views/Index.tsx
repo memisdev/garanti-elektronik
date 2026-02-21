@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, MessageCircle } from "lucide-react";
-import { useState, lazy, Suspense } from "react";
+import { useState, useCallback, lazy, Suspense } from "react";
 import { useBrands } from "@/hooks/useBrands";
 import { useProduct } from "@/hooks/useProduct";
 import { useFeaturedProducts } from "@/hooks/useFeaturedProducts";
@@ -34,6 +34,7 @@ const Index = () => {
   const { categories } = useCategories();
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   const { product: selectedProduct } = useProduct(selectedSlug ?? undefined);
+  const handleDetail = useCallback((slug: string) => setSelectedSlug(slug), []);
 
   const featuredIds = new Set(featuredProducts.map((p) => p.id));
   const filteredRecent = recentProducts.filter((p) => !featuredIds.has(p.id));
@@ -163,7 +164,7 @@ const Index = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {restProducts.map((product, i) => (
                 <div key={product.id} className={`reveal-on-scroll delay-${i + 2}`}>
-                  <ProductCard product={product} onDetail={(slug) => setSelectedSlug(slug)} />
+                  <ProductCard product={product} onDetail={handleDetail} />
                 </div>
               ))}
             </div>
@@ -221,7 +222,7 @@ const Index = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {filteredRecent.map((product, i) => (
                   <div key={product.id} className={`reveal-on-scroll delay-${Math.min(i + 1, 4)}`}>
-                    <ProductCard product={product} onDetail={(slug) => setSelectedSlug(slug)} />
+                    <ProductCard product={product} onDetail={handleDetail} />
                   </div>
                 ))}
               </div>

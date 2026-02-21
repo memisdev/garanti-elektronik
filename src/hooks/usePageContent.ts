@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchPageContent } from "@/lib/queries/page-contents";
 
-type ContentMap = Record<string, any>;
+type ContentMap = Record<string, unknown>;
 
 export function usePageContent<T extends ContentMap>(
   pageKey: string,

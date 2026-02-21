@@ -13,9 +13,33 @@ type Msg = {role: "user" | "assistant";content: string;};
 
 const CHAT_URL = "/api/part-finder-ai";
 
+interface ProductCardData {
+  id: string;
+  name: string;
+  slug: string;
+  code?: string;
+  image?: string;
+  brand?: string;
+}
+
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+function isValidProductData(data: unknown): data is ProductCardData {
+  if (typeof data !== "object" || data === null) return false;
+  const d = data as Record<string, unknown>;
+  return (
+    typeof d.id === "string" &&
+    typeof d.name === "string" &&
+    typeof d.slug === "string" && SLUG_PATTERN.test(d.slug) &&
+    (d.code === undefined || typeof d.code === "string") &&
+    (d.image === undefined || typeof d.image === "string") &&
+    (d.brand === undefined || typeof d.brand === "string")
+  );
+}
+
 // Parse product cards from AI response
 function parseAIContent(content: string) {
-  const parts: Array<{type: "text";value: string;} | {type: "product";data: any;}> = [];
+  const parts: Array<{type: "text";value: string;} | {type: "product";data: ProductCardData;}> = [];
   const regex = /:::product({.*?}):::/g;
   let lastIndex = 0;
   let match;
@@ -25,7 +49,12 @@ function parseAIContent(content: string) {
       parts.push({ type: "text", value: content.slice(lastIndex, match.index) });
     }
     try {
-      parts.push({ type: "product", data: JSON.parse(match[1]) });
+      const parsed = JSON.parse(match[1]);
+      if (isValidProductData(parsed)) {
+        parts.push({ type: "product", data: parsed });
+      } else {
+        parts.push({ type: "text", value: match[0] });
+      }
     } catch {
       parts.push({ type: "text", value: match[0] });
     }
@@ -37,7 +66,7 @@ function parseAIContent(content: string) {
   return parts;
 }
 
-function ProductInlineCard({ data, push }: {data: any;push: (path: string) => void;}) {
+function ProductInlineCard({ data, push }: {data: ProductCardData;push: (path: string) => void;}) {
   const whatsappMsg = siteConfig.whatsapp.defaultMessage(data.name, data.code ?? undefined);
   return (
     <div className="my-3 bg-card rounded-xl border border-border/40 p-4 flex gap-4 items-start hover:border-accent/30 transition-colors">

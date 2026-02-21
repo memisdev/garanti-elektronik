@@ -57,7 +57,8 @@ const AdminTVModels = () => {
 
   const fetchModels = async () => {
     setLoading(true);
-    const { data } = await supabase.from("tv_models").select("*, brands(name)").order("model_number");
+    const { data, error } = await supabase.from("tv_models").select("*, brands(name)").order("model_number");
+    if (error) { toast({ title: "Hata", description: "Modeller yüklenemedi.", variant: "destructive" }); }
     if (data) {
       setModels(data.map((d: any) => ({ ...d, brand_name: d.brands?.name })));
     }
@@ -65,21 +66,24 @@ const AdminTVModels = () => {
   };
 
   const fetchBrands = async () => {
-    const { data } = await supabase.from("brands").select("id, name").order("name");
+    const { data, error } = await supabase.from("brands").select("id, name").order("name");
+    if (error) { console.error("Failed to fetch brands:", error); }
     if (data) setBrands(data);
   };
 
   const fetchProducts = async () => {
-    const { data } = await supabase.from("products").select("id, name, code").order("name");
+    const { data, error } = await supabase.from("products").select("id, name, code").order("name");
+    if (error) { console.error("Failed to fetch products:", error); }
     if (data) setProducts(data);
   };
 
   const fetchCompatibilities = async (modelId: string) => {
     setCompLoading(true);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("model_product_compatibility")
       .select("id, product_id, notes, products(name, code)")
       .eq("tv_model_id", modelId);
+    if (error) { toast({ title: "Hata", description: "Uyumluluk listesi yüklenemedi.", variant: "destructive" }); }
     if (data) {
       setCompatibilities(
         data.map((d: any) => ({
@@ -127,7 +131,8 @@ const AdminTVModels = () => {
 
   const handleDeleteModel = async (id: string) => {
     if (!confirm("Bu modeli silmek istediğinize emin misiniz?")) return;
-    await supabase.from("tv_models").delete().eq("id", id);
+    const { error } = await supabase.from("tv_models").delete().eq("id", id);
+    if (error) { toast({ title: "Hata", description: "Model silinemedi.", variant: "destructive" }); return; }
     if (selectedModel?.id === id) setSelectedModel(null);
     fetchModels();
     toast({ title: "Model silindi" });
@@ -150,7 +155,8 @@ const AdminTVModels = () => {
   };
 
   const handleRemoveProduct = async (compId: string) => {
-    await supabase.from("model_product_compatibility").delete().eq("id", compId);
+    const { error } = await supabase.from("model_product_compatibility").delete().eq("id", compId);
+    if (error) { toast({ title: "Hata", description: "Ürün kaldırılamadı.", variant: "destructive" }); return; }
     if (selectedModel) fetchCompatibilities(selectedModel.id);
   };
 

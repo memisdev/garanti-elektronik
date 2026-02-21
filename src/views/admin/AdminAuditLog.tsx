@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { escapeIlike } from "@/lib/escapeIlike";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface LogEntry {
@@ -26,7 +27,7 @@ const AdminAuditLog = () => {
   const fetchLogs = useCallback(async () => {
     setLoading(true);
     let query = supabase.from("audit_log").select("*", { count: "exact" });
-    if (actionFilter) query = query.ilike("action", `%${actionFilter}%`);
+    if (actionFilter) query = query.ilike("action", `%${escapeIlike(actionFilter)}%`);
     if (dateFrom) query = query.gte("created_at", dateFrom);
     if (dateTo) query = query.lte("created_at", `${dateTo}T23:59:59`);
     const { data, count } = await query.order("created_at", { ascending: false }).range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);

@@ -96,14 +96,15 @@ const PAGE_DEFS: {
   },
 ];
 
-type SectionData = Record<string, any>;
+type SectionData = Record<string, unknown>;
 
 const AdminPageContents = () => {
   const [activePage, setActivePage] = useState(PAGE_DEFS[0].key);
   const [formData, setFormData] = useState<SectionData>({});
   const queryClient = useQueryClient();
 
-  const pageDef = PAGE_DEFS.find((p) => p.key === activePage)!;
+  const pageDef = PAGE_DEFS.find((p) => p.key === activePage);
+  if (!pageDef) return null;
 
   const { data: dbRows, isLoading } = useQuery({
     queryKey: ["admin-page-contents", activePage],
@@ -133,7 +134,7 @@ const AdminPageContents = () => {
         const { error } = await supabase
           .from("page_contents")
           .upsert(
-            { page_key: activePage, section_key: section.key, content: formData[section.key] },
+            { page_key: activePage, section_key: section.key, content: formData[section.key] as import("@/integrations/supabase/types").Json },
             { onConflict: "page_key,section_key" }
           );
         if (error) throw error;
@@ -149,7 +150,7 @@ const AdminPageContents = () => {
     },
   });
 
-  const updateField = (sectionKey: string, value: any) => {
+  const updateField = (sectionKey: string, value: unknown) => {
     setFormData((prev) => ({ ...prev, [sectionKey]: value }));
   };
 
@@ -220,8 +221,8 @@ function SectionEditor({
   onChange,
 }: {
   type: string;
-  value: any;
-  onChange: (v: any) => void;
+  value: unknown;
+  onChange: (v: unknown) => void;
 }) {
   if (type === "text") {
     return (

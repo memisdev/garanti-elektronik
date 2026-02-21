@@ -2,7 +2,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Package, Tag, FolderTree, Search as SearchIcon, FileEdit, Image, Users, ScrollText, LogOut, Tv, MessageSquare, Menu, X, FileText } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import SkeletonPage from "@/components/SkeletonPage";
 
@@ -21,28 +21,15 @@ const sidebarItems = [
   { label: "Sayfa İçerikleri", href: "/admin/sayfa-icerikleri", icon: FileText },
 ];
 
-const AdminLayout = ({ children }: { children: React.ReactNode }) => {
-  const pathname = usePathname();
-  const { loading, signOut } = useAdminAuth();
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [mobileOpen, setMobileOpen] = useState(false);
+const UNREAD_CACHE_TTL = 30_000; // 30 seconds
 
-  useEffect(() => {
-    supabase
-      .from("contact_messages")
-      .select("id", { count: "exact", head: true })
-      .eq("is_read", false)
-      .then(({ count }) => setUnreadCount(count || 0));
-  }, [pathname]);
-
-  if (loading) return <SkeletonPage />;
-
-  const NavItems = () => (
+function NavItems({ pathname, unreadCount, onNavigate }: { pathname: string; unreadCount: number; onNavigate?: () => void }) {
+  return (
     <>
       {sidebarItems.map((item) => {
         const active = pathname === item.href;
         return (
-          <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}
+          <Link key={item.href} href={item.href} onClick={onNavigate}
             className={`flex items-center gap-3 text-[13px] px-4 h-11 rounded-xl transition-all duration-200 relative ${active ? "bg-surface text-foreground font-medium" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`}>
             {active && <div className="absolute left-0 top-2 bottom-2 w-[3px] bg-accent-orange rounded-full" />}
             <item.icon className="w-4 h-4" />
@@ -55,6 +42,28 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
       })}
     </>
   );
+}
+
+const AdminLayout = ({ children }: { children: React.ReactNode }) => {
+  const pathname = usePathname();
+  const { loading, signOut } = useAdminAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const lastFetchRef = useRef(0);
+
+  useEffect(() => {
+    const now = Date.now();
+    if (now - lastFetchRef.current < UNREAD_CACHE_TTL) return;
+    lastFetchRef.current = now;
+
+    supabase
+      .from("contact_messages")
+      .select("id", { count: "exact", head: true })
+      .eq("is_read", false)
+      .then(({ count }) => setUnreadCount(count || 0));
+  }, [pathname]);
+
+  if (loading) return <SkeletonPage />;
 
   return (
     <div className="min-h-screen flex bg-surface">
@@ -67,7 +76,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           </Link>
         </div>
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          <NavItems />
+          <NavItems pathname={pathname} unreadCount={unreadCount} />
         </nav>
         <div className="p-4 border-t border-border/50">
           <button onClick={signOut} className="flex items-center gap-3 text-[13px] text-muted-foreground hover:text-destructive px-4 h-11 rounded-xl w-full transition-colors">
@@ -86,7 +95,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               <button onClick={() => setMobileOpen(false)}><X className="w-5 h-5 text-muted-foreground" /></button>
             </div>
             <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-              <NavItems />
+              <NavItems pathname={pathname} unreadCount={unreadCount} onNavigate={() => setMobileOpen(false)} />
             </nav>
             <div className="p-4 border-t border-border/50">
               <button onClick={signOut} className="flex items-center gap-3 text-[13px] text-muted-foreground hover:text-destructive px-4 h-11 rounded-xl w-full transition-colors">

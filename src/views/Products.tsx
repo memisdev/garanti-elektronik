@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useProducts } from "@/hooks/useProducts";
 import { useBrands } from "@/hooks/useBrands";
@@ -29,8 +29,8 @@ const Products = () => {
   const [showFilters, setShowFilters] = useState(false);
   const gridRef = useRevealOnScroll();
 
-  const handleDetail = (slug: string) => setDrawerSlug(slug);
-  const handleCloseDrawer = () => setDrawerSlug(null);
+  const handleDetail = useCallback((slug: string) => setDrawerSlug(slug), []);
+  const handleCloseDrawer = useCallback(() => setDrawerSlug(null), []);
 
   const setParam = (key: string, value: string) => {
     const sp = new URLSearchParams(searchParams.toString());

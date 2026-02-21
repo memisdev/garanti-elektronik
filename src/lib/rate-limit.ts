@@ -1,3 +1,9 @@
+/**
+ * In-memory rate limiter. Note: In a serverless deployment (Vercel), each
+ * function instance has its own Map, so the effective rate limit scales
+ * with the number of concurrent instances. For strict rate limiting in
+ * multi-instance environments, use a distributed store (Redis/Vercel KV).
+ */
 const stores = new Map<string, Map<string, { count: number; resetAt: number }>>();
 const lastCleanup = new Map<string, number>();
 

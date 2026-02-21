@@ -3,7 +3,9 @@ import { createServiceClient } from "@/lib/supabase/admin";
 import { getChatConfig } from "@/lib/ai/client";
 import { rateLimit } from "@/lib/rate-limit";
 
-// Cache product catalog in memory with 5-minute TTL
+// Cache product catalog in memory with 5-minute TTL.
+// Note: In serverless (Vercel), each function instance has its own cache.
+// The cache only helps within a warm instance; cold starts re-fetch.
 let productCache: { data: string; timestamp: number } | null = null;
 const CACHE_TTL = 5 * 60 * 1000;
 

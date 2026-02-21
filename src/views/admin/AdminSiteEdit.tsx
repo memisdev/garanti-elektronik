@@ -22,12 +22,19 @@ const AdminSiteEdit = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    supabase.from("site_settings").select("key, value").then(({ data }) => {
-      const map: Record<string, string> = {};
-      (data || []).forEach((r) => { map[r.key] = r.value || ""; });
-      setValues(map);
-      setLoading(false);
-    });
+    (async () => {
+      try {
+        const { data, error } = await supabase.from("site_settings").select("key, value");
+        if (error) { toast({ title: "Yükleme hatası", description: "Ayarlar yüklenemedi.", variant: "destructive" }); }
+        const map: Record<string, string> = {};
+        (data || []).forEach((r) => { map[r.key] = r.value || ""; });
+        setValues(map);
+      } catch {
+        toast({ title: "Yükleme hatası", description: "Ayarlar yüklenemedi.", variant: "destructive" });
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
   const handleSave = async () => {

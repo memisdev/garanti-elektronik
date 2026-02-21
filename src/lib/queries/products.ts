@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeProduct, type Product, type ProductRow } from "@/types/product";
 import { escapeIlike } from "@/lib/escapeIlike";
+import { MAX_FEATURED_PRODUCTS } from "@/config/site";
 
 const PRODUCT_SELECT = "*, brands(name, slug), categories(name, slug)" as const;
 
@@ -10,7 +11,7 @@ export async function fetchFeaturedProducts(): Promise<Product[]> {
     .select(PRODUCT_SELECT)
     .eq("is_featured", true)
     .order("featured_order")
-    .limit(4);
+    .limit(MAX_FEATURED_PRODUCTS);
   if (error) throw error;
   return (data as unknown as ProductRow[] | null)?.map(normalizeProduct) ?? [];
 }

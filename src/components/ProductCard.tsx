@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Image from "next/image";
 import { MessageCircle } from "lucide-react";
 import type { Product } from "@/types/product";
@@ -10,7 +11,7 @@ interface ProductCardProps {
   onDetail?: (slug: string) => void;
 }
 
-const ProductCard = ({ product, onDetail }: ProductCardProps) => {
+const ProductCard = memo(({ product, onDetail }: ProductCardProps) => {
   const categoryLabel = product.categories?.name ?? product.category;
   const whatsappMessage = siteConfig.whatsapp.defaultMessage(product.name, product.code);
 
@@ -63,6 +64,8 @@ const ProductCard = ({ product, onDetail }: ProductCardProps) => {
       </div>
     </article>
   );
-};
+});
+
+ProductCard.displayName = "ProductCard";
 
 export default ProductCard;

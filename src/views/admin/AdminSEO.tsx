@@ -19,15 +19,22 @@ const AdminSEO = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    supabase.from("site_settings").select("key, value").like("key", "seo_%").then(({ data }) => {
-      const map: Record<string, string> = {};
-      (data || []).forEach((r) => { map[r.key] = r.value || ""; });
-      setValues(map);
-      setLoading(false);
-    });
+    (async () => {
+      try {
+        const { data, error } = await supabase.from("site_settings").select("key, value").like("key", "seo_%");
+        if (error) { toast({ title: "Yükleme hatası", description: "SEO ayarları yüklenemedi.", variant: "destructive" }); }
+        const map: Record<string, string> = {};
+        (data || []).forEach((r) => { map[r.key] = r.value || ""; });
+        setValues(map);
+      } catch {
+        toast({ title: "Yükleme hatası", description: "SEO ayarları yüklenemedi.", variant: "destructive" });
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
-  const page = pages.find((p) => p.key === selected)!;
+  const page = pages.find((p) => p.key === selected) ?? pages[0];
   const title = values[page.titleKey] || "";
   const desc = values[page.descKey] || "";
 

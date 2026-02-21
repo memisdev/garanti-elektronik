@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { toast } from "@/hooks/use-toast";
 import { escapeIlike } from "@/lib/escapeIlike";
+import { slugify } from "@/lib/slugify";
+import { MAX_FEATURED_PRODUCTS } from "@/config/site";
 import { Search, Plus, Pencil, Trash2, Loader2, ChevronLeft, ChevronRight, Star, Wand2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -47,8 +49,6 @@ const AdminProducts = () => {
   const [specVal, setSpecVal] = useState("");
   const [processingImages, setProcessingImages] = useState<Set<number>>(new Set());
   const { log } = useAuditLog();
-
-  const slugify = (text: string) => text.toLowerCase().replace(/ğ/g, "g").replace(/ü/g, "u").replace(/ş/g, "s").replace(/ı/g, "i").replace(/ö/g, "o").replace(/ç/g, "c").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
   const removeBackground = async (imageUrl: string, index: number) => {
     // Extract storage path from full URL
@@ -202,8 +202,8 @@ const AdminProducts = () => {
 
   const handleToggleFeatured = async (p: Product) => {
     const featuredCount = products.filter((pr) => pr.is_featured).length;
-    if (!p.is_featured && featuredCount >= 4) {
-      toast({ title: "Maksimum 4 ürün öne çıkarılabilir.", variant: "destructive" });
+    if (!p.is_featured && featuredCount >= MAX_FEATURED_PRODUCTS) {
+      toast({ title: `Maksimum ${MAX_FEATURED_PRODUCTS} ürün öne çıkarılabilir.`, variant: "destructive" });
       return;
     }
     const { error } = await supabase

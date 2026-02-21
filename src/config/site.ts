@@ -1,3 +1,5 @@
+export const MAX_FEATURED_PRODUCTS = 4;
+
 export const siteConfig = {
   name: "Garanti Elektronik",
   shortName: "GE",

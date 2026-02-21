@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { timeAgo } from "@/lib/timeAgo";
 import { Mail, MailOpen, Trash2 } from "lucide-react";
 
 interface Message {
@@ -19,10 +20,11 @@ const AdminMessages = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchMessages = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("contact_messages")
       .select("*")
       .order("created_at", { ascending: false });
+    if (error) { toast({ title: "Hata", description: "Mesajlar yüklenemedi." }); }
     setMessages(data || []);
     setLoading(false);
   };
@@ -30,24 +32,17 @@ const AdminMessages = () => {
   useEffect(() => { fetchMessages(); }, []);
 
   const toggleRead = async (msg: Message) => {
-    await supabase.from("contact_messages").update({ is_read: !msg.is_read }).eq("id", msg.id);
+    const { error } = await supabase.from("contact_messages").update({ is_read: !msg.is_read }).eq("id", msg.id);
+    if (error) { toast({ title: "Hata", description: "İşlem başarısız.", variant: "destructive" }); return; }
     setMessages((prev) => prev.map((m) => m.id === msg.id ? { ...m, is_read: !m.is_read } : m));
     toast({ title: msg.is_read ? "Okunmadı olarak işaretlendi" : "Okundu olarak işaretlendi" });
   };
 
   const deleteMsg = async (id: string) => {
-    await supabase.from("contact_messages").delete().eq("id", id);
+    const { error } = await supabase.from("contact_messages").delete().eq("id", id);
+    if (error) { toast({ title: "Hata", description: "Mesaj silinemedi.", variant: "destructive" }); return; }
     setMessages((prev) => prev.filter((m) => m.id !== id));
     toast({ title: "Mesaj silindi" });
-  };
-
-  const timeAgo = (dateStr: string) => {
-    const diff = Date.now() - new Date(dateStr).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 60) return `${mins} dk önce`;
-    const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours} saat önce`;
-    return `${Math.floor(hours / 24)} gün önce`;
   };
 
   return (
@@ -74,6 +69,7 @@ const AdminMessages = () => {
                   </div>
                   <p className="text-sm text-foreground/80 mt-2">{msg.message}</p>
                   <span className="text-[11px] text-muted-foreground mt-2 block">{timeAgo(msg.created_at)}</span>
+
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <button onClick={() => toggleRead(msg)} className="w-9 h-9 rounded-xl bg-surface flex items-center justify-center hover:bg-accent transition-colors" title={msg.is_read ? "Okunmadı işaretle" : "Okundu işaretle"}>

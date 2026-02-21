@@ -13,6 +13,8 @@ export function useSiteSettings(): { settings: SiteSettings; loading: boolean } 
   const [loading, setLoading] = useState(!cached);
 
   useEffect(() => {
+    let mounted = true;
+
     if (cached) {
       setSettings(cached);
       setLoading(false);
@@ -33,9 +35,13 @@ export function useSiteSettings(): { settings: SiteSettings; loading: boolean } 
     }
 
     fetching.then((s) => {
-      setSettings(s);
-      setLoading(false);
+      if (mounted) {
+        setSettings(s);
+        setLoading(false);
+      }
     });
+
+    return () => { mounted = false; };
   }, []);
 
   return { settings, loading };

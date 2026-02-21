@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { toast } from "@/hooks/use-toast";
+import { slugify } from "@/lib/slugify";
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -27,14 +28,13 @@ const AdminCategories = () => {
   const { log } = useAuditLog();
 
   const fetchCategories = async () => {
-    const { data } = await supabase.from("categories").select("*").order("name");
+    const { data, error } = await supabase.from("categories").select("*").order("name");
+    if (error) { toast({ title: "Hata", description: "Kategoriler yüklenemedi.", variant: "destructive" }); }
     setCategories(data || []);
     setLoading(false);
   };
 
   useEffect(() => { fetchCategories(); }, []);
-
-  const slugify = (text: string) => text.toLowerCase().replace(/ğ/g, "g").replace(/ü/g, "u").replace(/ş/g, "s").replace(/ı/g, "i").replace(/ö/g, "o").replace(/ç/g, "c").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
   const openCreate = () => { setEditing(null); setForm({ name: "", slug: "", description: "" }); setDialogOpen(true); };
   const openEdit = (c: Category) => { setEditing(c); setForm({ name: c.name, slug: c.slug, description: c.description || "" }); setDialogOpen(true); };

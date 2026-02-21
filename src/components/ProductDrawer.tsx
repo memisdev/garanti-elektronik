@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Image from "next/image";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { MessageCircle } from "lucide-react";
@@ -12,7 +13,7 @@ interface ProductDrawerProps {
   onClose: () => void;
 }
 
-const ProductDrawer = ({ product, open, onClose }: ProductDrawerProps) => {
+const ProductDrawer = memo(({ product, open, onClose }: ProductDrawerProps) => {
   if (!product) return null;
 
   const categoryLabel = product.categories?.name ?? product.category;
@@ -77,6 +78,8 @@ const ProductDrawer = ({ product, open, onClose }: ProductDrawerProps) => {
       </SheetContent>
     </Sheet>
   );
-};
+});
+
+ProductDrawer.displayName = "ProductDrawer";
 
 export default ProductDrawer;

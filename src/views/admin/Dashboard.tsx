@@ -4,6 +4,7 @@ import { Package, Tag, FolderTree, Tv, MessageSquare, Plus, ArrowRight, Info } f
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { timeAgo } from "@/lib/timeAgo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface Stats {
@@ -26,27 +27,35 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
     const fetchData = async () => {
-      const [products, brands, categories, tvModels, messages, recentActivity] = await Promise.all([
-        supabase.from("products").select("id", { count: "exact", head: true }),
-        supabase.from("brands").select("id", { count: "exact", head: true }),
-        supabase.from("categories").select("id", { count: "exact", head: true }),
-        supabase.from("tv_models").select("id", { count: "exact", head: true }),
-        supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("is_read", false),
-        supabase.from("audit_log").select("action, detail, created_at").order("created_at", { ascending: false }).limit(10),
-      ]);
+      try {
+        const [products, brands, categories, tvModels, messages, recentActivity] = await Promise.all([
+          supabase.from("products").select("id", { count: "exact", head: true }),
+          supabase.from("brands").select("id", { count: "exact", head: true }),
+          supabase.from("categories").select("id", { count: "exact", head: true }),
+          supabase.from("tv_models").select("id", { count: "exact", head: true }),
+          supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("is_read", false),
+          supabase.from("audit_log").select("action, detail, created_at").order("created_at", { ascending: false }).limit(10),
+        ]);
 
-      setStats({
-        products: products.count || 0,
-        brands: brands.count || 0,
-        categories: categories.count || 0,
-        tvModels: tvModels.count || 0,
-        unreadMessages: messages.count || 0,
-      });
-      setActivity(recentActivity.data || []);
-      setLoading(false);
+        if (!mounted) return;
+        setStats({
+          products: products.count || 0,
+          brands: brands.count || 0,
+          categories: categories.count || 0,
+          tvModels: tvModels.count || 0,
+          unreadMessages: messages.count || 0,
+        });
+        setActivity(recentActivity.data || []);
+      } catch (err) {
+        console.error("Dashboard fetch error:", err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
     };
     fetchData();
+    return () => { mounted = false; };
   }, []);
 
   const statCards = [
@@ -59,17 +68,6 @@ const Dashboard = () => {
 
   const total = stats.products + stats.brands + stats.categories;
   const showOnboarding = !loading && total < 3;
-
-  const timeAgo = (dateStr: string) => {
-    const diff = Date.now() - new Date(dateStr).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return "Az önce";
-    if (mins < 60) return `${mins} dk önce`;
-    const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours} saat önce`;
-    const days = Math.floor(hours / 24);
-    return `${days} gün önce`;
-  };
 
   return (
     <div>

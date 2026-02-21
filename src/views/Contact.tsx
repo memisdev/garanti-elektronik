@@ -141,7 +141,7 @@ const Contact = () => {
                 </div>
                 <div className="flex items-start gap-3">
                   <Checkbox id="kvkk" checked={kvkkChecked === true}
-                    onCheckedChange={(checked) => setValue("kvkk", checked === true ? true : false as any)} className="mt-0.5" />
+                    onCheckedChange={(checked) => setValue("kvkk", checked === true ? true : (false as unknown as true), { shouldValidate: true })} className="mt-0.5" />
                   <label htmlFor="kvkk" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
                     Kişisel verilerimin işlenmesine ilişkin <Link href="/gizlilik-kvkk" className="text-foreground hover:underline font-medium">KVKK Aydınlatma Metni</Link>'ni okudum ve kabul ediyorum.
                   </label>

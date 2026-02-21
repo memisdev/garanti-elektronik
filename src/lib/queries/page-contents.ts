@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-type ContentMap = Record<string, any>;
+type ContentMap = Record<string, unknown>;
 
 export async function fetchPageContent<T extends ContentMap>(
   pageKey: string,
@@ -13,14 +13,14 @@ export async function fetchPageContent<T extends ContentMap>(
 
   if (error) throw error;
 
-  const merged = { ...defaults } as T;
+  const merged = { ...defaults } as Record<string, unknown>;
   if (data) {
     for (const row of data) {
       if (row.section_key in defaults) {
-        (merged as any)[row.section_key] = row.content;
+        merged[row.section_key] = row.content;
       }
     }
   }
 
-  return merged;
+  return merged as T;
 }
