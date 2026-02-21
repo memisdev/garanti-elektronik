@@ -3,7 +3,7 @@
 ## Migration Phase Tracker
 
 - [x] Phase 0: Project skeleton (Vite → Next.js 15 in-place conversion)
-- [ ] Phase 1: Providers & shared layout (QueryClient, ThemeProvider, Toaster)
+- [x] Phase 1: Providers & shared layout (QueryClient, ThemeProvider, Toaster)
 - [ ] Phase 2: Supabase client migration (VITE_ → NEXT_PUBLIC_, @supabase/ssr)
 - [ ] Phase 3: Routing migration (react-router-dom → App Router file routes)
 - [ ] Phase 4: Page-by-page migration (server components, metadata, loading states)
