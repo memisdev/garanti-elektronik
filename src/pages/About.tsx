@@ -1,26 +1,42 @@
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { usePageContent } from "@/hooks/usePageContent";
 import { Building2, Users, Award, Wrench } from "lucide-react";
 
-const milestones = [
-  { year: "2010", event: "İstanbul'da küçük bir atölye olarak faaliyete başladık." },
-  { year: "2014", event: "Samsung ve LG yetkili parça distribütörü olduk." },
-  { year: "2018", event: "Online satış kanalımızı açarak Türkiye geneline hizmet vermeye başladık." },
-  { year: "2022", event: "500+ ürün portföyü ve 5.000+ teknik servis müşterisine ulaştık." },
-];
-
-const team = [
-  { role: "Satış ve Müşteri İlişkileri", count: "4 kişi", desc: "Sipariş, fiyat ve uyumluluk sorularınıza hızlı dönüş" },
-  { role: "Teknik Destek", count: "3 kişi", desc: "Parça eşleştirme ve montaj danışmanlığı" },
-  { role: "Depo ve Lojistik", count: "3 kişi", desc: "Aynı gün kargo ve güvenli paketleme" },
-];
+const defaults = {
+  hero_subtitle: "2010'dan beri Türkiye'nin dört bir yanındaki teknik servislere güvenilir TV yedek parça tedariki sağlıyoruz.",
+  intro: "Garanti Elektronik, TV yedek parça ve anakart sektöründe uzun yıllara dayanan tecrübesiyle hizmet vermektedir. Samsung, LG, Vestel, Philips, Arçelik, Sony ve Toshiba başta olmak üzere tüm büyük markaların orijinal ve muadil parçalarını tedarik etmekteyiz.\n\nMüşterilerimizin %90'ından fazlası profesyonel teknik servislerdir. Bu bize sektörün ihtiyaçlarını yakından tanıma ve stok planlamasını buna göre yapma avantajı sağlamaktadır.",
+  mission: "Müşterilerimize en kaliteli elektronik yedek parçaları, uygun fiyatlarla ve hızlı teslimatla sunmak. Teknik destek ve uyumluluk danışmanlığı ile doğru parçayı bulmanızı sağlamak.",
+  milestones: [
+    { year: "2010", event: "İstanbul'da küçük bir atölye olarak faaliyete başladık." },
+    { year: "2014", event: "Samsung ve LG yetkili parça distribütörü olduk." },
+    { year: "2018", event: "Online satış kanalımızı açarak Türkiye geneline hizmet vermeye başladık." },
+    { year: "2022", event: "500+ ürün portföyü ve 5.000+ teknik servis müşterisine ulaştık." },
+  ],
+  team: [
+    { role: "Satış ve Müşteri İlişkileri", count: "4 kişi", desc: "Sipariş, fiyat ve uyumluluk sorularınıza hızlı dönüş" },
+    { role: "Teknik Destek", count: "3 kişi", desc: "Parça eşleştirme ve montaj danışmanlığı" },
+    { role: "Depo ve Lojistik", count: "3 kişi", desc: "Aynı gün kargo ve güvenli paketleme" },
+  ],
+  values: [
+    "Müşteri memnuniyeti odaklı çalışma",
+    "Orijinal ve kaliteli ürün garantisi",
+    "Hızlı ve güvenilir kargo",
+    "Teknik destek ve danışmanlık",
+  ],
+};
 
 const About = () => {
   usePageMeta({ title: "Hakkımızda | Garanti Elektronik", description: "2010'dan beri TV yedek parça tedarikinde güvenilir isim. Samsung, LG, Vestel ve daha fazlası." });
   const contentRef = useRevealOnScroll();
-  const valuesRef = useRevealOnScroll();
   const timelineRef = useRevealOnScroll();
   const teamRef = useRevealOnScroll();
+  const { content } = usePageContent("about", defaults);
+
+  const milestones = content.milestones as { year: string; event: string }[];
+  const team = content.team as { role: string; count: string; desc: string }[];
+  const values = content.values as string[];
+  const introParas = (content.intro as string).split("\n\n");
 
   return (
     <div>
@@ -37,7 +53,7 @@ const About = () => {
             <span className="font-black text-primary-foreground">ne yapıyoruz?</span>
           </h1>
           <p className="text-sm text-primary-foreground/50 mt-4 max-w-md leading-relaxed">
-            2010'dan beri Türkiye'nin dört bir yanındaki teknik servislere güvenilir TV yedek parça tedariki sağlıyoruz.
+            {content.hero_subtitle}
           </p>
         </div>
       </section>
@@ -46,12 +62,7 @@ const About = () => {
       <section ref={contentRef} className="bg-background">
         <div className="container mx-auto px-6 py-16 md:py-24 max-w-3xl">
           <div className="reveal-on-scroll text-muted-foreground space-y-5 leading-relaxed">
-            <p>
-              Garanti Elektronik, TV yedek parça ve anakart sektöründe uzun yıllara dayanan tecrübesiyle hizmet vermektedir. Samsung, LG, Vestel, Philips, Arçelik, Sony ve Toshiba başta olmak üzere tüm büyük markaların orijinal ve muadil parçalarını tedarik etmekteyiz.
-            </p>
-            <p>
-              Müşterilerimizin %90'ından fazlası profesyonel teknik servislerdir. Bu bize sektörün ihtiyaçlarını yakından tanıma ve stok planlamasını buna göre yapma avantajı sağlamaktadır.
-            </p>
+            {introParas.map((p, i) => <p key={i}>{p}</p>)}
           </div>
 
           {/* Stats row */}
@@ -74,9 +85,7 @@ const About = () => {
           <div className="reveal-on-scroll delay-2 mt-16">
             <div className="accent-bar mb-4" />
             <h2 className="text-xl font-black text-foreground tracking-tight mb-4">Misyonumuz</h2>
-            <p className="text-muted-foreground leading-relaxed">
-              Müşterilerimize en kaliteli elektronik yedek parçaları, uygun fiyatlarla ve hızlı teslimatla sunmak. Teknik destek ve uyumluluk danışmanlığı ile doğru parçayı bulmanızı sağlamak.
-            </p>
+            <p className="text-muted-foreground leading-relaxed">{content.mission}</p>
           </div>
         </div>
       </section>
@@ -89,7 +98,7 @@ const About = () => {
           </div>
           <div className="space-y-4">
             {milestones.map((m, i) => (
-              <div key={m.year} className={`reveal-on-scroll delay-${Math.min(i + 1, 4)} flex gap-6 items-start`}>
+              <div key={i} className={`reveal-on-scroll delay-${Math.min(i + 1, 4)} flex gap-6 items-start`}>
                 <span className="text-lg font-black text-accent shrink-0 w-14">{m.year}</span>
                 <div className="flex-1 bg-card rounded-2xl p-5 border border-border">
                   <p className="text-sm text-muted-foreground leading-relaxed">{m.event}</p>
@@ -108,7 +117,7 @@ const About = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {team.map((t, i) => (
-              <div key={t.role} className={`reveal-on-scroll delay-${i + 1} bg-card rounded-2xl p-6 border border-border card-hover-lift`}>
+              <div key={i} className={`reveal-on-scroll delay-${i + 1} bg-card rounded-2xl p-6 border border-border card-hover-lift`}>
                 <p className="text-sm font-bold text-foreground mb-1">{t.role}</p>
                 <p className="text-[11px] font-semibold text-accent mb-3">{t.count}</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">{t.desc}</p>
@@ -125,16 +134,8 @@ const About = () => {
             <h2 className="text-xl font-black text-foreground tracking-tight mb-8">Değerlerimiz</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {[
-              "Müşteri memnuniyeti odaklı çalışma",
-              "Orijinal ve kaliteli ürün garantisi",
-              "Hızlı ve güvenilir kargo",
-              "Teknik destek ve danışmanlık",
-            ].map((value, i) => (
-              <div
-                key={i}
-                className={`reveal-on-scroll delay-${i + 1} bg-card rounded-2xl p-6 border border-border card-hover-lift`}
-              >
+            {values.map((value, i) => (
+              <div key={i} className={`reveal-on-scroll delay-${i + 1} bg-card rounded-2xl p-6 border border-border card-hover-lift`}>
                 <div className="w-1.5 h-1.5 rounded-full bg-accent mb-3" aria-hidden="true" />
                 <p className="text-sm font-medium text-foreground">{value}</p>
               </div>

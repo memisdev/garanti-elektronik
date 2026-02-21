@@ -1,5 +1,6 @@
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { usePageContent } from "@/hooks/usePageContent";
 import {
   Accordion,
   AccordionContent,
@@ -10,45 +11,27 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { FAQPageJsonLd } from "@/components/seo/JsonLd";
 
-const faqs = [
-  {
-    q: "Ürünleriniz orijinal mi?",
-    a: "Evet, tüm ürünlerimiz orijinal üretici sertifikalı ve garantili parçalardır. Muadil ürünlerimiz de kalite testlerinden geçirilmektedir.",
-  },
-  {
-    q: "Nasıl sipariş verebilirim?",
-    a: "Ürün detay sayfasındaki WhatsApp butonuna tıklayarak veya İletişim sayfamız üzerinden bize ulaşabilirsiniz. Sipariş ve ödeme detaylarını sizinle paylaşacağız.",
-  },
-  {
-    q: "Kargo süresi ne kadar?",
-    a: "Saat 15:00'a kadar verilen siparişler aynı gün kargoya teslim edilir. Kargo süresi bulunduğunuz bölgeye göre 1-3 iş günü arasında değişmektedir.",
-  },
-  {
-    q: "Hangi kargo firmaları ile çalışıyorsunuz?",
-    a: "Yurtiçi Kargo, Aras Kargo, MNG Kargo, PTT Kargo ve Sürat Kargo ile çalışmaktayız. Tercih ettiğiniz kargo firmasını belirtebilirsiniz.",
-  },
-  {
-    q: "İade ve değişim koşullarınız nelerdir?",
-    a: "Ürün teslim tarihinden itibaren 14 gün içinde iade veya değişim yapılabilir. Detaylar için Garanti ve İade Koşulları sayfamızı inceleyebilirsiniz.",
-  },
-  {
-    q: "Parçanın TV modelime uyumlu olup olmadığını nasıl anlarım?",
-    a: "Her ürün detay sayfasında uyumluluk bilgisi yer almaktadır. Emin olamadığınız durumlarda WhatsApp üzerinden TV modelinizi ve arızanızı bildirmeniz yeterlidir, teknik ekibimiz size yardımcı olacaktır.",
-  },
-  {
-    q: "Toptan satış yapıyor musunuz?",
-    a: "Evet, teknik servisler ve bayiler için toptan satış imkânı sunuyoruz. Detaylı fiyat bilgisi ve anlaşma koşulları için bizimle iletişime geçin.",
-  },
-  {
-    q: "Garanti kapsamı nedir?",
-    a: "Tüm orijinal ürünlerimiz 6 ay, muadil ürünlerimiz 3 ay garanti kapsamındadır. Garanti süresi boyunca ücretsiz değişim yapılmaktadır.",
-  },
+const defaultFaqs = [
+  { q: "Ürünleriniz orijinal mi?", a: "Evet, tüm ürünlerimiz orijinal üretici sertifikalı ve garantili parçalardır. Muadil ürünlerimiz de kalite testlerinden geçirilmektedir." },
+  { q: "Nasıl sipariş verebilirim?", a: "Ürün detay sayfasındaki WhatsApp butonuna tıklayarak veya İletişim sayfamız üzerinden bize ulaşabilirsiniz. Sipariş ve ödeme detaylarını sizinle paylaşacağız." },
+  { q: "Kargo süresi ne kadar?", a: "Saat 15:00'a kadar verilen siparişler aynı gün kargoya teslim edilir. Kargo süresi bulunduğunuz bölgeye göre 1-3 iş günü arasında değişmektedir." },
+  { q: "Hangi kargo firmaları ile çalışıyorsunuz?", a: "Yurtiçi Kargo, Aras Kargo, MNG Kargo, PTT Kargo ve Sürat Kargo ile çalışmaktayız. Tercih ettiğiniz kargo firmasını belirtebilirsiniz." },
+  { q: "İade ve değişim koşullarınız nelerdir?", a: "Ürün teslim tarihinden itibaren 14 gün içinde iade veya değişim yapılabilir. Detaylar için Garanti ve İade Koşulları sayfamızı inceleyebilirsiniz." },
+  { q: "Parçanın TV modelime uyumlu olup olmadığını nasıl anlarım?", a: "Her ürün detay sayfasında uyumluluk bilgisi yer almaktadır. Emin olamadığınız durumlarda WhatsApp üzerinden TV modelinizi ve arızanızı bildirmeniz yeterlidir, teknik ekibimiz size yardımcı olacaktır." },
+  { q: "Toptan satış yapıyor musunuz?", a: "Evet, teknik servisler ve bayiler için toptan satış imkânı sunuyoruz. Detaylı fiyat bilgisi ve anlaşma koşulları için bizimle iletişime geçin." },
+  { q: "Garanti kapsamı nedir?", a: "Tüm orijinal ürünlerimiz 6 ay, muadil ürünlerimiz 3 ay garanti kapsamındadır. Garanti süresi boyunca ücretsiz değişim yapılmaktadır." },
 ];
+
+const defaults = {
+  hero_subtitle: "Merak ettiğiniz konularda hızlı yanıtlar. Aradığınız cevabı bulamıyorsanız bize ulaşın.",
+  items: defaultFaqs,
+};
 
 const FAQ = () => {
   usePageMeta({ title: "Sıkça Sorulan Sorular | Garanti Elektronik", description: "TV yedek parça siparişi, kargo, iade ve garanti hakkında sıkça sorulan sorular ve yanıtları." });
-  const heroRef = useRevealOnScroll<HTMLElement>();
   const contentRef = useRevealOnScroll<HTMLDivElement>();
+  const { content } = usePageContent("faq", defaults);
+  const faqs = content.items as { q: string; a: string }[];
 
   return (
     <div>
@@ -65,7 +48,7 @@ const FAQ = () => {
             <span className="font-black text-primary-foreground">Sorular</span>
           </h1>
           <p className="text-sm text-primary-foreground/50 mt-4 max-w-md leading-relaxed">
-            Merak ettiğiniz konularda hızlı yanıtlar. Aradığınız cevabı bulamıyorsanız bize ulaşın.
+            {content.hero_subtitle}
           </p>
         </div>
       </section>
@@ -90,9 +73,7 @@ const FAQ = () => {
           </Accordion>
 
           <div className="reveal-on-scroll mt-16 text-center">
-            <p className="text-sm text-muted-foreground mb-4">
-              Başka sorunuz mu var?
-            </p>
+            <p className="text-sm text-muted-foreground mb-4">Başka sorunuz mu var?</p>
             <Link
               to="/iletisim"
               className="inline-flex items-center gap-2 bg-foreground text-primary-foreground font-semibold px-6 py-3 rounded-full hover:opacity-90 transition-all text-sm"

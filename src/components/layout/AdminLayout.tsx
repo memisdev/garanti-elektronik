@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Package, Tag, FolderTree, Search as SearchIcon, FileEdit, Image, Users, ScrollText, LogOut, Tv, MessageSquare, Menu, X } from "lucide-react";
+import { LayoutDashboard, Package, Tag, FolderTree, Search as SearchIcon, FileEdit, Image, Users, ScrollText, LogOut, Tv, MessageSquare, Menu, X, FileText } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +17,7 @@ const sidebarItems = [
   { label: "Kullanıcılar", to: "/admin/kullanicilar", icon: Users },
   { label: "İşlem Kaydı", to: "/admin/islem-kaydi", icon: ScrollText },
   { label: "TV Modelleri", to: "/admin/tv-modelleri", icon: Tv },
+  { label: "Sayfa İçerikleri", to: "/admin/sayfa-icerikleri", icon: FileText },
 ];
 
 const AdminLayout = () => {
