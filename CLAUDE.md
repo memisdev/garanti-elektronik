@@ -7,7 +7,7 @@
 - [x] Phase 2: Supabase client migration (VITE_ → NEXT_PUBLIC_, @supabase/ssr)
 - [x] Phase 3: Routing migration (react-router-dom → App Router file routes)
 - [x] Phase 4: Page-by-page migration (server components, metadata, loading states)
-- [ ] Phase 5: Image optimization (next/image), fonts (next/font), SEO
+- [x] Phase 5: Image optimization (next/image), fonts (next/font), SEO
 - [ ] Phase 6: Cleanup & production readiness
 
 ## Decisions Log
@@ -23,6 +23,10 @@
 | Cookie-based auth via `@supabase/ssr` | Replaces `localStorage` auth; enables SSR-compatible sessions for future phases |
 | Middleware refreshes auth session | `supabase.auth.getUser()` on every non-static request keeps cookies fresh |
 | Next.js Metadata API replaces usePageMeta (Phase 4) | Server-side `<head>` via `export const metadata` / `generateMetadata`; deleted `usePageMeta` hook |
+| `next/font/google` for Inter with CSS variable (Phase 5) | `--font-inter` variable on `<html>`, referenced in Tailwind and globals.css; self-hosted by Next.js |
+| Default Next.js image optimization for `next/image` (Phase 5) | Remote patterns already configured; deleted `optimizeImageUrl` utility |
+| Dynamic sitemap/robots via App Router conventions (Phase 5) | `src/app/sitemap.ts` fetches products+brands from Supabase; `src/app/robots.ts` disallows `/admin/` |
+| OG metadata on root + dynamic pages (Phase 5) | Root layout has `openGraph` + `twitter` defaults; product/brand pages include OG images |
 
 ## Key Directories
 
@@ -41,7 +45,7 @@ src/
 
 ## Design Fidelity Checklist
 
-- [ ] Inter font loaded (currently via HTML link, will move to next/font)
+- [x] Inter font loaded via next/font/google
 - [ ] CSS design tokens preserved in globals.css (351 lines)
 - [ ] Dark mode variables intact
 - [ ] All custom animations (marquee, kenBurns, fadeIn, etc.)

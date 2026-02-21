@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeProduct, type ProductRow } from "@/types/product";
+import { getProductMeta } from "@/lib/metadata";
 import ProductPage from "@/views/ProductPage";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -12,10 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     .eq("slug", slug)
     .maybeSingle();
   const product = data ? normalizeProduct(data as unknown as ProductRow) : undefined;
-  return {
-    title: product ? product.name : "Ürün",
-    description: product ? `${product.name} - ${product.compatibility}` : "Ürün detayları",
-  };
+  return getProductMeta(product);
 }
 
 export default function ProductDetailPage() {

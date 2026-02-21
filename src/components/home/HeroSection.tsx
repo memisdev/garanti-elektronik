@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
@@ -18,18 +19,14 @@ const HeroSection = () => {
   return (
     <section ref={sectionRef} className="relative min-h-[90vh] bg-foreground overflow-hidden grain-overlay">
       <div className="absolute inset-0">
-        <picture>
-          <source srcSet="/images/hero-botika.jpg" type="image/webp" />
-          <img
-            src="/images/hero-botika.jpg"
-            alt="TV elektronik yedek parça ve anakart ürünleri"
-            className="w-full h-full object-cover hero-ken-burns opacity-25 object-right"
-            width={1920}
-            height={1080}
-            sizes="100vw"
-            decoding="async"
-            fetchPriority="high" />
-        </picture>
+        <Image
+          src="/images/hero-botika.jpg"
+          alt="TV elektronik yedek parça ve anakart ürünleri"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover hero-ken-burns opacity-25 object-right"
+        />
 
         <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/85 to-foreground/30" />
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-foreground/20" />

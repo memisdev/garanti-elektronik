@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { getBrandMeta } from "@/lib/metadata";
 import BrandPage from "@/views/BrandPage";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -10,10 +11,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     .select("name, description")
     .eq("slug", slug)
     .maybeSingle();
-  return {
-    title: data ? `${data.name} Ürünleri` : "Marka",
-    description: data?.description ?? "Marka ürünleri",
-  };
+  return getBrandMeta(data?.name, data?.description);
 }
 
 export default function BrandDetailPage() {

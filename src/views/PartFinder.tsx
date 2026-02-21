@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Search, MessageCircle, ChevronRight, Cpu, Bot, Send, Loader2, ArrowLeft } from "lucide-react";
@@ -41,7 +42,7 @@ function ProductInlineCard({ data, push }: {data: any;push: (path: string) => vo
   return (
     <div className="my-3 bg-card rounded-xl border border-border/40 p-4 flex gap-4 items-start hover:border-accent/30 transition-colors">
       {data.image &&
-      <img src={data.image} alt={data.name} className="w-16 h-16 object-contain rounded-lg bg-background flex-shrink-0" />
+      <Image src={data.image} alt={data.name} width={64} height={64} className="w-16 h-16 object-contain rounded-lg bg-background flex-shrink-0" />
       }
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">

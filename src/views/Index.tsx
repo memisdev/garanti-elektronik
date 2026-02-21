@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, MessageCircle } from "lucide-react";
 import { useState, lazy, Suspense } from "react";
@@ -9,7 +10,6 @@ import { useFeaturedProducts } from "@/hooks/useFeaturedProducts";
 import { useRecentProducts } from "@/hooks/useRecentProducts";
 import { useCategories } from "@/hooks/useCategories";
 import { siteConfig } from "@/config/site";
-import { optimizeImageUrl } from "@/lib/imageUtils";
 import ProductCard from "@/components/ProductCard";
 const ProductDrawer = lazy(() => import("@/components/ProductDrawer"));
 import HeroSection from "@/components/home/HeroSection";
@@ -70,13 +70,12 @@ const Index = () => {
                   className={`reveal-on-scroll delay-${Math.min(i + 1, 4)} group flex flex-col items-center flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 rounded-xl`}
                 >
                   <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-border/40 group-hover:border-accent group-hover:scale-105 transition-all duration-300">
-                    <img
-                      src={optimizeImageUrl(cat.firstImage || "/placeholder.svg", 96)}
+                    <Image
+                      src={cat.firstImage || "/placeholder.svg"}
                       alt={cat.name}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
                       width={96}
                       height={96}
+                      className="w-full h-full object-cover"
                     />
                   </div>
                   <span className="text-[11px] font-medium mt-2 block text-center text-muted-foreground group-hover:text-foreground uppercase tracking-[0.08em] transition-colors">
@@ -117,15 +116,13 @@ const Index = () => {
                 >
                   <div className="aspect-[4/3] md:aspect-auto md:w-1/2 bg-muted/30 flex items-center justify-center p-12 md:p-20 overflow-hidden relative">
                     <div className="absolute inset-0 bg-gradient-to-br from-muted/30 to-transparent" />
-                    <img
-                      src={optimizeImageUrl(heroProduct.images[0], 300)}
+                    <Image
+                      src={heroProduct.images[0]}
                       alt={heroProduct.name}
-                      className="max-h-[280px] md:max-h-[380px] max-w-full object-contain hero-product-image relative z-10"
-                      loading="lazy"
-                      decoding="async"
                       width={490}
                       height={490}
                       sizes="(max-width: 768px) 100vw, 50vw"
+                      className="max-h-[280px] md:max-h-[380px] max-w-full object-contain hero-product-image relative z-10"
                     />
                   </div>
                   <div className="md:w-1/2 p-10 md:p-14 flex flex-col justify-center relative z-10">

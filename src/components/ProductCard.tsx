@@ -1,9 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { MessageCircle } from "lucide-react";
 import type { Product } from "@/types/product";
 import { siteConfig } from "@/config/site";
-import { optimizeImageUrl } from "@/lib/imageUtils";
 
 interface ProductCardProps {
   product: Product;
@@ -18,15 +18,13 @@ const ProductCard = ({ product, onDetail }: ProductCardProps) => {
     <article className="bg-card rounded-2xl overflow-hidden group card-hover-lift border border-border/40 hover:border-accent/20 transition-all duration-500">
       <div className="aspect-[4/3] bg-muted/20 flex items-center justify-center p-8 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-card/30" />
-        <img
-          src={optimizeImageUrl(product.images[0], 400)}
+        <Image
+          src={product.images[0]}
           alt={product.name}
-          className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-700 relative z-10"
-          loading="lazy"
-          decoding="async"
           width={363}
           height={272}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-700 relative z-10"
         />
       </div>
       <div className="p-6">

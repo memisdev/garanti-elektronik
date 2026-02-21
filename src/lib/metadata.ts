@@ -1,90 +1,112 @@
+import type { Metadata } from "next";
 import type { Product } from "@/types/product";
 
-export interface PageMeta {
-  title: string;
-  description: string;
+export function getProductMeta(product?: Product): Metadata {
+  return {
+    title: product ? product.name : "Ürün",
+    description: product ? `${product.name} - ${product.compatibility}` : "Ürün detayları",
+    openGraph: product
+      ? {
+          title: product.name,
+          description: `${product.name} - ${product.compatibility}`,
+          images: product.images[0] ? [{ url: product.images[0] }] : [],
+        }
+      : undefined,
+  };
 }
 
-export function getIndexMeta(): PageMeta {
+export function getBrandMeta(
+  brandName?: string,
+  description?: string | null,
+): Metadata {
+  return {
+    title: brandName ? `${brandName} Ürünleri` : "Marka",
+    description: description ?? "Marka ürünleri",
+    openGraph: brandName
+      ? {
+          title: `${brandName} Ürünleri`,
+          description: description ?? "Marka ürünleri",
+        }
+      : undefined,
+  };
+}
+
+export function getIndexMeta(): Metadata {
   return {
     title: "Garanti Elektronik | Orijinal TV Yedek Parça ve Anakart Tedarikçisi",
-    description: "Samsung, LG, Vestel ve daha fazlası için orijinal TV yedek parça ve anakart tedariki. 500+ ürün, aynı gün kargo, teknik destek.",
+    description:
+      "Samsung, LG, Vestel ve daha fazlası için orijinal TV yedek parça ve anakart tedariki. 500+ ürün, aynı gün kargo, teknik destek.",
   };
 }
 
-export function getProductsMeta(): PageMeta {
+export function getProductsMeta(): Metadata {
   return {
-    title: "Ürünler | Garanti Elektronik",
-    description: "TV yedek parça, anakart, power board, T-Con board ve daha fazlası. Tüm markalarda orijinal ve muadil parçalar.",
+    title: "Ürünler",
+    description:
+      "TV yedek parça, anakart, power board, T-Con board ve daha fazlası. Tüm markalarda orijinal ve muadil parçalar.",
   };
 }
 
-export function getProductMeta(product?: Product): PageMeta {
+export function getAboutMeta(): Metadata {
   return {
-    title: product ? `${product.name} | Garanti Elektronik` : "Ürün | Garanti Elektronik",
-    description: product ? `${product.name} - ${product.compatibility}` : "Ürün detayları",
+    title: "Hakkımızda",
+    description:
+      "2010'dan beri TV yedek parça tedarikinde güvenilir isim. Samsung, LG, Vestel ve daha fazlası.",
   };
 }
 
-export function getBrandMeta(brandName?: string, description?: string | null): PageMeta {
+export function getContactMeta(): Metadata {
   return {
-    title: brandName ? `${brandName} Ürünleri | Garanti Elektronik` : "Marka | Garanti Elektronik",
-    description: description ?? "Marka ürünleri",
+    title: "İletişim",
+    description:
+      "Garanti Elektronik ile iletişime geçin. Adres, telefon, e-posta ve WhatsApp bilgileri.",
   };
 }
 
-export function getAboutMeta(): PageMeta {
+export function getFAQMeta(): Metadata {
   return {
-    title: "Hakkımızda | Garanti Elektronik",
-    description: "2010'dan beri TV yedek parça tedarikinde güvenilir isim. Samsung, LG, Vestel ve daha fazlası.",
+    title: "Sıkça Sorulan Sorular",
+    description:
+      "TV yedek parça siparişi, kargo, iade ve garanti hakkında sıkça sorulan sorular ve yanıtları.",
   };
 }
 
-export function getContactMeta(): PageMeta {
+export function getCargoTrackingMeta(): Metadata {
   return {
-    title: "İletişim | Garanti Elektronik",
-    description: "Garanti Elektronik ile iletişime geçin. Adres, telefon, e-posta ve WhatsApp bilgileri.",
+    title: "Kargo Takip",
+    description:
+      "Siparişinizin kargo durumunu takip edin. Yurtiçi, Aras, MNG, PTT ve Sürat kargo sorgulaması.",
   };
 }
 
-export function getFAQMeta(): PageMeta {
+export function getWarrantyMeta(): Metadata {
   return {
-    title: "Sıkça Sorulan Sorular | Garanti Elektronik",
-    description: "TV yedek parça siparişi, kargo, iade ve garanti hakkında sıkça sorulan sorular ve yanıtları.",
+    title: "Garanti ve İade Koşulları",
+    description:
+      "Orijinal parçalarda 6 ay, muadil parçalarda 3 ay garanti. 14 gün içinde iade imkânı.",
   };
 }
 
-export function getCargoTrackingMeta(): PageMeta {
+export function getPrivacyMeta(): Metadata {
   return {
-    title: "Kargo Takip | Garanti Elektronik",
-    description: "Siparişinizin kargo durumunu takip edin. Yurtiçi, Aras, MNG, PTT ve Sürat kargo sorgulaması.",
+    title: "Gizlilik ve KVKK Politikası",
+    description:
+      "Kişisel verilerin korunması ve KVKK kapsamındaki haklarınız hakkında bilgilendirme.",
   };
 }
 
-export function getWarrantyMeta(): PageMeta {
+export function getCookieMeta(): Metadata {
   return {
-    title: "Garanti ve İade Koşulları | Garanti Elektronik",
-    description: "Orijinal parçalarda 6 ay, muadil parçalarda 3 ay garanti. 14 gün içinde iade imkânı.",
+    title: "Çerez Politikası",
+    description:
+      "Web sitemizde kullanılan çerezler ve yönetim seçenekleri hakkında bilgi.",
   };
 }
 
-export function getPrivacyMeta(): PageMeta {
+export function getPartFinderMeta(): Metadata {
   return {
-    title: "Gizlilik ve KVKK Politikası | Garanti Elektronik",
-    description: "Kişisel verilerin korunması ve KVKK kapsamındaki haklarınız hakkında bilgilendirme.",
-  };
-}
-
-export function getCookieMeta(): PageMeta {
-  return {
-    title: "Çerez Politikası | Garanti Elektronik",
-    description: "Web sitemizde kullanılan çerezler ve yönetim seçenekleri hakkında bilgi.",
-  };
-}
-
-export function getPartFinderMeta(): PageMeta {
-  return {
-    title: "TV Parça Bulucu | Garanti Elektronik",
-    description: "TV model numaranızı girin veya Garanti Asistan'a arızanızı anlatın, uyumlu yedek parçaları anında bulun.",
+    title: "TV Parça Bulucu",
+    description:
+      "TV model numaranızı girin veya Garanti Asistan'a arızanızı anlatın, uyumlu yedek parçaları anında bulun.",
   };
 }
