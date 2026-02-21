@@ -75,6 +75,7 @@ const Index = () => {
                       alt={cat.name}
                       width={96}
                       height={96}
+                      sizes="96px"
                       className="w-full h-full object-cover"
                     />
                   </div>

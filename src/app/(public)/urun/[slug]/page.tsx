@@ -1,8 +1,17 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { createStaticClient } from "@/lib/supabase/static";
 import { normalizeProduct, type ProductRow } from "@/types/product";
 import { getProductMeta } from "@/lib/metadata";
 import ProductPage from "@/views/ProductPage";
+
+export const revalidate = 1800;
+
+export async function generateStaticParams() {
+  const supabase = createStaticClient();
+  const { data } = await supabase.from("products").select("slug");
+  return (data ?? []).map((p) => ({ slug: p.slug }));
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;

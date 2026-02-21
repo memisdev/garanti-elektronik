@@ -3,6 +3,8 @@ import { Suspense } from "react";
 import Products from "@/views/Products";
 import { getProductsMeta } from "@/lib/metadata";
 
+export const revalidate = 1800;
+
 const meta = getProductsMeta();
 export const metadata: Metadata = {
   title: "Ürünler",

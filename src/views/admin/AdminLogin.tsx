@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
@@ -20,42 +19,37 @@ const AdminLogin = () => {
     }
 
     setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      setLoading(false);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast({
+          title: "Giriş başarısız",
+          description: data.error ?? "Bir hata oluştu.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      toast({ title: "Hoş geldiniz!" });
+      router.push("/admin/dashboard");
+    } catch {
       toast({
-        title: "Giriş başarısız",
-        description: error.message === "Invalid login credentials"
-          ? "E-posta veya şifre hatalı."
-          : error.message,
+        title: "Bağlantı hatası",
+        description: "Lütfen tekrar deneyin.",
         variant: "destructive",
       });
-      return;
-    }
-
-    // Check admin role
-    const { data: roleData } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", data.user.id)
-      .eq("role", "admin")
-      .maybeSingle();
-
-    if (!roleData) {
-      await supabase.auth.signOut();
+    } finally {
       setLoading(false);
-      toast({
-        title: "Yetkiniz yok",
-        description: "Bu panele erişim yetkiniz bulunmamaktadır.",
-        variant: "destructive",
-      });
-      return;
     }
-
-    setLoading(false);
-    toast({ title: "Hoş geldiniz!" });
-    router.push("/admin/dashboard");
   };
 
   return (

@@ -11,6 +11,8 @@
 - [x] Phase 6: Cleanup & production readiness
 - [x] Phase 7: Admin panel (API routes, middleware protection, error/loading states)
 - [x] Phase 8: API Routes & Server Actions (contact form, audit log, part-finder AI, process-image)
+- [x] Phase 9: SEO & Performance (canonical URLs, ISR, generateStaticParams, image sizes, caching headers, bundle analyzer, web vitals)
+- [x] Phase 10: Security, QA & Final Audit (security headers, Zod validation, rate limit cleanup, brute-force protection, CORS, env docs)
 
 ## Decisions Log
 
@@ -38,6 +40,18 @@
 | Resend for contact form notifications (Phase 8) | Admin notified via email on new contact messages |
 | Server Actions for contact form + audit log (Phase 8) | Progressive enhancement, server-side validation, session-based user_id |
 | In-memory rate limiting (Phase 8) | Simple Map-based, sufficient for single-instance deployment |
+| Canonical URLs via `alternates` in metadata (Phase 9) | Relative paths resolve via `metadataBase`; every public page gets a canonical URL |
+| ISR with `revalidate` per page (Phase 9) | Dynamic pages 30m, homepage/brands 1h, static pages 24h, cargo-tracking fully static |
+| `generateStaticParams` for dynamic routes (Phase 9) | Products and brands pre-rendered at build time with ISR fallback |
+| `@next/bundle-analyzer` (Phase 9) | `npm run analyze` for bundle size inspection |
+| Web Vitals reporting via `useReportWebVitals` (Phase 9) | Console logging in dev, ready for analytics endpoint |
+| Security headers in `next.config.ts` (Phase 10) | CSP, HSTS, X-Frame-Options, Permissions-Policy on all routes |
+| Zod validation on admin API routes (Phase 10) | `invite-user` and `process-image` use Zod schemas; sanitized error messages |
+| Magic-byte MIME validation for image uploads (Phase 10) | Validates JPEG, PNG, WebP magic bytes before AI processing |
+| Rate limit memory leak fix (Phase 10) | Lazy cleanup every 60s per store; deletes expired entries |
+| Server-side login with brute-force protection (Phase 10) | `/api/auth/login` rate limits 5 attempts per 15min per IP |
+| CORS headers on API routes (Phase 10) | Restricted to `garantielektronik.com` origin |
+| Cookie-free Supabase client for build-time (Phase 10) | `createStaticClient()` avoids `cookies()` call in `generateStaticParams` |
 
 ## Key Directories
 
@@ -71,6 +85,7 @@ npm run dev      # Start dev server (Turbopack) — http://localhost:3000
 npm run build    # Production build
 npm run start    # Serve production build
 npm run lint     # ESLint
+npm run analyze  # Bundle analysis (opens browser report)
 ```
 
 ## Source Reference

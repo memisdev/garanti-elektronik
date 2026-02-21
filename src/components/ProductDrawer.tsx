@@ -24,7 +24,7 @@ const ProductDrawer = ({ product, open, onClose }: ProductDrawerProps) => {
         <div className="p-8 lg:p-10 pt-12">
           {/* Image */}
           <div className="aspect-square bg-card rounded-2xl flex items-center justify-center p-12 mb-8 border border-border/40">
-            <Image src={product.images[0]} alt={product.name} width={400} height={400} className="max-h-full max-w-full object-contain" />
+            <Image src={product.images[0]} alt={product.name} width={400} height={400} sizes="(max-width: 640px) 90vw, 400px" className="max-h-full max-w-full object-contain" />
           </div>
 
           {/* Info */}

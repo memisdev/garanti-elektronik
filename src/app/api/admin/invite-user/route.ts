@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { createServiceClient, verifyAdminRole } from "@/lib/supabase/admin";
+
+const inviteSchema = z.object({
+  email: z.string().email(),
+  role: z.enum(["admin", "editor"]),
+  password: z.string().min(8).optional(),
+});
 
 export async function POST(request: NextRequest) {
   const auth = await verifyAdminRole();
@@ -7,15 +14,25 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
-  const { email, role, password } = await request.json();
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Geçersiz istek formatı" },
+      { status: 400 },
+    );
+  }
 
-  if (!email || !role) {
+  const parsed = inviteSchema.safeParse(body);
+  if (!parsed.success) {
     return NextResponse.json(
       { error: "E-posta ve rol zorunludur" },
       { status: 400 },
     );
   }
 
+  const { email, role, password } = parsed.data;
   const serviceClient = createServiceClient();
 
   // Create user with service role
@@ -27,7 +44,11 @@ export async function POST(request: NextRequest) {
     });
 
   if (createError) {
-    return NextResponse.json({ error: createError.message }, { status: 400 });
+    console.error("invite-user createUser error:", createError.message);
+    return NextResponse.json(
+      { error: "Kullanıcı oluşturulurken bir hata oluştu" },
+      { status: 400 },
+    );
   }
 
   // Assign role
@@ -36,7 +57,11 @@ export async function POST(request: NextRequest) {
     .insert({ user_id: newUser.user.id, role });
 
   if (roleError) {
-    return NextResponse.json({ error: roleError.message }, { status: 400 });
+    console.error("invite-user role assignment error:", roleError.message);
+    return NextResponse.json(
+      { error: "Rol atanırken bir hata oluştu" },
+      { status: 400 },
+    );
   }
 
   // Audit log

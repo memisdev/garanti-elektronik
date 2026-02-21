@@ -1,6 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { verifyAdminRole, createServiceClient } from "@/lib/supabase/admin";
 import { getImageConfig } from "@/lib/ai/client";
+
+const requestSchema = z.object({
+  imagePath: z.string().min(1),
+});
+
+// Magic bytes for allowed image types
+const MAGIC_BYTES: Array<{ mime: string; bytes: number[] }> = [
+  { mime: "image/jpeg", bytes: [0xff, 0xd8] },
+  { mime: "image/png", bytes: [0x89, 0x50, 0x4e, 0x47] },
+  { mime: "image/webp", bytes: [0x52, 0x49, 0x46, 0x46] }, // RIFF header
+];
+
+function detectMimeType(buffer: Uint8Array): string | null {
+  for (const { mime, bytes } of MAGIC_BYTES) {
+    if (bytes.every((b, i) => buffer[i] === b)) {
+      return mime;
+    }
+  }
+  return null;
+}
 
 export async function POST(req: NextRequest) {
   // Auth + role check
@@ -13,14 +34,25 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { imagePath } = await req.json();
-    if (!imagePath) {
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
       return NextResponse.json(
-        { error: "imagePath is required" },
+        { error: "Geçersiz istek formatı" },
         { status: 400 },
       );
     }
 
+    const parsed = requestSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "imagePath alanı zorunludur" },
+        { status: 400 },
+      );
+    }
+
+    const { imagePath } = parsed.data;
     const adminClient = createServiceClient();
 
     // Download image from storage
@@ -31,25 +63,33 @@ export async function POST(req: NextRequest) {
     if (downloadError || !fileData) {
       console.error("Download error:", downloadError);
       return NextResponse.json(
-        { error: "Failed to download image from storage" },
+        { error: "Görsel depodan indirilemedi" },
         { status: 400 },
       );
     }
 
-    // Convert to base64 data URL
+    // Convert to buffer and validate
     const arrayBuffer = await fileData.arrayBuffer();
     const uint8 = new Uint8Array(arrayBuffer);
 
     if (uint8.length > 10 * 1024 * 1024) {
       return NextResponse.json(
-        { error: "Image too large (max 10MB)" },
+        { error: "Görsel çok büyük (maks. 10MB)" },
+        { status: 400 },
+      );
+    }
+
+    // Magic-byte MIME validation
+    const detectedMime = detectMimeType(uint8);
+    if (!detectedMime) {
+      return NextResponse.json(
+        { error: "Desteklenmeyen görsel formatı" },
         { status: 400 },
       );
     }
 
     const b64 = Buffer.from(uint8).toString("base64");
-    const mimeType = imagePath.endsWith(".png") ? "image/png" : "image/jpeg";
-    const dataUrl = `data:${mimeType};base64,${b64}`;
+    const dataUrl = `data:${detectedMime};base64,${b64}`;
 
     // Call Gemini to remove background
     const prompt =
@@ -84,19 +124,19 @@ export async function POST(req: NextRequest) {
 
       if (aiResponse.status === 429) {
         return NextResponse.json(
-          { error: "Rate limit exceeded. Please try again later." },
+          { error: "İstek limiti aşıldı. Lütfen daha sonra tekrar deneyin." },
           { status: 429 },
         );
       }
       if (aiResponse.status === 402) {
         return NextResponse.json(
-          { error: "AI credits exhausted." },
+          { error: "AI kredisi tükendi." },
           { status: 402 },
         );
       }
 
       return NextResponse.json(
-        { error: "AI processing failed" },
+        { error: "AI işlemi başarısız oldu" },
         { status: 500 },
       );
     }
@@ -131,7 +171,7 @@ export async function POST(req: NextRequest) {
         JSON.stringify(aiData).slice(0, 500),
       );
       return NextResponse.json(
-        { error: "AI did not return an image" },
+        { error: "AI bir görsel döndürmedi" },
         { status: 500 },
       );
     }
@@ -151,7 +191,7 @@ export async function POST(req: NextRequest) {
     if (uploadError) {
       console.error("Upload error:", uploadError);
       return NextResponse.json(
-        { error: "Failed to upload processed image" },
+        { error: "İşlenmiş görsel yüklenemedi" },
         { status: 500 },
       );
     }
@@ -172,7 +212,7 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     console.error("process-image error:", e);
     return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Unknown error" },
+      { error: "İşlem sırasında bir hata oluştu" },
       { status: 500 },
     );
   }

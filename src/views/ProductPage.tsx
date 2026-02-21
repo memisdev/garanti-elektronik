@@ -54,7 +54,7 @@ const ProductPage = () => {
         <div className="container mx-auto px-6 py-16 md:py-24">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
             <div className="reveal-on-scroll aspect-square bg-card rounded-2xl relative overflow-hidden border border-border/40">
-              <Image src={product.images[0]} alt={product.name} fill className="object-contain p-12" />
+              <Image src={product.images[0]} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-contain p-12" />
             </div>
 
             <div className="reveal-on-scroll delay-1">

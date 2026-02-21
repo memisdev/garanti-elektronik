@@ -1,7 +1,16 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { createStaticClient } from "@/lib/supabase/static";
 import { getBrandMeta } from "@/lib/metadata";
 import BrandPage from "@/views/BrandPage";
+
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  const supabase = createStaticClient();
+  const { data } = await supabase.from("brands").select("slug");
+  return (data ?? []).map((b) => ({ slug: b.slug }));
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -11,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     .select("name, description")
     .eq("slug", slug)
     .maybeSingle();
-  return getBrandMeta(data?.name, data?.description);
+  return getBrandMeta(slug, data?.name, data?.description);
 }
 
 export default function BrandDetailPage() {

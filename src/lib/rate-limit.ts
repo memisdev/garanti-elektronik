@@ -1,4 +1,23 @@
 const stores = new Map<string, Map<string, { count: number; resetAt: number }>>();
+const lastCleanup = new Map<string, number>();
+
+const CLEANUP_INTERVAL_MS = 60_000;
+
+function cleanupStore(name: string) {
+  const now = Date.now();
+  const last = lastCleanup.get(name) ?? 0;
+  if (now - last < CLEANUP_INTERVAL_MS) return;
+
+  lastCleanup.set(name, now);
+  const store = stores.get(name);
+  if (!store) return;
+
+  for (const [key, entry] of store) {
+    if (now > entry.resetAt) {
+      store.delete(key);
+    }
+  }
+}
 
 interface RateLimitOptions {
   windowMs: number;
@@ -20,6 +39,8 @@ export function rateLimit(
     stores.set(name, new Map());
   }
   const store = stores.get(name)!;
+
+  cleanupStore(name);
 
   const now = Date.now();
   const entry = store.get(key);

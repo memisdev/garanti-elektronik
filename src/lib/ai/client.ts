@@ -7,10 +7,16 @@ interface AIConfig {
   model: string;
 }
 
+function getApiKey(): string {
+  const apiKey = process.env.AI_API_KEY;
+  if (!apiKey) throw new Error("AI_API_KEY environment variable is not configured");
+  return apiKey;
+}
+
 export function getChatConfig(): AIConfig {
   return {
     url: `${BASE_URL}/chat/completions`,
-    apiKey: process.env.AI_API_KEY!,
+    apiKey: getApiKey(),
     model: process.env.AI_CHAT_MODEL ?? "gemini-2.0-flash",
   };
 }
@@ -18,7 +24,7 @@ export function getChatConfig(): AIConfig {
 export function getImageConfig(): AIConfig {
   return {
     url: `${BASE_URL}/chat/completions`,
-    apiKey: process.env.AI_API_KEY!,
+    apiKey: getApiKey(),
     model: process.env.AI_IMAGE_MODEL ?? "gemini-2.0-flash",
   };
 }
