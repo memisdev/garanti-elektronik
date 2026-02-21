@@ -10,6 +10,7 @@
 - [x] Phase 5: Image optimization (next/image), fonts (next/font), SEO
 - [x] Phase 6: Cleanup & production readiness
 - [x] Phase 7: Admin panel (API routes, middleware protection, error/loading states)
+- [x] Phase 8: API Routes & Server Actions (contact form, audit log, part-finder AI, process-image)
 
 ## Decisions Log
 
@@ -33,6 +34,10 @@
 | Admin API routes replace Edge Functions (Phase 7) | `list-users` + `invite-user` ported to `src/app/api/admin/`; service_role client in `src/lib/supabase/admin.ts` |
 | Middleware blocks unauthenticated `/admin/` + `/api/admin/` (Phase 7) | Session-only check (no DB query); role verification stays client-side via `useAdminAuth` |
 | Admin `loading.tsx` + `error.tsx` (Phase 7) | App Router conventions for skeleton loading and error boundary in admin panel route group |
+| Google AI Studio replaces Lovable gateway (Phase 8) | Lovable gateway stops post-migration; Google AI keeps Gemini model family, OpenAI-compatible format |
+| Resend for contact form notifications (Phase 8) | Admin notified via email on new contact messages |
+| Server Actions for contact form + audit log (Phase 8) | Progressive enhancement, server-side validation, session-based user_id |
+| In-memory rate limiting (Phase 8) | Simple Map-based, sufficient for single-instance deployment |
 
 ## Key Directories
 
