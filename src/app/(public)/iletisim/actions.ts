@@ -84,8 +84,8 @@ async function sendEmailNotification(
   const resend = new Resend(apiKey);
 
   await resend.emails.send({
-    from: "Garanti Elektronik <noreply@garantielektronik.com>",
-    to: "info@garantielektronik.com",
+    from: "Garanti Elektronik <noreply@garantielektronik.net>",
+    to: "info@garantielektronik.net",
     subject: `Yeni İletişim Formu: ${name}`,
     text: `Ad: ${name}\nE-posta: ${email}\n\nMesaj:\n${message}`,
   });

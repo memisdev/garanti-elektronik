@@ -12,7 +12,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://garantielektronik.com"),
+  metadataBase: new URL("https://garantielektronik.net"),
   title: {
     default: "Garanti Elektronik | Orijinal TV Yedek Parça ve Anakart Tedarikçisi",
     template: "%s | Garanti Elektronik",

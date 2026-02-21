@@ -67,7 +67,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Access-Control-Allow-Origin",
-            value: "https://garantielektronik.com",
+            value: "https://garantielektronik.net",
           },
           {
             key: "Access-Control-Allow-Methods",

@@ -7,7 +7,7 @@ const defaults = {
   intro: "Garanti Elektronik olarak kişisel verilerinizin korunmasına büyük önem veriyoruz. 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında aşağıdaki bilgilendirmeyi sunuyoruz.",
   collected: "İletişim formu aracılığıyla ad, soyad, e-posta adresi ve mesaj içeriği bilgileriniz toplanmaktadır. Bu bilgiler yalnızca taleplerinize yanıt vermek amacıyla kullanılmaktadır.",
   storage: "Kişisel verileriniz, ilgili mevzuatta belirtilen sürelere uygun olarak saklanmakta ve süre sonunda güvenli şekilde imha edilmektedir.",
-  rights: "KVKK kapsamında kişisel verilerinizin işlenip işlenmediğini öğrenme, düzeltilmesini isteme, silinmesini talep etme haklarına sahipsiniz. Bu haklarınızı kullanmak için info@garantielektronik.com adresinden bizimle iletişime geçebilirsiniz.",
+  rights: "KVKK kapsamında kişisel verilerinizin işlenip işlenmediğini öğrenme, düzeltilmesini isteme, silinmesini talep etme haklarına sahipsiniz. Bu haklarınızı kullanmak için info@garantielektronik.net adresinden bizimle iletişime geçebilirsiniz.",
 };
 
 const PrivacyKVKK = () => {
