@@ -10,11 +10,9 @@ import ProductDrawer from "@/components/ProductDrawer";
 import EmptyState from "@/components/EmptyState";
 import { useProduct } from "@/hooks/useProduct";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
-import { usePageMeta } from "@/hooks/usePageMeta";
 import { Filter, X } from "lucide-react";
 
 const Products = () => {
-  usePageMeta({ title: "Ürünler | Garanti Elektronik", description: "TV yedek parça, anakart, power board, T-Con board ve daha fazlası. Tüm markalarda orijinal ve muadil parçalar." });
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();

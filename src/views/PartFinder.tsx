@@ -6,7 +6,6 @@ import { Search, MessageCircle, ChevronRight, Cpu, Bot, Send, Loader2, ArrowLeft
 import { Input } from "@/components/ui/input";
 import { useModelSearch, useCompatibleProducts } from "@/hooks/usePartFinder";
 import { siteConfig } from "@/config/site";
-import { usePageMeta } from "@/hooks/usePageMeta";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 type Msg = {role: "user" | "assistant";content: string;};
@@ -73,7 +72,6 @@ function ProductInlineCard({ data, push }: {data: any;push: (path: string) => vo
 }
 
 const PartFinder = () => {
-  usePageMeta({ title: "TV Parça Bulucu | Garanti Elektronik", description: "TV model numaranızı girin veya Garanti Asistan'a arızanızı anlatın, uyumlu yedek parçaları anında bulun." });
   const [query, setQuery] = useState("");
   const [selectedModel, setSelectedModel] = useState<{id: string;model_number: string;brand_name?: string;} | null>(null);
   const { models, loading: searchLoading } = useModelSearch(selectedModel ? "" : query);

@@ -4,7 +4,6 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useProduct } from "@/hooks/useProduct";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
-import { usePageMeta } from "@/hooks/usePageMeta";
 import { MessageCircle, ArrowLeft } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { ProductJsonLd } from "@/components/seo/JsonLd";
@@ -13,7 +12,6 @@ const ProductPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { product } = useProduct(slug);
   const contentRef = useRevealOnScroll();
-  usePageMeta({ title: product ? `${product.name} | Garanti Elektronik` : "Ürün | Garanti Elektronik", description: product ? `${product.name} - ${product.compatibility}` : "Ürün detayları" });
 
   if (!product) {
     return (

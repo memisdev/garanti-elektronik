@@ -1,7 +1,6 @@
 "use client";
 
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
-import { usePageMeta } from "@/hooks/usePageMeta";
 import { usePageContent } from "@/hooks/usePageContent";
 import { Building2, Users, Award, Wrench } from "lucide-react";
 
@@ -29,7 +28,6 @@ const defaults = {
 };
 
 const About = () => {
-  usePageMeta({ title: "Hakkımızda | Garanti Elektronik", description: "2010'dan beri TV yedek parça tedarikinde güvenilir isim. Samsung, LG, Vestel ve daha fazlası." });
   const contentRef = useRevealOnScroll();
   const timelineRef = useRevealOnScroll();
   const teamRef = useRevealOnScroll();

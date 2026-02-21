@@ -7,7 +7,6 @@ import { useBrands } from "@/hooks/useBrands";
 import { useProducts } from "@/hooks/useProducts";
 import { useProduct } from "@/hooks/useProduct";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
-import { usePageMeta } from "@/hooks/usePageMeta";
 import ProductCard from "@/components/ProductCard";
 import ProductDrawer from "@/components/ProductDrawer";
 import { ArrowLeft } from "lucide-react";
@@ -16,7 +15,6 @@ const BrandPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { brands } = useBrands();
   const brand = brands.find((b) => b.slug === slug);
-  usePageMeta({ title: brand ? `${brand.name} Ürünleri | Garanti Elektronik` : "Marka | Garanti Elektronik", description: brand?.description ?? "Marka ürünleri" });
   const { products } = useProducts({ brand: brand?.name });
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   const { product: selectedProduct } = useProduct(selectedSlug ?? undefined);

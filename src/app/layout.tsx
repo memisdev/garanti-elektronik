@@ -3,9 +3,13 @@ import Providers from "./providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Garanti Elektronik | Endüstriyel Elektronik Çözümleri",
+  metadataBase: new URL("https://garantielektronik.com"),
+  title: {
+    default: "Garanti Elektronik | Orijinal TV Yedek Parça ve Anakart Tedarikçisi",
+    template: "%s | Garanti Elektronik",
+  },
   description:
-    "Endüstriyel otomasyon, servo motor, PLC, HMI ve daha fazlası. Türkiye'nin güvenilir endüstriyel elektronik tedarikçisi.",
+    "Samsung, LG, Vestel ve daha fazlası için orijinal TV yedek parça ve anakart tedariki. 500+ ürün, aynı gün kargo, teknik destek.",
 };
 
 export default function RootLayout({

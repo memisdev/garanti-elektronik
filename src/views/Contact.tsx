@@ -11,7 +11,6 @@ import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
 import { usePageContent } from "@/hooks/usePageContent";
 import { MapPin, Phone, Mail, Clock, ArrowRight, Loader2 } from "lucide-react";
 import { siteConfig } from "@/config/site";
-import { usePageMeta } from "@/hooks/usePageMeta";
 
 const contactSchema = z.object({
   name: z.string().min(2, "İsim en az 2 karakter olmalıdır."),
@@ -27,7 +26,6 @@ const defaults = {
 };
 
 const Contact = () => {
-  usePageMeta({ title: "İletişim | Garanti Elektronik", description: "Garanti Elektronik ile iletişime geçin. Adres, telefon, e-posta ve WhatsApp bilgileri." });
   const [submitting, setSubmitting] = useState(false);
   const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),

@@ -5,10 +5,8 @@ import { shippingCompanies } from "@/data/shipping-companies";
 import { ExternalLink, Package, Truck, MapPin } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
-import { usePageMeta } from "@/hooks/usePageMeta";
 
 const CargoTracking = () => {
-  usePageMeta({ title: "Kargo Takip | Garanti Elektronik", description: "Siparişinizin kargo durumunu takip edin. Yurtiçi, Aras, MNG, PTT ve Sürat kargo sorgulaması." });
   const [companyId, setCompanyId] = useState("");
   const [code, setCode] = useState("");
   const contentRef = useRevealOnScroll<HTMLElement>();

@@ -1,7 +1,6 @@
 "use client";
 
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
-import { usePageMeta } from "@/hooks/usePageMeta";
 import { usePageContent } from "@/hooks/usePageContent";
 import Link from "next/link";
 import { ArrowRight, Shield, RotateCcw, AlertTriangle, CheckCircle } from "lucide-react";
@@ -41,7 +40,6 @@ const defaults = {
 };
 
 const WarrantyReturn = () => {
-  usePageMeta({ title: "Garanti ve İade Koşulları | Garanti Elektronik", description: "Orijinal parçalarda 6 ay, muadil parçalarda 3 ay garanti. 14 gün içinde iade imkânı." });
   const contentRef = useRevealOnScroll<HTMLDivElement>();
   const { content } = usePageContent("warranty", defaults);
   const sections = content.sections as { title: string; items: string[] }[];

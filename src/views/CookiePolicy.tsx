@@ -1,7 +1,6 @@
 "use client";
 
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
-import { usePageMeta } from "@/hooks/usePageMeta";
 import { usePageContent } from "@/hooks/usePageContent";
 
 const defaults = {
@@ -12,7 +11,6 @@ const defaults = {
 };
 
 const CookiePolicy = () => {
-  usePageMeta({ title: "Çerez Politikası | Garanti Elektronik", description: "Web sitemizde kullanılan çerezler ve yönetim seçenekleri hakkında bilgi." });
   const contentRef = useRevealOnScroll();
   const { content } = usePageContent("cookie", defaults);
 

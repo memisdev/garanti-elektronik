@@ -16,7 +16,6 @@ import HeroSection from "@/components/home/HeroSection";
 import BrandMarquee from "@/components/home/BrandMarquee";
 import { OrganizationJsonLd } from "@/components/seo/JsonLd";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
-import { usePageMeta } from "@/hooks/usePageMeta";
 import { useLazyVisible } from "@/hooks/useLazyVisible";
 import { usePageContent } from "@/hooks/usePageContent";
 
@@ -29,7 +28,6 @@ const ctaDefaults = {
 };
 
 const Index = () => {
-  usePageMeta({ title: "Garanti Elektronik | Orijinal TV Yedek Parça ve Anakart Tedarikçisi", description: "Samsung, LG, Vestel ve daha fazlası için orijinal TV yedek parça ve anakart tedariki. 500+ ürün, aynı gün kargo, teknik destek." });
   const { brands } = useBrands();
   const { products: featuredProducts } = useFeaturedProducts();
   const { products: recentProducts } = useRecentProducts();

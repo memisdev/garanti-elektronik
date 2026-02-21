@@ -6,7 +6,7 @@
 - [x] Phase 1: Providers & shared layout (QueryClient, ThemeProvider, Toaster)
 - [x] Phase 2: Supabase client migration (VITE_ → NEXT_PUBLIC_, @supabase/ssr)
 - [x] Phase 3: Routing migration (react-router-dom → App Router file routes)
-- [ ] Phase 4: Page-by-page migration (server components, metadata, loading states)
+- [x] Phase 4: Page-by-page migration (server components, metadata, loading states)
 - [ ] Phase 5: Image optimization (next/image), fonts (next/font), SEO
 - [ ] Phase 6: Cleanup & production readiness
 
@@ -22,6 +22,7 @@
 | `src/env.d.ts` shim for `import.meta.env` | Removed in Phase 2 — all env refs now use `process.env.NEXT_PUBLIC_*` |
 | Cookie-based auth via `@supabase/ssr` | Replaces `localStorage` auth; enables SSR-compatible sessions for future phases |
 | Middleware refreshes auth session | `supabase.auth.getUser()` on every non-static request keeps cookies fresh |
+| Next.js Metadata API replaces usePageMeta (Phase 4) | Server-side `<head>` via `export const metadata` / `generateMetadata`; deleted `usePageMeta` hook |
 
 ## Key Directories
 

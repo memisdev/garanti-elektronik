@@ -1,7 +1,6 @@
 "use client";
 
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
-import { usePageMeta } from "@/hooks/usePageMeta";
 import { usePageContent } from "@/hooks/usePageContent";
 import {
   Accordion,
@@ -30,7 +29,6 @@ const defaults = {
 };
 
 const FAQ = () => {
-  usePageMeta({ title: "Sıkça Sorulan Sorular | Garanti Elektronik", description: "TV yedek parça siparişi, kargo, iade ve garanti hakkında sıkça sorulan sorular ve yanıtları." });
   const contentRef = useRevealOnScroll<HTMLDivElement>();
   const { content } = usePageContent("faq", defaults);
   const faqs = content.items as { q: string; a: string }[];

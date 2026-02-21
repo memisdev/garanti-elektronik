@@ -1,7 +1,6 @@
 "use client";
 
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
-import { usePageMeta } from "@/hooks/usePageMeta";
 import { usePageContent } from "@/hooks/usePageContent";
 
 const defaults = {
@@ -12,7 +11,6 @@ const defaults = {
 };
 
 const PrivacyKVKK = () => {
-  usePageMeta({ title: "Gizlilik ve KVKK Politikası | Garanti Elektronik", description: "Kişisel verilerin korunması ve KVKK kapsamındaki haklarınız hakkında bilgilendirme." });
   const contentRef = useRevealOnScroll();
   const { content } = usePageContent("privacy", defaults);
 
