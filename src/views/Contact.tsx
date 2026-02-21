@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
 import { usePageContent } from "@/hooks/usePageContent";
 import { MapPin, Phone, Mail, Clock, ArrowRight, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { siteConfig } from "@/config/site";
 
 const contactSchema = z.object({
@@ -140,7 +141,7 @@ const Contact = () => {
                   <Checkbox id="kvkk" checked={kvkkChecked === true}
                     onCheckedChange={(checked) => setValue("kvkk", checked === true ? true : false as any)} className="mt-0.5" />
                   <label htmlFor="kvkk" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
-                    Kişisel verilerimin işlenmesine ilişkin <a href="/gizlilik-kvkk" className="text-foreground hover:underline font-medium">KVKK Aydınlatma Metni</a>'ni okudum ve kabul ediyorum.
+                    Kişisel verilerimin işlenmesine ilişkin <Link href="/gizlilik-kvkk" className="text-foreground hover:underline font-medium">KVKK Aydınlatma Metni</Link>'ni okudum ve kabul ediyorum.
                   </label>
                 </div>
                 {errors.kvkk && <p className="text-xs text-destructive" role="alert">{errors.kvkk.message}</p>}

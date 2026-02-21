@@ -157,8 +157,7 @@ const PartFinder = () => {
           }
         }
       }
-    } catch (e) {
-      console.error(e);
+    } catch {
       setMessages((prev) => [...prev, { role: "assistant", content: "Bağlantı hatası oluştu, tekrar deneyin." }]);
     }
     setIsStreaming(false);
@@ -396,11 +395,12 @@ const PartFinder = () => {
                         <div className="aspect-[4/3] bg-background flex items-center justify-center p-8 relative overflow-hidden">
                           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-card/30" />
                           {product.images?.[0] &&
-                    <img
+                    <Image
                       src={product.images[0]}
                       alt={product.name}
-                      className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-700 relative z-10"
-                      loading="lazy" />
+                      width={363}
+                      height={272}
+                      className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-700 relative z-10" />
 
                     }
                         </div>

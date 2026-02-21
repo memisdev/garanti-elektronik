@@ -8,7 +8,7 @@
 - [x] Phase 3: Routing migration (react-router-dom → App Router file routes)
 - [x] Phase 4: Page-by-page migration (server components, metadata, loading states)
 - [x] Phase 5: Image optimization (next/image), fonts (next/font), SEO
-- [ ] Phase 6: Cleanup & production readiness
+- [x] Phase 6: Cleanup & production readiness
 
 ## Decisions Log
 
@@ -27,6 +27,8 @@
 | Default Next.js image optimization for `next/image` (Phase 5) | Remote patterns already configured; deleted `optimizeImageUrl` utility |
 | Dynamic sitemap/robots via App Router conventions (Phase 5) | `src/app/sitemap.ts` fetches products+brands from Supabase; `src/app/robots.ts` disallows `/admin/` |
 | OG metadata on root + dynamic pages (Phase 5) | Root layout has `openGraph` + `twitter` defaults; product/brand pages include OG images |
+| `error.tsx` replaces class ErrorBoundary (Phase 6) | Next.js App Router convention; deleted unused `ErrorBoundary.tsx` class component |
+| `poweredByHeader: false` + `reactStrictMode: true` (Phase 6) | Production hardening — hide framework fingerprint, catch React issues early |
 
 ## Key Directories
 
