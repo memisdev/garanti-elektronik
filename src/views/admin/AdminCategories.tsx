@@ -154,7 +154,7 @@ const AdminCategories = () => {
                 <tr key={c.id} className="border-b border-border/30 last:border-b-0 hover:bg-accent/50 transition-colors">
                   <td className="px-5 py-3.5">
                     {c.image_url ? (
-                      <Image src={c.image_url} alt={c.name} width={40} height={40} className="w-10 h-10 rounded-lg object-cover" />
+                      <Image src={c.image_url} alt={c.name} width={40} height={40} className="w-10 h-10 rounded-lg object-contain" />
                     ) : (
                       <div className="w-10 h-10 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground text-[10px]">—</div>
                     )}

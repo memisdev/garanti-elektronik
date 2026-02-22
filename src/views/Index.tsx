@@ -70,7 +70,7 @@ const Index = () => {
                   href={`/urunler?category=${cat.slug}`}
                   className={`reveal-on-scroll delay-${Math.min(i + 1, 4)} group flex flex-col items-center flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 rounded-xl`}
                 >
-                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-border/40 group-hover:border-accent group-hover:scale-105 transition-all duration-300 bg-white flex items-center justify-center">
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-border/40 group-hover:border-accent group-hover:scale-105 transition-all duration-300 bg-white flex items-center justify-center shadow-sm dark:shadow-none dark:border-border/20">
                     <Image
                       src={cat.firstImage || "/placeholder.svg"}
                       alt={cat.name}
@@ -78,7 +78,7 @@ const Index = () => {
                       height={96}
                       loading="lazy"
                       sizes="96px"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain p-2"
                     />
                   </div>
                   <span className="text-[11px] font-medium mt-2 block text-center text-muted-foreground group-hover:text-foreground uppercase tracking-[0.08em] transition-colors">

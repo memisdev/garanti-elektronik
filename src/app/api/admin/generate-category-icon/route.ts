@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
 
     const prompt = `Create a minimal, modern icon for the electronic component category '${categoryName}'.${descHint}
 Style: solid dark icon on pure white background, high contrast, flat design.
-Use ONLY a single dark color (#1a1a1a) for the icon. Background must be pure white (#ffffff).
+Use ONLY a single dark color (#14181F) for the icon. Background must be pure white (#ffffff).
 Simple recognizable silhouette of the component, bold and clearly visible.
 Centered, fills ~80% of canvas. No text, no shadows, no 3D, no gradients.
 Consistent thick line weight. Square aspect ratio. 256x256px.`;
@@ -138,12 +138,44 @@ Consistent thick line weight. Square aspect ratio. 256x256px.`;
       );
     }
 
-    // Convert to 256x256 WebP: flatten to white, resize, then remove white bg
+    // Convert to 256x256 WebP: deterministic #14181F recolor with alpha transparency
+    // Brand color: --foreground: 220 20% 10% = RGB(20, 24, 31)
+    const BRAND_R = 0x14, BRAND_G = 0x18, BRAND_B = 0x1F;
+
     const rawBytes = Buffer.from(base64Image, "base64");
-    const bytes = await sharp(rawBytes)
+    const flattened = await sharp(rawBytes)
       .flatten({ background: { r: 255, g: 255, b: 255 } })
-      .resize(ICON_SIZE, ICON_SIZE, { fit: "contain", background: { r: 255, g: 255, b: 255 } })
-      .unflatten()
+      .resize(ICON_SIZE, ICON_SIZE, {
+        fit: "contain",
+        background: { r: 255, g: 255, b: 255 },
+      })
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+
+    const { data: pixels, info } = flattened;
+    const out = Buffer.alloc(pixels.length);
+
+    for (let i = 0; i < pixels.length; i += 4) {
+      const r = pixels[i], g = pixels[i + 1], b = pixels[i + 2];
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+
+      if (lum >= 250) {
+        // White: fully transparent
+        out[i] = BRAND_R; out[i + 1] = BRAND_G; out[i + 2] = BRAND_B; out[i + 3] = 0;
+      } else if (lum <= 64) {
+        // Dark: fully opaque brand color
+        out[i] = BRAND_R; out[i + 1] = BRAND_G; out[i + 2] = BRAND_B; out[i + 3] = 255;
+      } else {
+        // Anti-aliasing: proportional alpha
+        const alpha = Math.round(255 * (1 - (lum - 64) / (250 - 64)));
+        out[i] = BRAND_R; out[i + 1] = BRAND_G; out[i + 2] = BRAND_B; out[i + 3] = alpha;
+      }
+    }
+
+    const bytes = await sharp(out, {
+      raw: { width: info.width, height: info.height, channels: 4 },
+    })
       .webp({ quality: 90, alphaQuality: 100 })
       .toBuffer();
 
