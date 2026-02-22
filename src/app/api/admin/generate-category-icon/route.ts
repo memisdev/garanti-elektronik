@@ -73,9 +73,9 @@ Consistent thick line weight. Square aspect ratio. 256x256px.`;
 
     let aiResponse: Response;
     try {
-      aiResponse = await fetch(`${config.url}?key=${config.apiKey}`, {
+      aiResponse = await fetch(config.url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-goog-api-key": config.apiKey },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: { responseModalities: ["TEXT", "IMAGE"] },

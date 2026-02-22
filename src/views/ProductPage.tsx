@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useProduct } from "@/hooks/useProduct";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
-import { MessageCircle, ArrowLeft } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { ProductJsonLd } from "@/components/seo/JsonLd";
 

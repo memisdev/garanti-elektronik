@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { Upload, Trash2, Copy, Loader2, Image as ImageIcon, Wand2, Check } from "lucide-react";
+import { Upload, Trash2, Copy, Loader2, Wand2, Check } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface MediaFile {

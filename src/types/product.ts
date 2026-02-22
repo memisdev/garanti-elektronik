@@ -80,6 +80,6 @@ export function normalizeProduct(row: ProductRow | ProductQueryRow): Product {
     brands: row.brands,
     categories: row.categories,
     brand: row.brands?.name ?? "",
-    category: row.categories?.slug ?? "",
+    category: row.categories?.name ?? "",
   };
 }

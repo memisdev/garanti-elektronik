@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, MessageCircle, ChevronRight, Cpu, Bot, Send, Loader2, ArrowLeft } from "lucide-react";
+import { Search, MessageCircle, ChevronRight, Cpu, Bot, Send, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useModelSearch, useCompatibleProducts } from "@/hooks/usePartFinder";
 import { siteConfig } from "@/config/site";

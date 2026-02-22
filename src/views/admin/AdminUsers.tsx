@@ -21,11 +21,6 @@ interface ListUserItem {
   email: string;
 }
 
-const roleBadge = (role: string) => {
-  const cls = role === "admin" ? "bg-accent-orange text-white" : "bg-surface text-foreground";
-  return <span className={`text-[11px] font-medium px-3 py-1 rounded-full ${cls}`}>{role}</span>;
-};
-
 const AdminUsers = () => {
   const [users, setUsers] = useState<UserRole[]>([]);
   const [loading, setLoading] = useState(true);

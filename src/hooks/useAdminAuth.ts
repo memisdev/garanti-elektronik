@@ -30,9 +30,9 @@ export function useAdminAuth() {
         if (roleError) {
           console.error("Admin role check failed:", roleError.message);
           router.replace("/admin");
-        } else if (data) {
+        } else if (data && (data.role === "admin" || data.role === "editor")) {
           setIsAdmin(true);
-          setRole(data.role as "admin" | "editor");
+          setRole(data.role);
           setUserId(user.id);
         } else {
           router.replace("/admin");
