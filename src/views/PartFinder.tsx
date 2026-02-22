@@ -3,13 +3,13 @@
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, MessageCircle, ChevronRight, Cpu, Bot, Send, Loader2, ArrowLeft } from "lucide-react";
+import { Search, MessageCircle, ChevronRight, Cpu, Bot, Send, Loader2, ArrowLeft, ImagePlus, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useModelSearch, useCompatibleProducts } from "@/hooks/usePartFinder";
 import { siteConfig } from "@/config/site";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
-type Msg = {role: "user" | "assistant";content: string;};
+type Msg = {role: "user" | "assistant"; content: string; imagePreview?: string;};
 
 const CHAT_URL = "/api/part-finder-ai";
 
@@ -112,20 +112,45 @@ const PartFinder = () => {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [pendingImage, setPendingImage] = useState<{ data: string; mimeType: string; preview: string } | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const el = chatContainerRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages]);
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const base64 = result.split(",")[1];
+      setPendingImage({ data: base64, mimeType: file.type, preview: result });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
   const sendMessage = async () => {
     const text = chatInput.trim();
     if (!text || isStreaming) return;
     setChatInput("");
 
-    const userMsg: Msg = { role: "user", content: text };
+    const currentImage = pendingImage;
+    setPendingImage(null);
+
+    const userMsg: Msg = { role: "user", content: text, imagePreview: currentImage?.preview };
     const history = messages.map((m) => ({ role: m.role, content: m.content }));
     setMessages((prev) => [...prev, userMsg]);
     setIsStreaming(true);
@@ -133,10 +158,15 @@ const PartFinder = () => {
     let assistantSoFar = "";
 
     try {
+      const payload: Record<string, unknown> = { message: text, history };
+      if (currentImage) {
+        payload.image = { data: currentImage.data, mimeType: currentImage.mimeType };
+      }
+
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, history })
+        body: JSON.stringify(payload)
       });
 
       if (!resp.ok) {
@@ -274,7 +304,12 @@ const PartFinder = () => {
 
                       ) :
 
-                      <span>{msg.content}</span>
+                      <>
+                        {msg.imagePreview && (
+                          <Image src={msg.imagePreview} alt="Yüklenen görsel" width={200} height={150} className="rounded-lg mb-2 max-w-[200px]" />
+                        )}
+                        <span>{msg.content}</span>
+                      </>
                       }
                       </div>
                     </div>
@@ -291,35 +326,53 @@ const PartFinder = () => {
                 </div>
 
                 {/* Input */}
-                <div className="border-t border-border/40 p-4 flex gap-2 items-end">
-                  <textarea
-                    ref={textareaRef}
-                    value={chatInput}
-                    onChange={(e) => {
-                      setChatInput(e.target.value);
-                      const el = e.target;
-                      el.style.height = "auto";
-                      el.style.height = Math.min(el.scrollHeight, 120) + "px";
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        sendMessage();
-                        if (textareaRef.current) textareaRef.current.style.height = "auto";
-                      }
-                    }}
-                    placeholder="Model kodu, semptom veya arızayı yazın..."
-                    className="flex-1 min-h-[44px] max-h-[120px] resize-none rounded-xl border border-border/60 bg-background px-3 py-2.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    disabled={isStreaming}
-                    rows={1} />
+                <div className="border-t border-border/40 p-4">
+                  {pendingImage && (
+                    <div className="relative inline-block mb-2">
+                      <Image src={pendingImage.preview} alt="Yüklenecek görsel" width={80} height={60} className="rounded-lg max-w-[80px] max-h-[60px] object-cover border border-border/60" />
+                      <button onClick={() => setPendingImage(null)} className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center text-xs">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+                  <div className="flex gap-2 items-end">
+                    <input ref={imageInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageSelect} className="hidden" />
+                    <button
+                      onClick={() => imageInputRef.current?.click()}
+                      disabled={isStreaming}
+                      className="w-11 h-11 flex items-center justify-center rounded-xl border border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all disabled:opacity-40 flex-shrink-0"
+                      title="Arıza fotoğrafı ekle">
+                      <ImagePlus className="w-4 h-4" />
+                    </button>
+                    <textarea
+                      ref={textareaRef}
+                      value={chatInput}
+                      onChange={(e) => {
+                        setChatInput(e.target.value);
+                        const el = e.target;
+                        el.style.height = "auto";
+                        el.style.height = Math.min(el.scrollHeight, 120) + "px";
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          sendMessage();
+                          if (textareaRef.current) textareaRef.current.style.height = "auto";
+                        }
+                      }}
+                      placeholder="Model kodu, semptom veya arızayı yazın..."
+                      className="flex-1 min-h-[44px] max-h-[120px] resize-none rounded-xl border border-border/60 bg-background px-3 py-2.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={isStreaming}
+                      rows={1} />
 
-                  <button
-                    onClick={sendMessage}
-                    disabled={isStreaming || !chatInput.trim()}
-                    className="w-11 h-11 flex items-center justify-center rounded-xl bg-foreground text-background hover:opacity-90 transition-all disabled:opacity-40">
+                    <button
+                      onClick={sendMessage}
+                      disabled={isStreaming || !chatInput.trim()}
+                      className="w-11 h-11 flex items-center justify-center rounded-xl bg-foreground text-background hover:opacity-90 transition-all disabled:opacity-40 flex-shrink-0">
 
-                    {isStreaming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                  </button>
+                      {isStreaming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
               </div>
             </TabsContent>

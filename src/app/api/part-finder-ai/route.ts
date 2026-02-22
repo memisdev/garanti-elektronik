@@ -18,7 +18,7 @@ async function getProductList(): Promise<string> {
   const { data: products } = await sb
     .from("products")
     .select(
-      "id, name, slug, code, compatibility, brands(name), categories(name)",
+      "id, name, slug, code, compatibility, images, brands(name), categories(name)",
     );
 
   const productList = (products ?? []).map((p: Record<string, unknown>) => ({
@@ -29,6 +29,7 @@ async function getProductList(): Promise<string> {
     compatibility: p.compatibility,
     brand: (p.brands as { name: string } | null)?.name ?? null,
     category: (p.categories as { name: string } | null)?.name ?? null,
+    image: ((p.images as string[] | null)?.[0]) ?? null,
   }));
 
   const serialized = JSON.stringify(productList, null, 0);
@@ -65,6 +66,18 @@ export async function POST(req: NextRequest) {
         { error: "Mesaj çok uzun (max 2000 karakter)." },
         { status: 400 },
       );
+    }
+
+    // Optional image for fault diagnosis (base64)
+    let imageContent: { type: "image_url"; image_url: { url: string } } | null = null;
+    if (body.image && typeof body.image === "object" && typeof body.image.data === "string" && typeof body.image.mimeType === "string") {
+      const allowedMimes = ["image/jpeg", "image/png", "image/webp"];
+      if (allowedMimes.includes(body.image.mimeType) && body.image.data.length <= 10_000_000) {
+        imageContent = {
+          type: "image_url",
+          image_url: { url: `data:${body.image.mimeType};base64,${body.image.data}` },
+        };
+      }
     }
 
     // Validate and limit history
@@ -249,14 +262,29 @@ Kullanıcı tipi SON KULLANICI ise şu 4 soruyu sor:
 Bunlar gelmeden parça kodu verme.
 
 ═══════════════════════════════════════
+GÖRSEL ANALİZİ (KULLANICI FOTOĞRAF GÖNDERDİYSE)
+═══════════════════════════════════════
+
+Kullanıcı TV arızasına ait fotoğraf gönderirse:
+1) Fotoğraftaki semptomları (ekran artefaktları, yanmış komponent, şişmiş kapasitör, kırık konnektör vb.) detaylı analiz et.
+2) Board code, model etiketi, panel code gibi okunabilir yazıları oku ve teşhise dahil et.
+3) Görsel bulgularla birlikte standart triage formatını uygula.
+4) Fotoğraf kalitesi düşükse veya ilgisizse kibarca daha net fotoğraf iste.
+
+═══════════════════════════════════════
 MEVCUT ÜRÜN KATALOĞU
 ═══════════════════════════════════════
 ${productListJson}`;
 
+    // Build user message — multimodal array only when image is present, plain string otherwise
+    const userMessage = imageContent
+      ? { role: "user", content: [{ type: "text", text: message }, imageContent] }
+      : { role: "user", content: message };
+
     const messages = [
       { role: "system", content: systemPrompt },
       ...(history ?? []),
-      { role: "user", content: message },
+      userMessage,
     ];
 
     const config = getChatConfig();
@@ -288,7 +316,8 @@ ${productListJson}`;
         );
       }
       const t = await aiResponse.text();
-      console.error("AI gateway error:", aiResponse.status, t);
+      console.error("AI gateway error:", aiResponse.status, t.slice(0, 500));
+      console.error("AI config:", { model: config.model, url: config.url, keyLen: config.apiKey.length, keyPrefix: config.apiKey.slice(0, 5) });
       return NextResponse.json(
         { error: "AI servisi şu an kullanılamıyor." },
         { status: 500 },

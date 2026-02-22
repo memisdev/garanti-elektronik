@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { toast } from "@/hooks/use-toast";
 import { slugify } from "@/lib/slugify";
-import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import Image from "next/image";
+import { Plus, Pencil, Trash2, Loader2, Upload, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
@@ -14,6 +15,7 @@ interface Category {
   name: string;
   slug: string;
   description: string | null;
+  image_url: string | null;
 }
 
 const AdminCategories = () => {
@@ -24,7 +26,8 @@ const AdminCategories = () => {
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
   const [productCount, setProductCount] = useState(0);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ name: "", slug: "", description: "" });
+  const [uploading, setUploading] = useState(false);
+  const [form, setForm] = useState({ name: "", slug: "", description: "", image_url: "" });
   const { log } = useAuditLog();
 
   const fetchCategories = async () => {
@@ -36,8 +39,25 @@ const AdminCategories = () => {
 
   useEffect(() => { fetchCategories(); }, []);
 
-  const openCreate = () => { setEditing(null); setForm({ name: "", slug: "", description: "" }); setDialogOpen(true); };
-  const openEdit = (c: Category) => { setEditing(c); setForm({ name: c.name, slug: c.slug, description: c.description || "" }); setDialogOpen(true); };
+  const openCreate = () => { setEditing(null); setForm({ name: "", slug: "", description: "", image_url: "" }); setDialogOpen(true); };
+  const openEdit = (c: Category) => { setEditing(c); setForm({ name: c.name, slug: c.slug, description: c.description || "", image_url: c.image_url || "" }); setDialogOpen(true); };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const ext = file.name.split(".").pop();
+    const path = `categories/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from("product-images").upload(path, file);
+    if (error) {
+      toast({ title: "Hata", description: "Görsel yüklenemedi.", variant: "destructive" });
+    } else {
+      const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(path);
+      setForm((prev) => ({ ...prev, image_url: urlData.publicUrl }));
+    }
+    setUploading(false);
+    e.target.value = "";
+  };
 
   const openDelete = async (c: Category) => {
     const { count } = await supabase.from("products").select("id", { count: "exact", head: true }).eq("category_id", c.id);
@@ -50,13 +70,15 @@ const AdminCategories = () => {
     setSaving(true);
     const slug = form.slug || slugify(form.name);
 
+    const imageUrl = form.image_url || null;
+
     if (editing) {
-      const { error } = await supabase.from("categories").update({ name: form.name, slug, description: form.description }).eq("id", editing.id);
+      const { error } = await supabase.from("categories").update({ name: form.name, slug, description: form.description, image_url: imageUrl }).eq("id", editing.id);
       if (error) { toast({ title: "Hata", description: error.message, variant: "destructive" }); setSaving(false); return; }
       await log("Kategori güncellendi", form.name);
       toast({ title: "Kategori güncellendi" });
     } else {
-      const { error } = await supabase.from("categories").insert({ name: form.name, slug, description: form.description });
+      const { error } = await supabase.from("categories").insert({ name: form.name, slug, description: form.description, image_url: imageUrl });
       if (error) { toast({ title: "Hata", description: error.message, variant: "destructive" }); setSaving(false); return; }
       await log("Yeni kategori eklendi", form.name);
       toast({ title: "Kategori başarıyla eklendi" });
@@ -94,6 +116,7 @@ const AdminCategories = () => {
         <div className="bg-card border border-border/30 rounded-2xl overflow-hidden">
           <table className="w-full text-sm">
             <thead><tr className="border-b border-border/50 bg-muted/50">
+              <th className="text-left px-5 py-3.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.15em] w-12">Görsel</th>
               <th className="text-left px-5 py-3.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.15em]">Kategori</th>
               <th className="text-left px-5 py-3.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.15em]">Slug</th>
               <th className="text-left px-5 py-3.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.15em]">Açıklama</th>
@@ -102,6 +125,13 @@ const AdminCategories = () => {
             <tbody>
               {categories.map((c) => (
                 <tr key={c.id} className="border-b border-border/30 last:border-b-0 hover:bg-accent/50 transition-colors">
+                  <td className="px-5 py-3.5">
+                    {c.image_url ? (
+                      <Image src={c.image_url} alt={c.name} width={40} height={40} className="w-10 h-10 rounded-lg object-cover" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground text-[10px]">—</div>
+                    )}
+                  </td>
                   <td className="px-5 py-3.5 font-medium text-foreground">{c.name}</td>
                   <td className="px-5 py-3.5 text-muted-foreground font-mono text-xs">{c.slug}</td>
                   <td className="px-5 py-3.5 text-muted-foreground">{c.description}</td>
@@ -132,6 +162,27 @@ const AdminCategories = () => {
               <input type="text" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })}
                 className="w-full h-11 text-sm px-4 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10 font-mono" />
               <p className="text-[11px] text-muted-foreground mt-1">URL'de kullanılır, otomatik oluşturulur.</p>
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em] block mb-2">Kategori Görseli</label>
+              {form.image_url ? (
+                <div className="relative inline-block">
+                  <Image src={form.image_url} alt="Kategori görseli" width={120} height={120} className="w-[120px] h-[120px] rounded-xl object-cover border border-border" />
+                  <button type="button" onClick={() => setForm({ ...form, image_url: "" })} className="absolute -top-2 -right-2 w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center hover:opacity-90 transition-opacity">
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex items-center justify-center gap-2 w-full h-24 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-foreground/30 transition-colors">
+                  {uploading ? <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /> : (
+                    <>
+                      <Upload className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">Görsel yükle</span>
+                    </>
+                  )}
+                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageUpload} className="hidden" disabled={uploading} />
+                </label>
+              )}
             </div>
             <div>
               <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em] block mb-2">Açıklama</label>

@@ -5,6 +5,7 @@ export interface Category {
   slug: string;
   name: string;
   description: string | null;
+  image_url: string | null;
   productCount?: number;
   firstImage?: string;
 }
@@ -33,6 +34,6 @@ export async function fetchCategories(): Promise<Category[]> {
   return catRes.data.map((cat) => ({
     ...cat,
     productCount: countMap.get(cat.id) ?? 0,
-    firstImage: imageMap.get(cat.id) ?? "/placeholder.svg",
+    firstImage: cat.image_url || imageMap.get(cat.id) || "/placeholder.svg",
   }));
 }
