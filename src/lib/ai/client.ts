@@ -17,7 +17,7 @@ export function getChatConfig(): AIConfig {
   return {
     url: `${BASE_URL}/chat/completions`,
     apiKey: getApiKey(),
-    model: (process.env.AI_CHAT_MODEL ?? "gemini-2.5-flash").trim(),
+    model: (process.env.AI_CHAT_MODEL ?? "gemini-3-flash-preview").trim(),
   };
 }
 
@@ -25,7 +25,7 @@ export function getImageConfig(): AIConfig {
   return {
     url: `${BASE_URL}/chat/completions`,
     apiKey: getApiKey(),
-    model: (process.env.AI_IMAGE_MODEL ?? "gemini-2.5-flash-image").trim(),
+    model: (process.env.AI_IMAGE_MODEL ?? "gemini-3-pro-image-preview").trim(),
   };
 }
 
@@ -33,6 +33,6 @@ export function getIconGenerationConfig(): AIConfig {
   return {
     url: `${BASE_URL}/chat/completions`,
     apiKey: getApiKey(),
-    model: (process.env.AI_ICON_MODEL ?? "gemini-2.5-flash-image").trim(),
+    model: (process.env.AI_ICON_MODEL ?? "gemini-3-pro-image-preview").trim(),
   };
 }
