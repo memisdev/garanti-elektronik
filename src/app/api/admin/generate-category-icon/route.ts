@@ -111,13 +111,19 @@ Consistent line weight. Square aspect ratio. PNG with transparency.`;
       }
       if (aiResponse.status === 404) {
         return NextResponse.json(
-          { error: "AI ikon modeli bulunamadı. AI_ICON_MODEL ayarını kontrol edin." },
+          { error: `AI ikon modeli bulunamadı: ${config.model}. AI_ICON_MODEL ayarını kontrol edin.` },
           { status: 500 },
+        );
+      }
+      if (aiResponse.status === 400) {
+        return NextResponse.json(
+          { error: `Model görsel üretimini desteklemiyor: ${config.model}. Görsel destekli bir model kullanın (ör. gemini-2.5-flash-image).` },
+          { status: 400 },
         );
       }
 
       return NextResponse.json(
-        { error: "AI ikon üretimi başarısız oldu" },
+        { error: `AI ikon üretimi başarısız oldu (${aiResponse.status})` },
         { status: 500 },
       );
     }
