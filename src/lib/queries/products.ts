@@ -40,10 +40,12 @@ export interface FetchProductsOptions {
   query?: string;
   category?: string;
   brand?: string;
+  page?: number;
+  pageSize?: number;
 }
 
 export async function fetchProducts(options: FetchProductsOptions = {}): Promise<{ products: Product[]; total: number }> {
-  const { query, category, brand } = options;
+  const { query, category, brand, page = 0, pageSize = 24 } = options;
 
   let q = supabase
     .from("products")
@@ -77,7 +79,9 @@ export async function fetchProducts(options: FetchProductsOptions = {}): Promise
     q = q.or(`name.ilike.%${escaped}%,code.ilike.%${escaped}%`);
   }
 
-  const { data, count, error } = await q.order("created_at", { ascending: false });
+  const from = page * pageSize;
+  const to = from + pageSize - 1;
+  const { data, count, error } = await q.order("created_at", { ascending: false }).range(from, to);
   if (error) throw error;
   return {
     products: (data as ProductQueryRow[] | null)?.map(normalizeProduct) ?? [],

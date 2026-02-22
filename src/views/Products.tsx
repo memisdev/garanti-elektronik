@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef, useTransition } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useProducts } from "@/hooks/useProducts";
 import { useBrands } from "@/hooks/useBrands";
@@ -11,6 +11,17 @@ import EmptyState from "@/components/EmptyState";
 import { useProduct } from "@/hooks/useProduct";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
 import { Filter, X } from "lucide-react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
+
+const PAGE_SIZE = 24;
 
 const Products = () => {
   const searchParams = useSearchParams();
@@ -19,8 +30,24 @@ const Products = () => {
   const q = searchParams.get("q") ?? "";
   const cat = searchParams.get("category") ?? "";
   const br = searchParams.get("brand") ?? "";
+  const page = Math.max(0, parseInt(searchParams.get("page") ?? "0", 10) || 0);
 
-  const { products, total } = useProducts({ query: q, category: cat, brand: br });
+  const [inputValue, setInputValue] = useState(q);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const [isPending, startTransition] = useTransition();
+
+  // Sync inputValue when URL query changes externally (e.g. clear filters)
+  useEffect(() => {
+    setInputValue(q);
+  }, [q]);
+
+  const { products, total, isPlaceholderData } = useProducts({
+    query: q,
+    category: cat,
+    brand: br,
+    page,
+    pageSize: PAGE_SIZE,
+  });
   const { brands } = useBrands();
   const { categories } = useCategories();
 
@@ -32,13 +59,45 @@ const Products = () => {
   const handleDetail = useCallback((slug: string) => setDrawerSlug(slug), []);
   const handleCloseDrawer = useCallback(() => setDrawerSlug(null), []);
 
-  const setParam = (key: string, value: string) => {
-    const sp = new URLSearchParams(searchParams.toString());
-    if (value) sp.set(key, value);
-    else sp.delete(key);
-    router.push(`${pathname}?${sp.toString()}`, { scroll: false });
-  };
+  const setParam = useCallback(
+    (key: string, value: string) => {
+      const sp = new URLSearchParams(searchParams.toString());
+      if (value) sp.set(key, value);
+      else sp.delete(key);
+      // Reset page on filter changes
+      if (key !== "page") sp.delete("page");
+      startTransition(() => {
+        router.push(`${pathname}?${sp.toString()}`, { scroll: false });
+      });
+    },
+    [searchParams, pathname, router],
+  );
 
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setInputValue(value);
+      clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        setParam("q", value);
+      }, 300);
+    },
+    [setParam],
+  );
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => clearTimeout(debounceRef.current);
+  }, []);
+
+  const goToPage = useCallback(
+    (p: number) => {
+      setParam("page", p > 0 ? String(p) : "");
+    },
+    [setParam],
+  );
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
   const hasFilters = q || cat || br;
 
   return (
@@ -85,7 +144,7 @@ const Products = () => {
                   <label htmlFor="search-filter" className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em] block mb-3">Arama</label>
                   <input
                     id="search-filter"
-                    type="text" value={q} onChange={(e) => setParam("q", e.target.value)}
+                    type="text" value={inputValue} onChange={handleSearchChange}
                     placeholder="Parça kodu ara..."
                     className="w-full h-11 text-sm px-4 border-0 rounded-xl bg-background placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground/10 transition-all duration-200"
                   />
@@ -107,7 +166,12 @@ const Products = () => {
                   </select>
                 </div>
                 {hasFilters && (
-                  <button onClick={() => router.push(pathname, { scroll: false })}
+                  <button onClick={() => {
+                    setInputValue("");
+                    startTransition(() => {
+                      router.push(pathname, { scroll: false });
+                    });
+                  }}
                     className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors hover:underline focus:outline-none focus:underline">
                     <X className="w-3 h-3" aria-hidden="true" /> Filtreleri Temizle
                   </button>
@@ -117,16 +181,56 @@ const Products = () => {
 
             {/* Grid */}
             <div className="flex-1">
-              {products.length === 0 ? (
-                <EmptyState />
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {products.map((product, i) => (
-                    <div key={product.id} className={`reveal-on-scroll delay-${Math.min(i + 1, 4)}`}>
-                      <ProductCard product={product} onDetail={handleDetail} />
-                    </div>
-                  ))}
-                </div>
+              <div
+                className="transition-opacity duration-200"
+                style={{ opacity: isPending || isPlaceholderData ? 0.6 : 1 }}
+              >
+                {products.length === 0 ? (
+                  <EmptyState />
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {products.map((product, i) => (
+                      <div key={product.id} className={`reveal-on-scroll delay-${Math.min(i + 1, 4)}`}>
+                        <ProductCard product={product} onDetail={handleDetail} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <Pagination className="mt-12">
+                  <PaginationContent>
+                    {page > 0 && (
+                      <PaginationItem>
+                        <PaginationPrevious href="#" onClick={(e) => { e.preventDefault(); goToPage(page - 1); }} />
+                      </PaginationItem>
+                    )}
+                    {getPageNumbers(page, totalPages).map((p, i) =>
+                      p === "ellipsis" ? (
+                        <PaginationItem key={`e-${i}`}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      ) : (
+                        <PaginationItem key={p}>
+                          <PaginationLink
+                            href="#"
+                            isActive={p === page}
+                            onClick={(e) => { e.preventDefault(); goToPage(p); }}
+                          >
+                            {p + 1}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ),
+                    )}
+                    {page < totalPages - 1 && (
+                      <PaginationItem>
+                        <PaginationNext href="#" onClick={(e) => { e.preventDefault(); goToPage(page + 1); }} />
+                      </PaginationItem>
+                    )}
+                  </PaginationContent>
+                </Pagination>
               )}
             </div>
           </div>
@@ -137,5 +241,23 @@ const Products = () => {
     </div>
   );
 };
+
+/** Compute page numbers with ellipsis for compact pagination */
+function getPageNumbers(current: number, total: number): (number | "ellipsis")[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i);
+
+  const pages: (number | "ellipsis")[] = [0];
+
+  if (current > 2) pages.push("ellipsis");
+
+  const start = Math.max(1, current - 1);
+  const end = Math.min(total - 2, current + 1);
+  for (let i = start; i <= end; i++) pages.push(i);
+
+  if (current < total - 3) pages.push("ellipsis");
+
+  pages.push(total - 1);
+  return pages;
+}
 
 export default Products;
