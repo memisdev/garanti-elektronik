@@ -95,7 +95,7 @@ async function sendEmailNotification(
 
   await resend.emails.send({
     from: "Garanti Elektronik <noreply@garantielektronik.net>",
-    to: "info@garantielektronik.net",
+    to: "garantielektronik034@gmail.com",
     subject: `Yeni İletişim Formu: ${name.replace(/[\r\n]/g, " ")}`,
     text: `Ad: ${name}\nE-posta: ${email}\n\nMesaj:\n${message}`,
   });
