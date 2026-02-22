@@ -6,16 +6,16 @@ import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import SkeletonPage from "@/components/SkeletonPage";
 
-const sidebarItems = [
+const sidebarItems: { label: string; href: string; icon: typeof LayoutDashboard; badge?: boolean; adminOnly?: boolean }[] = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { label: "Ürünler", href: "/admin/urunler", icon: Package },
   { label: "Markalar", href: "/admin/markalar", icon: Tag },
   { label: "Kategoriler", href: "/admin/kategoriler", icon: FolderTree },
   { label: "Mesajlar", href: "/admin/mesajlar", icon: MessageSquare, badge: true },
-  { label: "SEO", href: "/admin/seo", icon: SearchIcon },
-  { label: "Site Düzenleme", href: "/admin/site-duzenle", icon: FileEdit },
+  { label: "SEO", href: "/admin/seo", icon: SearchIcon, adminOnly: true },
+  { label: "Site Düzenleme", href: "/admin/site-duzenle", icon: FileEdit, adminOnly: true },
   { label: "Medya", href: "/admin/medya", icon: Image },
-  { label: "Kullanıcılar", href: "/admin/kullanicilar", icon: Users },
+  { label: "Kullanıcılar", href: "/admin/kullanicilar", icon: Users, adminOnly: true },
   { label: "İşlem Kaydı", href: "/admin/islem-kaydi", icon: ScrollText },
   { label: "TV Modelleri", href: "/admin/tv-modelleri", icon: Tv },
   { label: "Sayfa İçerikleri", href: "/admin/sayfa-icerikleri", icon: FileText },
@@ -23,10 +23,11 @@ const sidebarItems = [
 
 const UNREAD_CACHE_TTL = 30_000; // 30 seconds
 
-function NavItems({ pathname, unreadCount, onNavigate }: { pathname: string; unreadCount: number; onNavigate?: () => void }) {
+function NavItems({ pathname, unreadCount, role, onNavigate }: { pathname: string; unreadCount: number; role: "admin" | "editor" | null; onNavigate?: () => void }) {
+  const visibleItems = role === "editor" ? sidebarItems.filter((item) => !item.adminOnly) : sidebarItems;
   return (
     <>
-      {sidebarItems.map((item) => {
+      {visibleItems.map((item) => {
         const active = pathname === item.href;
         return (
           <Link key={item.href} href={item.href} onClick={onNavigate}
@@ -46,7 +47,7 @@ function NavItems({ pathname, unreadCount, onNavigate }: { pathname: string; unr
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
-  const { loading, signOut } = useAdminAuth();
+  const { loading, role, signOut } = useAdminAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
   const lastFetchRef = useRef(0);
@@ -76,7 +77,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           </Link>
         </div>
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          <NavItems pathname={pathname} unreadCount={unreadCount} />
+          <NavItems pathname={pathname} unreadCount={unreadCount} role={role} />
         </nav>
         <div className="p-4 border-t border-border/50">
           <button onClick={signOut} className="flex items-center gap-3 text-[13px] text-muted-foreground hover:text-destructive px-4 h-11 rounded-xl w-full transition-colors">
@@ -95,7 +96,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               <button onClick={() => setMobileOpen(false)}><X className="w-5 h-5 text-muted-foreground" /></button>
             </div>
             <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-              <NavItems pathname={pathname} unreadCount={unreadCount} onNavigate={() => setMobileOpen(false)} />
+              <NavItems pathname={pathname} unreadCount={unreadCount} role={role} onNavigate={() => setMobileOpen(false)} />
             </nav>
             <div className="p-4 border-t border-border/50">
               <button onClick={signOut} className="flex items-center gap-3 text-[13px] text-muted-foreground hover:text-destructive px-4 h-11 rounded-xl w-full transition-colors">
@@ -111,7 +112,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         <header className="h-16 bg-card border-b border-border/50 flex items-center justify-between px-4 lg:px-8 shrink-0">
           <button onClick={() => setMobileOpen(true)} className="lg:hidden"><Menu className="w-5 h-5 text-foreground" /></button>
           <div className="hidden lg:flex items-center gap-3">
-            <p className="text-sm text-muted-foreground">Hoş geldiniz, Admin</p>
+            <p className="text-sm text-muted-foreground">Hoş geldiniz, {role === "editor" ? "Editör" : "Admin"}</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-foreground flex items-center justify-center text-background text-xs font-bold">A</div>
