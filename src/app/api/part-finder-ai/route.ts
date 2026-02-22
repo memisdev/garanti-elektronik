@@ -317,10 +317,17 @@ ${productListJson}`;
       }
       const t = await aiResponse.text();
       console.error("AI gateway error:", aiResponse.status, t.slice(0, 500));
-      console.error("AI config:", { model: config.model, url: config.url, keyLen: config.apiKey.length, keyPrefix: config.apiKey.slice(0, 5) });
+      console.error("AI config:", { model: config.model, url: config.url, keyLen: config.apiKey.length });
       return NextResponse.json(
         { error: "AI servisi şu an kullanılamıyor." },
         { status: 500 },
+      );
+    }
+
+    if (!aiResponse.body) {
+      return NextResponse.json(
+        { error: "AI servisi boş yanıt döndü." },
+        { status: 502 },
       );
     }
 

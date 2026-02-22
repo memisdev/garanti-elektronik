@@ -36,6 +36,25 @@ interface Compatibility {
   notes: string | null;
 }
 
+/** Shape returned by tv_models join with brands */
+interface TvModelQueryRow {
+  id: string;
+  model_number: string;
+  brand_id: string | null;
+  screen_size: string | null;
+  year: string | null;
+  brands: { name: string } | null;
+  [key: string]: unknown;
+}
+
+/** Shape returned by model_product_compatibility join with products */
+interface CompatibilityQueryRow {
+  id: string;
+  product_id: string;
+  notes: string | null;
+  products: { name: string; code: string | null } | null;
+}
+
 const AdminTVModels = () => {
   const { toast } = useToast();
   const [models, setModels] = useState<TvModel[]>([]);
@@ -60,7 +79,7 @@ const AdminTVModels = () => {
     const { data, error } = await supabase.from("tv_models").select("*, brands(name)").order("model_number");
     if (error) { toast({ title: "Hata", description: "Modeller yüklenemedi.", variant: "destructive" }); }
     if (data) {
-      setModels(data.map((d: any) => ({ ...d, brand_name: d.brands?.name })));
+      setModels((data as TvModelQueryRow[]).map((d) => ({ ...d, brand_name: d.brands?.name })));
     }
     setLoading(false);
   };
@@ -86,7 +105,7 @@ const AdminTVModels = () => {
     if (error) { toast({ title: "Hata", description: "Uyumluluk listesi yüklenemedi.", variant: "destructive" }); }
     if (data) {
       setCompatibilities(
-        data.map((d: any) => ({
+        (data as CompatibilityQueryRow[]).map((d) => ({
           id: d.id,
           product_id: d.product_id,
           product_name: d.products?.name ?? "",

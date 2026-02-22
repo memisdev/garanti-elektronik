@@ -7,7 +7,7 @@ import type { Product } from "@/types/product";
 export function useProduct(slug: string | undefined) {
   const { data, isLoading, error } = useQuery<Product | undefined>({
     queryKey: ["product", slug],
-    queryFn: () => fetchProduct(slug!),
+    queryFn: () => fetchProduct(slug as string),
     enabled: !!slug,
     staleTime: 5 * 60 * 1000,
   });

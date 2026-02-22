@@ -47,7 +47,7 @@ const Index = () => {
 
   const heroProduct = featuredProducts[0];
   const restProducts = featuredProducts.slice(1);
-  const whatsappMessage = heroProduct ? siteConfig.whatsapp.defaultMessage(heroProduct.name, heroProduct.code) : "";
+  const whatsappMessage = heroProduct ? siteConfig.whatsapp.defaultMessage(heroProduct.name, heroProduct.code ?? undefined) : "";
 
   // Lazy render below-fold sections
   const { ref: lazyFeaturesRef, visible: featuresVisible } = useLazyVisible();

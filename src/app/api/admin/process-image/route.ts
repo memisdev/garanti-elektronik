@@ -4,7 +4,13 @@ import { verifyAdminRole, createServiceClient } from "@/lib/supabase/admin";
 import { getImageConfig } from "@/lib/ai/client";
 
 const requestSchema = z.object({
-  imagePath: z.string().min(1),
+  imagePath: z
+    .string()
+    .min(1)
+    .regex(/^[a-zA-Z0-9._\-/]+$/, "Geçersiz dosya yolu karakteri")
+    .refine((p) => !p.includes("..") && !p.startsWith("/"), {
+      message: "Geçersiz dosya yolu",
+    }),
 });
 
 // Magic bytes for allowed image types

@@ -13,7 +13,7 @@ interface ProductCardProps {
 
 const ProductCard = memo(({ product, onDetail }: ProductCardProps) => {
   const categoryLabel = product.categories?.name ?? product.category;
-  const whatsappMessage = siteConfig.whatsapp.defaultMessage(product.name, product.code);
+  const whatsappMessage = siteConfig.whatsapp.defaultMessage(product.name, product.code ?? undefined);
 
   return (
     <article className="bg-card rounded-2xl overflow-hidden group card-hover-lift border border-border/40 hover:border-accent/20 transition-all duration-500">

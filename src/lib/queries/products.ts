@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { normalizeProduct, type Product, type ProductRow } from "@/types/product";
+import { normalizeProduct, type Product, type ProductQueryRow } from "@/types/product";
 import { escapeIlike } from "@/lib/escapeIlike";
 import { MAX_FEATURED_PRODUCTS } from "@/config/site";
 
@@ -13,7 +13,7 @@ export async function fetchFeaturedProducts(): Promise<Product[]> {
     .order("featured_order")
     .limit(MAX_FEATURED_PRODUCTS);
   if (error) throw error;
-  return (data as unknown as ProductRow[] | null)?.map(normalizeProduct) ?? [];
+  return (data as ProductQueryRow[] | null)?.map(normalizeProduct) ?? [];
 }
 
 export async function fetchRecentProducts(): Promise<Product[]> {
@@ -23,7 +23,7 @@ export async function fetchRecentProducts(): Promise<Product[]> {
     .order("created_at", { ascending: false })
     .limit(4);
   if (error) throw error;
-  return (data as unknown as ProductRow[] | null)?.map(normalizeProduct) ?? [];
+  return (data as ProductQueryRow[] | null)?.map(normalizeProduct) ?? [];
 }
 
 export async function fetchProduct(slug: string): Promise<Product | undefined> {
@@ -33,7 +33,7 @@ export async function fetchProduct(slug: string): Promise<Product | undefined> {
     .eq("slug", slug)
     .maybeSingle();
   if (error) throw error;
-  return data ? normalizeProduct(data as unknown as ProductRow) : undefined;
+  return data ? normalizeProduct(data as ProductQueryRow) : undefined;
 }
 
 export interface FetchProductsOptions {
@@ -80,7 +80,7 @@ export async function fetchProducts(options: FetchProductsOptions = {}): Promise
   const { data, count, error } = await q.order("created_at", { ascending: false });
   if (error) throw error;
   return {
-    products: (data as unknown as ProductRow[] | null)?.map(normalizeProduct) ?? [],
+    products: (data as ProductQueryRow[] | null)?.map(normalizeProduct) ?? [],
     total: count ?? 0,
   };
 }
@@ -94,5 +94,5 @@ export async function searchProducts(query: string): Promise<Product[]> {
     .or(`name.ilike.%${escaped}%,code.ilike.%${escaped}%`)
     .limit(8);
   if (error) throw error;
-  return (data as unknown as ProductRow[] | null)?.map(normalizeProduct) ?? [];
+  return (data as ProductQueryRow[] | null)?.map(normalizeProduct) ?? [];
 }

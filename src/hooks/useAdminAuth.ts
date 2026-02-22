@@ -19,7 +19,7 @@ export function useAdminAuth() {
         return;
       }
 
-      const { data } = await supabase
+      const { data, error: roleError } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id)
@@ -27,7 +27,10 @@ export function useAdminAuth() {
         .maybeSingle();
 
       if (mounted) {
-        if (data) {
+        if (roleError) {
+          console.error("Admin role check failed:", roleError.message);
+          router.replace("/admin");
+        } else if (data) {
           setIsAdmin(true);
           setRole(data.role as "admin" | "editor");
           setUserId(user.id);

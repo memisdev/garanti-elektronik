@@ -27,6 +27,32 @@ interface CompatibleProduct {
   notes: string | null;
 }
 
+/** Shape returned by tv_models join with brands */
+interface TvModelRow {
+  id: string;
+  model_number: string;
+  brand_id: string | null;
+  screen_size: string | null;
+  year: string | null;
+  brands: { name: string } | null;
+}
+
+/** Shape returned by model_product_compatibility join */
+interface CompatibilityRow {
+  notes: string | null;
+  products: {
+    id: string;
+    name: string;
+    slug: string;
+    code: string | null;
+    images: string[] | null;
+    compatibility: string | null;
+    specs: Record<string, string> | null;
+    brands: { name: string } | null;
+    categories: { name: string; slug: string } | null;
+  } | null;
+}
+
 export function useModelSearch(query: string) {
   const [models, setModels] = useState<TvModel[]>([]);
   const [loading, setLoading] = useState(false);
@@ -50,13 +76,13 @@ export function useModelSearch(query: string) {
 
         if (current && data) {
           setModels(
-            data.map((d: any) => ({
+            (data as TvModelRow[]).map((d) => ({
               id: d.id,
               model_number: d.model_number,
               brand_id: d.brand_id,
               screen_size: d.screen_size,
               year: d.year,
-              brand_name: d.brands?.name ?? null,
+              brand_name: d.brands?.name ?? undefined,
             }))
           );
         }
@@ -104,9 +130,9 @@ export function useCompatibleProducts(modelId: string | null) {
 
         if (current && data) {
           setProducts(
-            data
-              .filter((d: any) => d.products)
-              .map((d: any) => ({
+            (data as CompatibilityRow[])
+              .filter((d): d is CompatibilityRow & { products: NonNullable<CompatibilityRow["products"]> } => d.products !== null)
+              .map((d) => ({
                 id: d.products.id,
                 name: d.products.name,
                 slug: d.products.slug,

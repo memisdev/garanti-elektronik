@@ -64,10 +64,20 @@ export async function submitContactForm(
     return { success: false, error: "Mesaj gönderilemedi. Lütfen tekrar deneyin." };
   }
 
-  // Send email notification (fire-and-forget)
-  sendEmailNotification(name, email, message).catch((err) =>
-    console.error("Resend email error:", err),
-  );
+  // Send email notification — log failure to DB for visibility
+  try {
+    await sendEmailNotification(name, email, message);
+  } catch (err) {
+    console.error("Resend email error:", err);
+    // Record the email failure in contact_messages so admin can see it
+    await supabase
+      .from("contact_messages")
+      .update({ email_sent: false } as Record<string, unknown>)
+      .eq("email", email)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .then(() => {}, () => {});
+  }
 
   return { success: true };
 }

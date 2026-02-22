@@ -17,7 +17,7 @@ const ProductDrawer = memo(({ product, open, onClose }: ProductDrawerProps) => {
   if (!product) return null;
 
   const categoryLabel = product.categories?.name ?? product.category;
-  const whatsappMessage = siteConfig.whatsapp.defaultMessage(product.name, product.code);
+  const whatsappMessage = siteConfig.whatsapp.defaultMessage(product.name, product.code ?? undefined);
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>

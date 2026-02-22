@@ -19,28 +19,23 @@ export async function fetchCategories(): Promise<Category[]> {
   if (error) throw error;
   if (!categories || categories.length === 0) return [];
 
-  // Fetch only category_id and first image per category using a minimal query
-  const { data: products } = await supabase
-    .from("products")
-    .select("category_id, images")
-    .not("category_id", "is", null);
+  // Single query via the category_stats view (replaces N+1 pattern)
+  const { data: stats } = await supabase
+    .from("category_stats" as "categories")
+    .select("category_id, product_count, first_product_image");
 
-  const countMap = new Map<string, number>();
-  const imageMap = new Map<string, string>();
+  const statsMap = new Map(
+    (stats as { category_id: string; product_count: number; first_product_image: string | null }[] | null)?.map(
+      (s) => [s.category_id, s] as const
+    ) ?? []
+  );
 
-  if (products) {
-    for (const p of products) {
-      if (!p.category_id) continue;
-      countMap.set(p.category_id, (countMap.get(p.category_id) ?? 0) + 1);
-      if (!imageMap.has(p.category_id) && p.images?.[0]) {
-        imageMap.set(p.category_id, p.images[0]);
-      }
-    }
-  }
-
-  return categories.map((cat) => ({
-    ...cat,
-    productCount: countMap.get(cat.id) ?? 0,
-    firstImage: cat.image_url || imageMap.get(cat.id) || "/placeholder.svg",
-  }));
+  return categories.map((cat) => {
+    const s = statsMap.get(cat.id);
+    return {
+      ...cat,
+      productCount: s?.product_count ?? 0,
+      firstImage: cat.image_url || s?.first_product_image || "/placeholder.svg",
+    };
+  });
 }

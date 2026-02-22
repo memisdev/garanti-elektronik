@@ -41,10 +41,11 @@ export function rateLimit(
   key: string,
   { windowMs, maxRequests }: RateLimitOptions,
 ): RateLimitResult {
-  if (!stores.has(name)) {
-    stores.set(name, new Map());
+  let store = stores.get(name);
+  if (!store) {
+    store = new Map();
+    stores.set(name, store);
   }
-  const store = stores.get(name)!;
 
   cleanupStore(name);
 

@@ -32,7 +32,7 @@ const ProductPage = () => {
   }
 
   const categoryLabel = product.categories?.name ?? product.category;
-  const whatsappMessage = siteConfig.whatsapp.defaultMessage(product.name, product.code);
+  const whatsappMessage = siteConfig.whatsapp.defaultMessage(product.name, product.code ?? undefined);
 
   return (
     <div>
@@ -40,7 +40,7 @@ const ProductPage = () => {
         name={product.name}
         description={product.compatibility ?? ""}
         image={product.images[0] ?? ""}
-        sku={product.code}
+        sku={product.code ?? undefined}
         brand={product.brand}
         url={`${siteConfig.url}/urun/${product.slug}`}
       />
