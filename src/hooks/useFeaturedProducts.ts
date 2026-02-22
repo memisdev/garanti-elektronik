@@ -1,23 +1,19 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { normalizeProduct, type Product, type ProductRow } from "@/types/product";
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { fetchFeaturedProducts } from "@/lib/queries/products";
+import type { Product } from "@/types/product";
 
 export function useFeaturedProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading, error } = useQuery<Product[]>({
+    queryKey: ["featured-products"],
+    queryFn: fetchFeaturedProducts,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    supabase
-      .from("products")
-      .select("*, brands(name, slug), categories(name, slug)")
-      .eq("is_featured", true)
-      .order("featured_order")
-      .limit(4)
-      .then(({ data }) => {
-        setProducts((data as unknown as ProductRow[] | null)?.map(normalizeProduct) ?? []);
-        setLoading(false);
-      });
-  }, []);
-
-  return { products, loading };
+  return {
+    products: data ?? [],
+    loading: isLoading,
+    error: error ? "Öne çıkan ürünler yüklenemedi" : null,
+  };
 }

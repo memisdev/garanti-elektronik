@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Next.js
+.next/
+next-env.d.ts
+.env*.local
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,3 +27,20 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment
+.env
+
+# Build cache
+tsconfig.tsbuildinfo
+
+# Secrets
+keys.txt
+.vercel
+
+# Lovable (legacy)
+.lovable/
+
+# Source assets
+garanti logo.jpeg
+*:Zone.Identifier

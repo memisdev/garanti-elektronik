@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom";
+import Link from "next/link";
+import Image from "next/image";
+// Note: Footer is server-compatible (no state/effects). No "use client" needed.
 import { MessageCircle } from "lucide-react";
 import { siteConfig } from "@/config/site";
-import Logo from "@/components/Logo";
 
 const Footer = () => {
   return (
@@ -10,8 +11,8 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
           {/* Company */}
           <div className="md:col-span-1">
-            <Link to="/" className="flex items-center gap-2 font-bold text-lg mb-6" aria-label="Garanti Elektronik Ana Sayfa">
-              <Logo className="w-7 h-7 text-primary-foreground" darkInner />
+            <Link href="/" className="flex items-center gap-2 font-bold text-lg mb-6" aria-label="Garanti Elektronik Ana Sayfa">
+              <Image src="/logo.png" alt="Garanti Elektronik" width={44} height={40} className="h-7 w-auto" />
               {siteConfig.name}
             </Link>
             <p className="text-sm text-primary-foreground/70 leading-relaxed max-w-xs">
@@ -23,11 +24,11 @@ const Footer = () => {
           <nav aria-label="Sayfalar">
             <h3 className="text-xs font-semibold text-primary-foreground/60 uppercase tracking-widest mb-6">Sayfalar</h3>
             <ul className="space-y-3 text-sm">
-              <li><Link to="/urunler" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Ürünler</Link></li>
-              <li><Link to="/hakkimizda" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Hakkımızda</Link></li>
-              <li><Link to="/iletisim" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">İletişim</Link></li>
-              <li><Link to="/kargo-takip" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Kargo Takip</Link></li>
-              <li><Link to="/sss" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Sıkça Sorulan Sorular</Link></li>
+              <li><Link href="/urunler" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Ürünler</Link></li>
+              <li><Link href="/hakkimizda" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Hakkımızda</Link></li>
+              <li><Link href="/iletisim" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">İletişim</Link></li>
+              <li><Link href="/kargo-takip" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Kargo Takip</Link></li>
+              <li><Link href="/sss" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Sıkça Sorulan Sorular</Link></li>
             </ul>
           </nav>
 
@@ -35,9 +36,9 @@ const Footer = () => {
           <nav aria-label="Yasal">
             <h3 className="text-xs font-semibold text-primary-foreground/60 uppercase tracking-widest mb-6">Yasal</h3>
             <ul className="space-y-3 text-sm">
-              <li><Link to="/garanti-iade" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Garanti ve İade</Link></li>
-              <li><Link to="/gizlilik-kvkk" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Gizlilik / KVKK</Link></li>
-              <li><Link to="/cerez-politikasi" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Çerez Politikası</Link></li>
+              <li><Link href="/garanti-iade" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Garanti ve İade</Link></li>
+              <li><Link href="/gizlilik-kvkk" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Gizlilik / KVKK</Link></li>
+              <li><Link href="/cerez-politikasi" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Çerez Politikası</Link></li>
             </ul>
           </nav>
 

@@ -1,3 +1,7 @@
+"use client";
+
+import { memo } from "react";
+import Image from "next/image";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { MessageCircle } from "lucide-react";
 import type { Product } from "@/types/product";
@@ -9,11 +13,11 @@ interface ProductDrawerProps {
   onClose: () => void;
 }
 
-const ProductDrawer = ({ product, open, onClose }: ProductDrawerProps) => {
+const ProductDrawer = memo(({ product, open, onClose }: ProductDrawerProps) => {
   if (!product) return null;
 
   const categoryLabel = product.categories?.name ?? product.category;
-  const whatsappMessage = siteConfig.whatsapp.defaultMessage(product.name, product.code);
+  const whatsappMessage = siteConfig.whatsapp.defaultMessage(product.name, product.code ?? undefined);
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
@@ -21,7 +25,11 @@ const ProductDrawer = ({ product, open, onClose }: ProductDrawerProps) => {
         <div className="p-8 lg:p-10 pt-12">
           {/* Image */}
           <div className="aspect-square bg-card rounded-2xl flex items-center justify-center p-12 mb-8 border border-border/40">
-            <img src={product.images[0]} alt={product.name} className="max-h-full max-w-full object-contain" loading="lazy" width={400} height={400} />
+            {product.images[0] ? (
+              <Image src={product.images[0]} alt={product.name} width={400} height={400} sizes="(max-width: 640px) 90vw, 400px" className="max-h-full max-w-full object-contain mix-blend-multiply" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground/30 text-xs">Görsel yok</div>
+            )}
           </div>
 
           {/* Info */}
@@ -70,6 +78,8 @@ const ProductDrawer = ({ product, open, onClose }: ProductDrawerProps) => {
       </SheetContent>
     </Sheet>
   );
-};
+});
+
+ProductDrawer.displayName = "ProductDrawer";
 
 export default ProductDrawer;

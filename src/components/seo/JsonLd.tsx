@@ -1,5 +1,10 @@
 import { siteConfig } from "@/config/site";
 
+/** Escape </script> sequences to prevent XSS in JSON-LD blocks */
+function safeJsonLd(schema: object): string {
+  return JSON.stringify(schema).replace(/<\/script>/gi, "<\\/script>");
+}
+
 export const OrganizationJsonLd = () => {
   const schema = {
     "@context": "https://schema.org",
@@ -25,7 +30,7 @@ export const OrganizationJsonLd = () => {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
     />
   );
 };
@@ -62,7 +67,7 @@ export const ProductJsonLd = ({ name, description, image, sku, brand, url }: Pro
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
     />
   );
 };
@@ -89,7 +94,7 @@ export const FAQPageJsonLd = ({ faqs }: { faqs: FAQItem[] }) => {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
     />
   );
 };

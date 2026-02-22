@@ -1,27 +1,20 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+"use client";
 
-export interface Brand {
-  id: string;
-  slug: string;
-  name: string;
-  description: string | null;
-}
+import { useQuery } from "@tanstack/react-query";
+import { fetchBrands, type Brand } from "@/lib/queries/brands";
+
+export type { Brand };
 
 export function useBrands() {
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["brands"],
+    queryFn: fetchBrands,
+    staleTime: 10 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    supabase
-      .from("brands")
-      .select("*")
-      .order("name")
-      .then(({ data }) => {
-        setBrands(data ?? []);
-        setLoading(false);
-      });
-  }, []);
-
-  return { brands, loading };
+  return {
+    brands: data ?? [],
+    loading: isLoading,
+    error: error ? "Markalar yüklenemedi" : null,
+  };
 }

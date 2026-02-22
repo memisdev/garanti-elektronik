@@ -1,31 +1,48 @@
+"use client";
+
+import { memo } from "react";
+import Image from "next/image";
 import { MessageCircle } from "lucide-react";
 import type { Product } from "@/types/product";
 import { siteConfig } from "@/config/site";
-import { optimizeImageUrl } from "@/lib/imageUtils";
 
 interface ProductCardProps {
   product: Product;
   onDetail?: (slug: string) => void;
 }
 
-const ProductCard = ({ product, onDetail }: ProductCardProps) => {
+const ProductCard = memo(({ product, onDetail }: ProductCardProps) => {
   const categoryLabel = product.categories?.name ?? product.category;
-  const whatsappMessage = siteConfig.whatsapp.defaultMessage(product.name, product.code);
+  const whatsappMessage = siteConfig.whatsapp.defaultMessage(product.name, product.code ?? undefined);
+
+  const handleCardClick = () => onDetail?.(product.slug);
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") onDetail?.(product.slug);
+  };
 
   return (
-    <article className="bg-card rounded-2xl overflow-hidden group card-hover-lift border border-border/40 hover:border-accent/20 transition-all duration-500">
+    <article
+      className="bg-card rounded-2xl overflow-hidden group card-hover-lift border border-border/40 hover:border-accent/20 transition-all duration-500 cursor-pointer"
+      onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+    >
       <div className="aspect-[4/3] bg-muted/20 flex items-center justify-center p-8 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-card/30" />
-        <img
-          src={optimizeImageUrl(product.images[0], 400)}
-          alt={product.name}
-          className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-700 relative z-10"
-          loading="lazy"
-          decoding="async"
-          width={363}
-          height={272}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-        />
+        {product.images[0] ? (
+          <Image
+            src={product.images[0]}
+            alt={product.name}
+            width={363}
+            height={272}
+            loading="lazy"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="max-h-full max-w-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-700 relative z-10"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-muted-foreground/30 text-xs">Görsel yok</div>
+        )}
       </div>
       <div className="p-6">
         <div className="flex items-center gap-2 mb-3">
@@ -49,6 +66,7 @@ const ProductCard = ({ product, onDetail }: ProductCardProps) => {
             href={siteConfig.social.whatsappUrl(whatsappMessage)}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
             className="flex items-center justify-center gap-1.5 flex-1 text-[13px] font-bold text-primary-foreground bg-whatsapp hover:bg-whatsapp-hover py-2.5 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-whatsapp/50"
             aria-label={`${product.name} için WhatsApp'tan sor`}
           >
@@ -59,6 +77,8 @@ const ProductCard = ({ product, onDetail }: ProductCardProps) => {
       </div>
     </article>
   );
-};
+});
+
+ProductCard.displayName = "ProductCard";
 
 export default ProductCard;

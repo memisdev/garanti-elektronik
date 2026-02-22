@@ -1,11 +1,14 @@
-import { useState, useMemo, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { normalizeProduct, type Product, type ProductRow } from "@/types/product";
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { searchProducts } from "@/lib/queries/products";
+import type { Product } from "@/types/product";
 
 export function useSearch() {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Product[]>([]);
+  const requestId = useRef(0);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedQuery(query), 300);
@@ -14,13 +17,13 @@ export function useSearch() {
 
   useEffect(() => {
     if (debouncedQuery.length < 2) { setSuggestions([]); return; }
-    supabase
-      .from("products")
-      .select("*, brands(name, slug), categories(name, slug)")
-      .or(`name.ilike.%${debouncedQuery}%,code.ilike.%${debouncedQuery}%`)
-      .limit(8)
-      .then(({ data }) => {
-        setSuggestions((data as unknown as ProductRow[] | null)?.map(normalizeProduct) ?? []);
+    const id = ++requestId.current;
+    searchProducts(debouncedQuery)
+      .then((data) => {
+        if (id === requestId.current) setSuggestions(data);
+      })
+      .catch(() => {
+        if (id === requestId.current) setSuggestions([]);
       });
   }, [debouncedQuery]);
 

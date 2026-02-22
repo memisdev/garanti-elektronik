@@ -1,3 +1,5 @@
+import type { StaticImageData } from "next/image";
+
 import productPowerBoard from "@/assets/product-power-board-nobg.png";
 import productMainBoard from "@/assets/product-main-board.jpg";
 import productTconBoard from "@/assets/product-tcon-board.jpg";
@@ -11,7 +13,7 @@ export interface Product {
   brand: string;
   category: "tv-parca" | "anakart";
   code?: string;
-  images: string[];
+  images: (string | StaticImageData)[];
   specs: Record<string, string>;
   compatibility: string;
 }

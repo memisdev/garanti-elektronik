@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback } from "react";
 
 let sharedObserver: IntersectionObserver | null = null;

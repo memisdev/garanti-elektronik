@@ -1,24 +1,20 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { normalizeProduct, type Product, type ProductRow } from "@/types/product";
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { fetchProduct } from "@/lib/queries/products";
+import type { Product } from "@/types/product";
 
 export function useProduct(slug: string | undefined) {
-  const [product, setProduct] = useState<Product | undefined>();
-  const [loading, setLoading] = useState(false);
+  const { data, isLoading, error } = useQuery<Product | undefined>({
+    queryKey: ["product", slug],
+    queryFn: () => fetchProduct(slug as string),
+    enabled: !!slug,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    if (!slug) { setProduct(undefined); return; }
-    setLoading(true);
-    supabase
-      .from("products")
-      .select("*, brands(name, slug), categories(name, slug)")
-      .eq("slug", slug)
-      .maybeSingle()
-      .then(({ data }) => {
-        setProduct(data ? normalizeProduct(data as unknown as ProductRow) : undefined);
-        setLoading(false);
-      });
-  }, [slug]);
-
-  return { product, loading };
+  return {
+    product: data,
+    loading: isLoading,
+    error: error ? "Ürün yüklenemedi" : null,
+  };
 }

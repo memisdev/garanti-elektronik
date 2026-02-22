@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/integrations/supabase/client";
 
 export function useAdminAuth() {
@@ -7,32 +7,35 @@ export function useAdminAuth() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [role, setRole] = useState<"admin" | "editor" | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     let mounted = true;
 
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        if (mounted) navigate("/admin", { replace: true });
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        if (mounted) router.replace("/admin");
         return;
       }
 
-      const { data } = await supabase
+      const { data, error: roleError } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", session.user.id)
+        .eq("user_id", user.id)
         .in("role", ["admin", "editor"])
         .maybeSingle();
 
       if (mounted) {
-        if (data) {
+        if (roleError) {
+          console.error("Admin role check failed:", roleError.message);
+          router.replace("/admin");
+        } else if (data) {
           setIsAdmin(true);
           setRole(data.role as "admin" | "editor");
-          setUserId(session.user.id);
+          setUserId(user.id);
         } else {
-          navigate("/admin", { replace: true });
+          router.replace("/admin");
         }
         setLoading(false);
       }
@@ -42,7 +45,7 @@ export function useAdminAuth() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") {
-        if (mounted) navigate("/admin", { replace: true });
+        if (mounted) router.replace("/admin");
       }
     });
 
@@ -50,11 +53,11 @@ export function useAdminAuth() {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [router]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    navigate("/admin", { replace: true });
+    router.replace("/admin");
   };
 
   return { loading, isAdmin, role, userId, signOut };
