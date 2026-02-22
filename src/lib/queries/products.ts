@@ -49,23 +49,28 @@ export async function fetchProducts(options: FetchProductsOptions = {}): Promise
     .from("products")
     .select(PRODUCT_SELECT, { count: "exact" });
 
-  if (category) {
-    const { data: cat } = await supabase
-      .from("categories")
-      .select("id")
-      .eq("slug", category)
-      .maybeSingle();
-    if (cat) q = q.eq("category_id", cat.id);
-  }
+  // Resolve category and brand IDs in parallel
+  const [catId, brandId] = await Promise.all([
+    category
+      ? supabase
+          .from("categories")
+          .select("id")
+          .eq("slug", category)
+          .maybeSingle()
+          .then(({ data }) => data?.id)
+      : Promise.resolve(undefined),
+    brand
+      ? supabase
+          .from("brands")
+          .select("id")
+          .ilike("name", brand)
+          .maybeSingle()
+          .then(({ data }) => data?.id)
+      : Promise.resolve(undefined),
+  ]);
 
-  if (brand) {
-    const { data: br } = await supabase
-      .from("brands")
-      .select("id")
-      .ilike("name", brand)
-      .maybeSingle();
-    if (br) q = q.eq("brand_id", br.id);
-  }
+  if (catId) q = q.eq("category_id", catId);
+  if (brandId) q = q.eq("brand_id", brandId);
 
   if (query) {
     const escaped = escapeIlike(query);

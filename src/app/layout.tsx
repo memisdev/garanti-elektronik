@@ -1,15 +1,25 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Providers from "./providers";
-import { WebVitals } from "@/components/WebVitals";
 import "./globals.css";
 
 const inter = Inter({
   subsets: ["latin", "latin-ext"],
   variable: "--font-inter",
+  display: "swap",
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#111318" },
+  ],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://garantielektronik.net"),
@@ -36,11 +46,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="tr" className={inter.variable} suppressHydrationWarning>
+      <head>
+        <link rel="dns-prefetch" href="https://vacerlceqblpygsdjpeq.supabase.co" />
+        <link rel="preconnect" href="https://vacerlceqblpygsdjpeq.supabase.co" crossOrigin="anonymous" />
+      </head>
       <body>
         <Providers>{children}</Providers>
         <Analytics />
         <SpeedInsights />
-        <WebVitals />
       </body>
     </html>
   );

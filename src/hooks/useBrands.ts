@@ -1,27 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { fetchBrands, type Brand } from "@/lib/queries/brands";
 
 export type { Brand };
 
 export function useBrands() {
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["brands"],
+    queryFn: fetchBrands,
+    staleTime: 10 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    fetchBrands()
-      .then((data) => {
-        setBrands(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch brands:", err);
-        setError("Markalar yüklenemedi");
-        setLoading(false);
-      });
-  }, []);
-
-  return { brands, loading, error };
+  return {
+    brands: data ?? [],
+    loading: isLoading,
+    error: error ? "Markalar yüklenemedi" : null,
+  };
 }

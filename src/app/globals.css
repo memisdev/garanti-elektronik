@@ -150,16 +150,15 @@
 /* ===== Card hover lift ===== */
 .card-hover-lift {
   transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
 }
 .card-hover-lift:hover {
   transform: translateY(-6px);
-  box-shadow:
-    0 24px 48px -12px hsl(var(--foreground) / 0.15),
-    0 8px 16px -4px hsl(var(--foreground) / 0.06);
+  box-shadow: 0 20px 40px -12px hsl(var(--foreground) / 0.12);
 }
 
-@media (max-width: 640px) {
-  .card-hover-lift { transition: none; }
+@media (max-width: 768px) {
+  .card-hover-lift { transition: none; will-change: auto; }
   .card-hover-lift:hover { transform: none; box-shadow: none; }
 }
 
@@ -171,16 +170,23 @@
 
 /* ===== Brand marquee ===== */
 @keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
 }
 
 .marquee-track {
   animation: marquee 30s linear infinite;
+  will-change: transform;
 }
 
 .marquee-track:hover {
   animation-play-state: paused;
+}
+
+@media (max-width: 768px) {
+  .marquee-track {
+    animation-duration: 20s;
+  }
 }
 
 .marquee-container {
@@ -214,18 +220,20 @@
 
 /* ===== Mobile GPU optimization ===== */
 @media (max-width: 768px) {
-  .hero-ken-burns { animation: none; transform: scale(1); }
+  .hero-ken-burns { animation: none; transform: scale(1); will-change: auto; }
   .grain-overlay::before { display: none; }
   .hover-glow::after { display: none; }
   .hover-glow:hover::after { display: none; }
   .glass-card { backdrop-filter: none; -webkit-backdrop-filter: none; background: hsl(var(--card) / 0.95); }
   .category-banner-img { transition: none; }
   .hero-product-image { transition: none; }
+  .group:hover .category-banner-img { transform: none; }
+  .group:hover .hero-product-image { transform: none; }
 }
 
 /* ===== CSS Containment for layout optimization ===== */
 section {
-  contain: layout style;
+  contain: layout style paint;
 }
 
 /* ===== Scroll-triggered reveal ===== */
@@ -233,23 +241,37 @@ section {
   opacity: 0;
   transform: translateY(24px);
   transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
 }
 
-/* Hero section: make LCP content visible immediately */
-section:first-of-type .reveal-on-scroll {
+/* Above-fold content: visible immediately to prevent CLS and improve LCP */
+section:first-of-type .reveal-on-scroll,
+section:nth-of-type(2) .reveal-on-scroll,
+section:nth-of-type(3) .reveal-on-scroll {
   opacity: 1;
   transform: translateY(0);
+  transition: none;
 }
 
 .reveal-on-scroll.revealed {
   opacity: 1;
   transform: translateY(0);
+  will-change: auto;
 }
 
 .reveal-on-scroll.revealed.delay-1 { transition-delay: 0.1s; }
 .reveal-on-scroll.revealed.delay-2 { transition-delay: 0.2s; }
 .reveal-on-scroll.revealed.delay-3 { transition-delay: 0.3s; }
 .reveal-on-scroll.revealed.delay-4 { transition-delay: 0.4s; }
+
+/* Mobile: disable reveal animations entirely to eliminate CLS */
+@media (max-width: 768px) {
+  .reveal-on-scroll {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
 
 /* ===== Stat number ===== */
 .stat-number {

@@ -20,11 +20,13 @@ const HeroSection = () => {
     <section ref={sectionRef} className="relative min-h-[90vh] bg-foreground overflow-hidden grain-overlay">
       <div className="absolute inset-0">
         <Image
-          src="/images/hero-botika.jpg"
+          src="/images/hero-botika.webp"
           alt="TV elektronik yedek parça ve anakart ürünleri"
           fill
           priority
           sizes="100vw"
+          placeholder="blur"
+          blurDataURL="data:image/jpeg;base64,/9j/2wBDACgcHiMeGSgjISMtKygwPGRBPDc3PHtYXUlkkYCZlo+AjIqgtObDoKrarYqMyP/L2u71////m8H////6/+b9//j/2wBDASstLTw1PHZBQXb4pYyl+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj/wAARCAAGAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAIE/8QAHhAAAgIBBQEAAAAAAAAAAAAAAQIAA0EEERITIXL/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A36lLWIKW8VPjDbEjpXD2gfcRA//Z"
           className="object-cover hero-ken-burns opacity-25 object-right"
         />
 

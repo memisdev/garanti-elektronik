@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import Link from "next/link";
 import { Menu, Search, X, ArrowRight } from "lucide-react";
 import Logo from "@/components/Logo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import SearchBar from "@/components/SearchBar";
+
+const SearchBar = lazy(() => import("@/components/SearchBar"));
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -15,18 +16,26 @@ const Header = () => {
 
   useEffect(() => {
     let lastY = window.scrollY;
+    let ticking = false;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setSearchOpen(false);
     };
-    const handleScroll = () => {
+    const updateHeader = () => {
       const y = window.scrollY;
       setScrolled(y > 16);
       setVisible(y < lastY || y < 80);
       lastY = y;
+      ticking = false;
+    };
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(updateHeader);
+        ticking = true;
+      }
     };
     document.addEventListener("keydown", handleKey);
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
+    updateHeader();
     return () => {
       document.removeEventListener("keydown", handleKey);
       window.removeEventListener("scroll", handleScroll);
@@ -170,7 +179,9 @@ const Header = () => {
                     <X className="w-4 h-4 text-muted-foreground" />
                   </button>
                 </div>
-                <SearchBar onNavigate={() => setSearchOpen(false)} />
+                <Suspense fallback={<div className="h-13 bg-surface rounded-2xl animate-pulse" />}>
+                  <SearchBar onNavigate={() => setSearchOpen(false)} />
+                </Suspense>
               </div>
             </div>
           </div>

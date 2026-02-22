@@ -1,29 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { fetchProduct } from "@/lib/queries/products";
 import type { Product } from "@/types/product";
 
 export function useProduct(slug: string | undefined) {
-  const [product, setProduct] = useState<Product | undefined>();
-  const [loading, setLoading] = useState(!!slug);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isLoading, error } = useQuery<Product | undefined>({
+    queryKey: ["product", slug],
+    queryFn: () => fetchProduct(slug!),
+    enabled: !!slug,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    if (!slug) { setProduct(undefined); setLoading(false); return; }
-    setLoading(true);
-    setError(null);
-    fetchProduct(slug)
-      .then((data) => {
-        setProduct(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch product:", err);
-        setError("Ürün yüklenemedi");
-        setLoading(false);
-      });
-  }, [slug]);
-
-  return { product, loading, error };
+  return {
+    product: data,
+    loading: isLoading,
+    error: error ? "Ürün yüklenemedi" : null,
+  };
 }

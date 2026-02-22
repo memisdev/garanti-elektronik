@@ -1,26 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { fetchRecentProducts } from "@/lib/queries/products";
 import type { Product } from "@/types/product";
 
 export function useRecentProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isLoading, error } = useQuery<Product[]>({
+    queryKey: ["recent-products"],
+    queryFn: fetchRecentProducts,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    fetchRecentProducts()
-      .then((data) => {
-        setProducts(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch recent products:", err);
-        setError("Son eklenen ürünler yüklenemedi");
-        setLoading(false);
-      });
-  }, []);
-
-  return { products, loading, error };
+  return {
+    products: data ?? [],
+    loading: isLoading,
+    error: error ? "Son eklenen ürünler yüklenemedi" : null,
+  };
 }

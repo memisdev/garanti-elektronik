@@ -1,26 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { fetchFeaturedProducts } from "@/lib/queries/products";
 import type { Product } from "@/types/product";
 
 export function useFeaturedProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isLoading, error } = useQuery<Product[]>({
+    queryKey: ["featured-products"],
+    queryFn: fetchFeaturedProducts,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    fetchFeaturedProducts()
-      .then((data) => {
-        setProducts(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch featured products:", err);
-        setError("Öne çıkan ürünler yüklenemedi");
-        setLoading(false);
-      });
-  }, []);
-
-  return { products, loading, error };
+  return {
+    products: data ?? [],
+    loading: isLoading,
+    error: error ? "Öne çıkan ürünler yüklenemedi" : null,
+  };
 }
