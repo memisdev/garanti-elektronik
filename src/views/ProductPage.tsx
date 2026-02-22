@@ -47,7 +47,7 @@ const ProductPage = () => {
 
       {/* Hero Band */}
       <section className="bg-foreground relative overflow-hidden">
-        <div className="relative container mx-auto px-6 py-16 md:py-20">
+        <div className="relative container mx-auto px-6 pt-[136px] pb-16 md:pt-[152px] md:pb-20">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-[11px] font-medium bg-primary-foreground/10 text-primary-foreground px-3 py-1 rounded-full">{product.brand}</span>
             <span className="text-[11px] text-primary-foreground/50">{categoryLabel}</span>

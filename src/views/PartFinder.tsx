@@ -203,7 +203,7 @@ const PartFinder = () => {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="bg-gradient-to-b from-muted/60 to-background py-16 lg:py-24">
+      <section className="bg-gradient-to-b from-muted/60 to-background pt-[136px] pb-16 lg:pt-[168px] lg:pb-24">
         <div className="container mx-auto px-6 text-center max-w-3xl">
           <div className="inline-flex items-center gap-2 bg-accent/10 text-accent px-4 py-1.5 rounded-full text-[11px] font-bold tracking-wide uppercase mb-6">
             <Cpu className="w-3.5 h-3.5" />

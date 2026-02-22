@@ -42,7 +42,7 @@ const About = () => {
     <div>
       {/* Hero Band */}
       <section className="bg-foreground relative overflow-hidden">
-        <div className="relative container mx-auto px-6 py-20 md:py-28">
+        <div className="relative container mx-auto px-6 pt-[152px] pb-20 md:pt-[184px] md:pb-28">
           <div className="flex items-center gap-3 mb-5">
             <div className="accent-bar" />
             <span className="text-[11px] font-semibold text-primary-foreground/60 uppercase tracking-[0.2em]">Hakkımızda</span>

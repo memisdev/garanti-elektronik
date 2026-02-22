@@ -64,7 +64,7 @@ const Contact = () => {
   return (
     <div>
       <section className="bg-foreground relative overflow-hidden">
-        <div className="relative container mx-auto px-6 py-20 md:py-28">
+        <div className="relative container mx-auto px-6 pt-[152px] pb-20 md:pt-[184px] md:pb-28">
           <div className="max-w-2xl">
             <div className="flex items-center gap-3 mb-5">
               <div className="accent-bar" />

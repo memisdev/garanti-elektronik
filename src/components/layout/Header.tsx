@@ -2,6 +2,7 @@
 
 import { useState, useEffect, lazy, Suspense } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, Search, X, ArrowRight } from "lucide-react";
 import Logo from "@/components/Logo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -9,10 +10,14 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 const SearchBar = lazy(() => import("@/components/SearchBar"));
 
 const Header = () => {
+  const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [visible, setVisible] = useState(true);
+
+  const isLightHero = pathname === "/parca-bulucu";
+  const isOverlay = !isLightHero && !scrolled;
 
   useEffect(() => {
     let lastY = window.scrollY;
@@ -22,7 +27,7 @@ const Header = () => {
     };
     const updateHeader = () => {
       const y = window.scrollY;
-      setScrolled(y > 16);
+      setScrolled(y > 100);
       setVisible(y < lastY || y < 80);
       lastY = y;
       ticking = false;
@@ -53,7 +58,7 @@ const Header = () => {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 transition-all duration-500 ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           visible ? "translate-y-0" : "-translate-y-full"
         } ${
           scrolled
@@ -64,11 +69,11 @@ const Header = () => {
         <div className="container mx-auto flex items-center justify-between h-[72px] px-6">
           {/* Left: Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
-            <Logo className="w-8 h-8 text-foreground transition-transform duration-300 group-hover:scale-105" />
+            <Logo className={`w-8 h-8 transition-all duration-500 group-hover:scale-105 ${isOverlay ? "text-primary-foreground" : "text-foreground"}`} darkInner={isOverlay} />
             <div className="hidden sm:flex flex-col leading-none">
-              <span className="text-[15px] font-bold tracking-tight text-foreground">Garanti Elektronik</span>
+              <span className={`text-[15px] font-bold tracking-tight transition-colors duration-500 ${isOverlay ? "text-primary-foreground" : "text-foreground"}`}>Garanti Elektronik</span>
             </div>
-            <span className="sm:hidden text-[15px] font-bold tracking-tight text-foreground">Garanti</span>
+            <span className={`sm:hidden text-[15px] font-bold tracking-tight transition-colors duration-500 ${isOverlay ? "text-primary-foreground" : "text-foreground"}`}>Garanti</span>
           </Link>
 
           {/* Center: Nav */}
@@ -77,7 +82,11 @@ const Header = () => {
               <Link
                 key={link.label}
                 href={link.href}
-                className="text-[13px] font-medium text-muted-foreground hover:text-foreground px-3.5 py-2 transition-all duration-200"
+                className={`text-[13px] font-medium px-3.5 py-2 transition-all duration-500 ${
+                  isOverlay
+                    ? "text-primary-foreground/70 hover:text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
               >
                 {link.label}
               </Link>
@@ -88,24 +97,36 @@ const Header = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSearchOpen(true)}
-              className="w-9 h-9 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all duration-200"
+              className={`w-9 h-9 flex items-center justify-center rounded-full transition-all duration-500 ${
+                isOverlay
+                  ? "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+              }`}
               aria-label="Ara"
             >
               <Search className="w-[17px] h-[17px]" strokeWidth={1.8} />
             </button>
 
-            <div className="hidden sm:block w-px h-5 bg-border/60 mx-1" />
+            <div className={`hidden sm:block w-px h-5 mx-1 transition-colors duration-500 ${isOverlay ? "bg-primary-foreground/20" : "bg-border/60"}`} />
 
             <Link
               href="/parca-bulucu"
-              className="hidden sm:inline-flex text-[13px] font-medium text-muted-foreground hover:text-foreground px-3 py-2 rounded-full hover:bg-muted/60 transition-all duration-200"
+              className={`hidden sm:inline-flex text-[13px] font-medium px-3 py-2 rounded-full transition-all duration-500 ${
+                isOverlay
+                  ? "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+              }`}
             >
               Parça Bulucu
             </Link>
 
             <Link
               href="/urunler"
-              className="hidden sm:inline-flex items-center gap-1.5 bg-foreground text-background text-[12px] font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-all duration-200"
+              className={`hidden sm:inline-flex items-center gap-1.5 text-[12px] font-semibold px-5 py-2.5 rounded-full transition-all duration-500 ${
+                isOverlay
+                  ? "border border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+                  : "bg-foreground text-background hover:opacity-90"
+              }`}
             >
               Ürünleri İncele
               <ArrowRight className="w-3.5 h-3.5" />
@@ -114,7 +135,7 @@ const Header = () => {
             {/* Mobile menu */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <button className="lg:hidden w-9 h-9 flex items-center justify-center rounded-full text-foreground hover:bg-muted/60 transition-all duration-200" aria-label="Menü">
+                <button className={`lg:hidden w-9 h-9 flex items-center justify-center rounded-full transition-all duration-500 ${isOverlay ? "text-primary-foreground hover:bg-primary-foreground/10" : "text-foreground hover:bg-muted/60"}`} aria-label="Menü">
                   <Menu className="w-[18px] h-[18px]" strokeWidth={1.8} />
                 </button>
               </SheetTrigger>

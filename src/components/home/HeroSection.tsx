@@ -34,8 +34,10 @@ const HeroSection = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-foreground/20" />
       </div>
 
+      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-foreground/30 to-transparent z-[2]" />
+
       <div className="relative z-10 container mx-auto px-6 h-full min-h-[90vh] flex items-center">
-        <div className="max-w-2xl py-24 md:py-32">
+        <div className="max-w-2xl pt-32 pb-24 md:pt-40 md:pb-32">
           <h1 className="reveal-on-scroll text-[2.4rem] sm:text-[3.2rem] md:text-[4rem] lg:text-[4.8rem] tracking-[-0.04em] leading-[1.02] mb-8">
             <span className="font-extralight text-primary-foreground/60">{content.title_light}</span>
             <br />

@@ -40,7 +40,7 @@ const BrandPage = () => {
     <div>
       {/* Hero Band */}
       <section className="bg-foreground relative overflow-hidden">
-        <div className="relative container mx-auto px-6 py-20 md:py-28">
+        <div className="relative container mx-auto px-6 pt-[152px] pb-20 md:pt-[184px] md:pb-28">
           <h1 className="text-[2.8rem] md:text-[3.5rem] tracking-[-0.04em] leading-[1.05]">
             <span className="font-light text-primary-foreground/50">Marka:</span>{" "}
             <span className="font-black text-primary-foreground">{brand.name}</span>
