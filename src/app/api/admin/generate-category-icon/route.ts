@@ -138,12 +138,13 @@ Consistent thick line weight. Square aspect ratio. 256x256px.`;
       );
     }
 
-    // Convert to 256x256 WebP with clean white background
+    // Convert to 256x256 WebP: flatten to white, resize, then remove white bg
     const rawBytes = Buffer.from(base64Image, "base64");
     const bytes = await sharp(rawBytes)
       .flatten({ background: { r: 255, g: 255, b: 255 } })
       .resize(ICON_SIZE, ICON_SIZE, { fit: "contain", background: { r: 255, g: 255, b: 255 } })
-      .webp({ quality: 90 })
+      .unflatten()
+      .webp({ quality: 90, alphaQuality: 100 })
       .toBuffer();
 
     // Upload to Supabase Storage
