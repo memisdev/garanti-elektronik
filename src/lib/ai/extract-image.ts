@@ -1,31 +1,26 @@
 /**
- * Extracts a base64 image from a Gemini/OpenAI-compatible chat completion response.
- * Shared by process-image and generate-category-icon routes.
+ * Extracts a base64 image from a Gemini native API response.
+ * Supports the native generateContent response format.
  */
 export function extractImageFromResponse(
   aiData: Record<string, unknown>,
 ): string | null {
-  const choices = (aiData.choices as Array<Record<string, unknown>>) || [];
-  let base64Image: string | null = null;
-
-  for (const choice of choices) {
-    const message = choice.message as Record<string, unknown> | undefined;
-    const content = message?.content;
-    if (Array.isArray(content)) {
-      for (const part of content) {
-        if (part.type === "image_url" && part.image_url?.url) {
-          const imgUrl: string = part.image_url.url;
-          if (imgUrl.startsWith("data:")) {
-            base64Image = imgUrl.split(",")[1];
-          } else {
-            base64Image = imgUrl;
+  // Native Gemini API format: candidates[].content.parts[].inlineData
+  const candidates = aiData.candidates as Array<Record<string, unknown>> | undefined;
+  if (candidates) {
+    for (const candidate of candidates) {
+      const content = candidate.content as Record<string, unknown> | undefined;
+      const parts = content?.parts as Array<Record<string, unknown>> | undefined;
+      if (parts) {
+        for (const part of parts) {
+          const inlineData = part.inlineData as Record<string, string> | undefined;
+          if (inlineData?.data) {
+            return inlineData.data;
           }
-          break;
         }
       }
     }
-    if (base64Image) break;
   }
 
-  return base64Image;
+  return null;
 }

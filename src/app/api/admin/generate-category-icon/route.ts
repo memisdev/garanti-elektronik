@@ -73,16 +73,12 @@ Consistent line weight. Square aspect ratio. PNG with transparency.`;
 
     let aiResponse: Response;
     try {
-      aiResponse = await fetch(config.url, {
+      aiResponse = await fetch(`${config.url}?key=${config.apiKey}`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${config.apiKey}`,
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: config.model,
-          messages: [{ role: "user", content: prompt }],
-          modalities: ["image", "text"],
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
         }),
         signal: controller.signal,
       });

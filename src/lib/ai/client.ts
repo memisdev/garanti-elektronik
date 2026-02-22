@@ -1,5 +1,5 @@
-const BASE_URL =
-  "https://generativelanguage.googleapis.com/v1beta/openai";
+const OPENAI_BASE = "https://generativelanguage.googleapis.com/v1beta/openai";
+const NATIVE_BASE = "https://generativelanguage.googleapis.com/v1beta";
 
 interface AIConfig {
   url: string;
@@ -13,26 +13,31 @@ function getApiKey(): string {
   return apiKey;
 }
 
+/** Chat completions (text only) — uses OpenAI-compatible endpoint */
 export function getChatConfig(): AIConfig {
   return {
-    url: `${BASE_URL}/chat/completions`,
+    url: `${OPENAI_BASE}/chat/completions`,
     apiKey: getApiKey(),
     model: (process.env.AI_CHAT_MODEL ?? "gemini-3-flash-preview").trim(),
   };
 }
 
+/** Image processing (bg removal) — uses native Gemini API */
 export function getImageConfig(): AIConfig {
+  const model = (process.env.AI_IMAGE_MODEL ?? "gemini-3-pro-image-preview").trim();
   return {
-    url: `${BASE_URL}/chat/completions`,
+    url: `${NATIVE_BASE}/models/${model}:generateContent`,
     apiKey: getApiKey(),
-    model: (process.env.AI_IMAGE_MODEL ?? "gemini-3-pro-image-preview").trim(),
+    model,
   };
 }
 
+/** Icon generation — uses native Gemini API */
 export function getIconGenerationConfig(): AIConfig {
+  const model = (process.env.AI_ICON_MODEL ?? "gemini-3-pro-image-preview").trim();
   return {
-    url: `${BASE_URL}/chat/completions`,
+    url: `${NATIVE_BASE}/models/${model}:generateContent`,
     apiKey: getApiKey(),
-    model: (process.env.AI_ICON_MODEL ?? "gemini-3-pro-image-preview").trim(),
+    model,
   };
 }

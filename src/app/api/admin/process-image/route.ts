@@ -100,32 +100,24 @@ export async function POST(req: NextRequest) {
     }
 
     const b64 = Buffer.from(uint8).toString("base64");
-    const dataUrl = `data:${detectedMime};base64,${b64}`;
 
-    // Call Gemini to remove background
+    // Call Gemini to remove background (native API)
     const prompt =
       "Remove the background from this product image completely. Keep only the product itself with a transparent background. Output a clean PNG with transparency. Maintain the original quality and details of the product. Do not add any shadows, reflections, or visual effects.";
 
     const config = getImageConfig();
 
-    const aiResponse = await fetch(config.url, {
+    const aiResponse = await fetch(`${config.url}?key=${config.apiKey}`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${config.apiKey}`,
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: config.model,
-        messages: [
-          {
-            role: "user",
-            content: [
-              { type: "text", text: prompt },
-              { type: "image_url", image_url: { url: dataUrl } },
-            ],
-          },
-        ],
-        modalities: ["image", "text"],
+        contents: [{
+          parts: [
+            { text: prompt },
+            { inlineData: { mimeType: detectedMime, data: b64 } },
+          ],
+        }],
+        generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
       }),
     });
 
