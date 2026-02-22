@@ -12,6 +12,12 @@ import { useProduct } from "@/hooks/useProduct";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
 import { Filter, X } from "lucide-react";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import {
   Pagination,
   PaginationContent,
   PaginationItem,
@@ -22,6 +28,74 @@ import {
 } from "@/components/ui/pagination";
 
 const PAGE_SIZE = 24;
+
+/** Shared filter controls used in both sidebar and mobile sheet */
+function FilterControls({
+  inputValue,
+  onSearchChange,
+  cat,
+  br,
+  categories,
+  brands,
+  setParam,
+  hasFilters,
+  onClear,
+}: {
+  inputValue: string;
+  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  cat: string;
+  br: string;
+  categories: { id: string; slug: string; name: string }[];
+  brands: { id: string; name: string }[];
+  setParam: (key: string, value: string) => void;
+  hasFilters: string | boolean;
+  onClear: () => void;
+}) {
+  return (
+    <div className="space-y-6">
+      <div>
+        <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em] block mb-3">Arama</label>
+        <input
+          type="text"
+          value={inputValue}
+          onChange={onSearchChange}
+          placeholder="Parça kodu ara..."
+          className="w-full h-11 text-sm px-4 border-0 rounded-xl bg-background placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground/10 transition-all duration-200"
+        />
+      </div>
+      <div>
+        <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em] block mb-3">Kategori</label>
+        <select
+          value={cat}
+          onChange={(e) => setParam("category", e.target.value)}
+          className="w-full h-11 text-sm px-4 border-0 rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10 transition-all duration-200"
+        >
+          <option value="">Tümü</option>
+          {categories.map((c) => <option key={c.id} value={c.slug}>{c.name}</option>)}
+        </select>
+      </div>
+      <div>
+        <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em] block mb-3">Marka</label>
+        <select
+          value={br}
+          onChange={(e) => setParam("brand", e.target.value)}
+          className="w-full h-11 text-sm px-4 border-0 rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10 transition-all duration-200"
+        >
+          <option value="">Tümü</option>
+          {brands.map((b) => <option key={b.id} value={b.name}>{b.name}</option>)}
+        </select>
+      </div>
+      {hasFilters && (
+        <button
+          onClick={onClear}
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors hover:underline focus:outline-none focus:underline"
+        >
+          <X className="w-3 h-3" aria-hidden="true" /> Filtreleri Temizle
+        </button>
+      )}
+    </div>
+  );
+}
 
 const Products = () => {
   const searchParams = useSearchParams();
@@ -53,7 +127,7 @@ const Products = () => {
 
   const [drawerSlug, setDrawerSlug] = useState<string | null>(null);
   const { product: drawerProduct } = useProduct(drawerSlug ?? undefined);
-  const [showFilters, setShowFilters] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const gridRef = useRevealOnScroll();
 
   const handleDetail = useCallback((slug: string) => setDrawerSlug(slug), []);
@@ -97,8 +171,27 @@ const Products = () => {
     [setParam],
   );
 
+  const clearAllFilters = useCallback(() => {
+    setInputValue("");
+    startTransition(() => {
+      router.push(pathname, { scroll: false });
+    });
+  }, [pathname, router]);
+
   const totalPages = Math.ceil(total / PAGE_SIZE);
   const hasFilters = q || cat || br;
+
+  // Count active filters for badge
+  const activeFilterCount = [q, cat, br].filter(Boolean).length;
+
+  // Build active filter chip list
+  const activeChips: { label: string; onRemove: () => void }[] = [];
+  if (q) activeChips.push({ label: `"${q}"`, onRemove: () => { setInputValue(""); setParam("q", ""); } });
+  if (cat) {
+    const catName = categories.find((c) => c.slug === cat)?.name ?? cat;
+    activeChips.push({ label: catName, onRemove: () => setParam("category", "") });
+  }
+  if (br) activeChips.push({ label: br, onRemove: () => setParam("brand", "") });
 
   return (
     <div>
@@ -120,62 +213,105 @@ const Products = () => {
       {/* Content */}
       <section ref={gridRef} className="bg-background">
         <div className="container mx-auto px-6 py-16 md:py-24">
-          <div className="flex items-center justify-end mb-8 lg:hidden">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 text-sm font-medium border border-border rounded-full px-5 py-2.5 hover:bg-card transition-colors focus:outline-none focus:ring-2 focus:ring-foreground/20"
-              aria-expanded={showFilters}
-              aria-controls="filters-sidebar"
-            >
-              <Filter className="w-4 h-4" aria-hidden="true" />
-              Filtreler
-            </button>
-          </div>
-
-          <div className="flex gap-10">
-            {/* Filters Sidebar */}
-            <aside
-              id="filters-sidebar"
-              className={`${showFilters ? "block" : "hidden"} lg:block w-full lg:w-60 shrink-0`}
-              aria-label="Ürün filtreleri"
-            >
-              <div className="reveal-on-scroll bg-card rounded-2xl p-7 space-y-6 sticky top-24 border border-border/40">
-                <div>
-                  <label htmlFor="search-filter" className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em] block mb-3">Arama</label>
-                  <input
-                    id="search-filter"
-                    type="text" value={inputValue} onChange={handleSearchChange}
-                    placeholder="Parça kodu ara..."
-                    className="w-full h-11 text-sm px-4 border-0 rounded-xl bg-background placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground/10 transition-all duration-200"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="category-filter" className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em] block mb-3">Kategori</label>
-                  <select id="category-filter" value={cat} onChange={(e) => setParam("category", e.target.value)}
-                    className="w-full h-11 text-sm px-4 border-0 rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10 transition-all duration-200">
-                    <option value="">Tümü</option>
-                    {categories.map((c) => <option key={c.id} value={c.slug}>{c.name}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="brand-filter" className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em] block mb-3">Marka</label>
-                  <select id="brand-filter" value={br} onChange={(e) => setParam("brand", e.target.value)}
-                    className="w-full h-11 text-sm px-4 border-0 rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10 transition-all duration-200">
-                    <option value="">Tümü</option>
-                    {brands.map((b) => <option key={b.id} value={b.name}>{b.name}</option>)}
-                  </select>
-                </div>
-                {hasFilters && (
-                  <button onClick={() => {
-                    setInputValue("");
-                    startTransition(() => {
-                      router.push(pathname, { scroll: false });
-                    });
-                  }}
-                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors hover:underline focus:outline-none focus:underline">
-                    <X className="w-3 h-3" aria-hidden="true" /> Filtreleri Temizle
+          {/* Mobile: filter button + active chips */}
+          <div className="lg:hidden mb-6 space-y-3">
+            <div className="flex items-center justify-end">
+              <button
+                onClick={() => setSheetOpen(true)}
+                className="flex items-center gap-2 text-sm font-medium border border-border rounded-full px-5 py-2.5 hover:bg-card transition-colors focus:outline-none focus:ring-2 focus:ring-foreground/20"
+              >
+                <Filter className="w-4 h-4" aria-hidden="true" />
+                Filtreler
+                {activeFilterCount > 0 && (
+                  <span className="ml-1 bg-foreground text-primary-foreground text-[11px] font-bold w-5 h-5 rounded-full inline-flex items-center justify-center">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
+            </div>
+            {activeChips.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {activeChips.map((chip) => (
+                  <span
+                    key={chip.label}
+                    className="inline-flex items-center gap-1.5 text-xs font-medium bg-card border border-border rounded-full px-3 py-1.5"
+                  >
+                    {chip.label}
+                    <button
+                      onClick={chip.onRemove}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label={`${chip.label} filtresini kaldır`}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+                {activeChips.length > 1 && (
+                  <button
+                    onClick={clearAllFilters}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
+                  >
+                    Tümünü temizle
                   </button>
                 )}
+              </div>
+            )}
+          </div>
+
+          {/* Mobile filter sheet */}
+          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+            <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh]">
+              <SheetHeader>
+                <SheetTitle>Filtreler</SheetTitle>
+              </SheetHeader>
+              <div className="py-4 overflow-y-auto">
+                <FilterControls
+                  inputValue={inputValue}
+                  onSearchChange={handleSearchChange}
+                  cat={cat}
+                  br={br}
+                  categories={categories}
+                  brands={brands}
+                  setParam={setParam}
+                  hasFilters={hasFilters}
+                  onClear={clearAllFilters}
+                />
+                <div className="flex gap-3 mt-8">
+                  <button
+                    onClick={clearAllFilters}
+                    className="flex-1 text-sm font-medium py-3 rounded-xl border border-border hover:bg-card transition-colors"
+                  >
+                    Temizle
+                  </button>
+                  <button
+                    onClick={() => setSheetOpen(false)}
+                    className="flex-1 text-sm font-semibold py-3 rounded-xl bg-foreground text-primary-foreground hover:opacity-90 transition-all"
+                  >
+                    Uygula
+                  </button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          <div className="flex gap-10">
+            {/* Filters Sidebar — desktop only */}
+            <aside
+              className="hidden lg:block w-60 shrink-0"
+              aria-label="Ürün filtreleri"
+            >
+              <div className="reveal-on-scroll bg-card rounded-2xl p-7 sticky top-24 border border-border/40">
+                <FilterControls
+                  inputValue={inputValue}
+                  onSearchChange={handleSearchChange}
+                  cat={cat}
+                  br={br}
+                  categories={categories}
+                  brands={brands}
+                  setParam={setParam}
+                  hasFilters={hasFilters}
+                  onClear={clearAllFilters}
+                />
               </div>
             </aside>
 

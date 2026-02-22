@@ -15,8 +15,19 @@ const ProductCard = memo(({ product, onDetail }: ProductCardProps) => {
   const categoryLabel = product.categories?.name ?? product.category;
   const whatsappMessage = siteConfig.whatsapp.defaultMessage(product.name, product.code ?? undefined);
 
+  const handleCardClick = () => onDetail?.(product.slug);
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") onDetail?.(product.slug);
+  };
+
   return (
-    <article className="bg-card rounded-2xl overflow-hidden group card-hover-lift border border-border/40 hover:border-accent/20 transition-all duration-500">
+    <article
+      className="bg-card rounded-2xl overflow-hidden group card-hover-lift border border-border/40 hover:border-accent/20 transition-all duration-500 cursor-pointer"
+      onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+    >
       <div className="aspect-[4/3] bg-muted/20 flex items-center justify-center p-8 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-card/30" />
         {product.images[0] ? (
@@ -55,6 +66,7 @@ const ProductCard = memo(({ product, onDetail }: ProductCardProps) => {
             href={siteConfig.social.whatsappUrl(whatsappMessage)}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
             className="flex items-center justify-center gap-1.5 flex-1 text-[13px] font-bold text-primary-foreground bg-whatsapp hover:bg-whatsapp-hover py-2.5 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-whatsapp/50"
             aria-label={`${product.name} için WhatsApp'tan sor`}
           >

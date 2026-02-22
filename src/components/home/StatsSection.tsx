@@ -1,16 +1,21 @@
 "use client";
 
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
+import { usePageContent } from "@/hooks/usePageContent";
 
-const stats = [
-  { value: "500+", label: "Ürün Çeşidi" },
-  { value: "10K+", label: "Mutlu Müşteri" },
-  { value: "8+", label: "Marka" },
-  { value: "%100", label: "Orijinal Garanti" },
-];
+const defaultStats = {
+  stats: [
+    { value: "500+", label: "Ürün Çeşidi" },
+    { value: "10K+", label: "Mutlu Müşteri" },
+    { value: "8+", label: "Marka" },
+    { value: "%100", label: "Orijinal Garanti" },
+  ],
+};
 
 const StatsSection = () => {
   const sectionRef = useRevealOnScroll<HTMLElement>();
+  const { content } = usePageContent("home_stats", defaultStats);
+  const stats = content.stats as { value: string; label: string }[];
 
   return (
     <section ref={sectionRef} className="bg-background border-t border-b border-border/40">
@@ -18,7 +23,7 @@ const StatsSection = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0">
           {stats.map((stat, i) => (
             <div
-              key={stat.label}
+              key={i}
               className={`reveal-on-scroll delay-${i + 1} text-center relative ${
                 i < stats.length - 1 ? 'md:border-r md:border-border/50' : ''
               }`}

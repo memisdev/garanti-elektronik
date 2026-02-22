@@ -11,87 +11,95 @@ import { Textarea } from "@/components/ui/textarea";
 const PAGE_DEFS: {
   key: string;
   label: string;
-  sections: { key: string; label: string; type: "text" | "textarea" | "list" | "faq_list" | "milestone_list" | "team_list" | "warranty_sections" }[];
+  sections: { key: string; label: string; description: string; type: "text" | "textarea" | "list" | "faq_list" | "milestone_list" | "team_list" | "warranty_sections" | "stat_list" }[];
 }[] = [
   {
     key: "home_hero",
     label: "Ana Sayfa - Hero",
     sections: [
-      { key: "title_light", label: "Başlık (açık)", type: "text" },
-      { key: "title_bold", label: "Başlık (koyu)", type: "text" },
-      { key: "subtitle", label: "Alt yazı", type: "textarea" },
+      { key: "title_light", label: "Başlık (açık)", description: "Ana sayfa açılışındaki büyük başlığın ince yazı kısmı", type: "text" },
+      { key: "title_bold", label: "Başlık (koyu)", description: "Ana sayfa açılışındaki büyük başlığın kalın yazı kısmı", type: "text" },
+      { key: "subtitle", label: "Alt yazı", description: "Ana sayfa başlığının altındaki açıklama paragrafı", type: "textarea" },
     ],
   },
   {
     key: "home_cta",
     label: "Ana Sayfa - CTA",
     sections: [
-      { key: "title", label: "Başlık", type: "textarea" },
-      { key: "subtitle", label: "Alt yazı", type: "textarea" },
+      { key: "title", label: "Başlık", description: "Ana sayfanın alt kısmındaki koyu bölümdeki başlık", type: "textarea" },
+      { key: "subtitle", label: "Alt yazı", description: "Ana sayfanın alt kısmındaki koyu bölümdeki açıklama", type: "textarea" },
     ],
   },
   {
     key: "home_features",
     label: "Ana Sayfa - Özellikler",
     sections: [
-      { key: "section_label", label: "Bölüm etiketi", type: "text" },
-      { key: "section_title", label: "Bölüm başlığı", type: "text" },
-      { key: "features", label: "Özellikler (başlık + açıklama)", type: "list" },
+      { key: "section_label", label: "Bölüm etiketi", description: "Özellikler bölümünün üstündeki küçük etiket (örn: Neden Biz?)", type: "text" },
+      { key: "section_title", label: "Bölüm başlığı", description: "Özellikler bölümünün ana başlığı", type: "text" },
+      { key: "features", label: "Özellikler (başlık + açıklama)", description: "4 özellik kartı — her biri 'Başlık|Açıklama' formatında", type: "list" },
+    ],
+  },
+  {
+    key: "home_stats",
+    label: "Ana Sayfa - İstatistikler",
+    sections: [
+      { key: "stats", label: "İstatistikler", description: "Ana sayfadaki 4 büyük istatistik (örn: 500+ Ürün Çeşidi)", type: "stat_list" },
     ],
   },
   {
     key: "about",
     label: "Hakkımızda",
     sections: [
-      { key: "hero_subtitle", label: "Hero alt yazı", type: "textarea" },
-      { key: "intro", label: "Tanıtım paragrafları", type: "textarea" },
-      { key: "mission", label: "Misyon", type: "textarea" },
-      { key: "milestones", label: "Tarihçe", type: "milestone_list" },
-      { key: "team", label: "Ekip", type: "team_list" },
-      { key: "values", label: "Değerler", type: "list" },
+      { key: "hero_subtitle", label: "Hero alt yazı", description: "Hakkımızda sayfasının üst kısmındaki açıklama", type: "textarea" },
+      { key: "intro", label: "Tanıtım paragrafları", description: "Hakkımızda tanıtım paragrafları", type: "textarea" },
+      { key: "mission", label: "Misyon", description: "Misyonumuz bölümündeki metin", type: "textarea" },
+      { key: "milestones", label: "Tarihçe", description: "Tarihçe zaman çizelgesi — yıl ve olay", type: "milestone_list" },
+      { key: "team", label: "Ekip", description: "Ekip bölümü — rol, sayı ve açıklama", type: "team_list" },
+      { key: "values", label: "Değerler", description: "Değerlerimiz listesi", type: "list" },
+      { key: "stats", label: "İstatistikler", description: "Hakkımızda sayfasındaki 4 istatistik kutusu", type: "stat_list" },
     ],
   },
   {
     key: "contact",
     label: "İletişim",
     sections: [
-      { key: "hero_subtitle", label: "Hero alt yazı", type: "textarea" },
+      { key: "hero_subtitle", label: "Hero alt yazı", description: "İletişim sayfasının üst kısmındaki açıklama", type: "textarea" },
     ],
   },
   {
     key: "faq",
     label: "SSS",
     sections: [
-      { key: "hero_subtitle", label: "Hero alt yazı", type: "textarea" },
-      { key: "items", label: "Sorular ve Cevaplar", type: "faq_list" },
+      { key: "hero_subtitle", label: "Hero alt yazı", description: "SSS sayfasının üst kısmındaki açıklama", type: "textarea" },
+      { key: "items", label: "Sorular ve Cevaplar", description: "Sık sorulan sorular ve cevapları", type: "faq_list" },
     ],
   },
   {
     key: "warranty",
     label: "Garanti ve İade",
     sections: [
-      { key: "hero_subtitle", label: "Hero alt yazı", type: "textarea" },
-      { key: "sections", label: "Bölümler", type: "warranty_sections" },
+      { key: "hero_subtitle", label: "Hero alt yazı", description: "Garanti/İade sayfası üst açıklama", type: "textarea" },
+      { key: "sections", label: "Bölümler", description: "Garanti ve iade politikası bölümleri", type: "warranty_sections" },
     ],
   },
   {
     key: "privacy",
     label: "Gizlilik KVKK",
     sections: [
-      { key: "intro", label: "Giriş paragrafı", type: "textarea" },
-      { key: "collected", label: "Toplanan Veriler", type: "textarea" },
-      { key: "storage", label: "Verilerin Saklanması", type: "textarea" },
-      { key: "rights", label: "Haklarınız", type: "textarea" },
+      { key: "intro", label: "Giriş paragrafı", description: "Gizlilik politikası giriş paragrafı", type: "textarea" },
+      { key: "collected", label: "Toplanan Veriler", description: "Gizlilik politikası — toplanan veriler bölümü", type: "textarea" },
+      { key: "storage", label: "Verilerin Saklanması", description: "Gizlilik politikası — verilerin saklanması bölümü", type: "textarea" },
+      { key: "rights", label: "Haklarınız", description: "Gizlilik politikası — haklarınız bölümü", type: "textarea" },
     ],
   },
   {
     key: "cookie",
     label: "Çerez Politikası",
     sections: [
-      { key: "intro", label: "Giriş paragrafı", type: "textarea" },
-      { key: "what_is", label: "Çerez Nedir?", type: "textarea" },
-      { key: "types", label: "Kullandığımız Çerezler", type: "textarea" },
-      { key: "manage", label: "Çerezleri Yönetme", type: "textarea" },
+      { key: "intro", label: "Giriş paragrafı", description: "Çerez politikası giriş paragrafı", type: "textarea" },
+      { key: "what_is", label: "Çerez Nedir?", description: "Çerez politikası — çerez nedir bölümü", type: "textarea" },
+      { key: "types", label: "Kullandığımız Çerezler", description: "Çerez politikası — kullanılan çerez türleri bölümü", type: "textarea" },
+      { key: "manage", label: "Çerezleri Yönetme", description: "Çerez politikası — çerezleri yönetme bölümü", type: "textarea" },
     ],
   },
 ];
@@ -188,9 +196,10 @@ const AdminPageContents = () => {
             <div className="space-y-6">
               {pageDef.sections.map((section) => (
                 <div key={section.key} className="bg-card rounded-xl border border-border p-5">
-                  <label className="text-[13px] font-semibold text-foreground mb-3 block">
+                  <label className="text-[13px] font-semibold text-foreground mb-1 block">
                     {section.label}
                   </label>
+                  <p className="text-xs text-muted-foreground mb-3">{section.description}</p>
                   <SectionEditor
                     type={section.type}
                     value={formData[section.key]}
@@ -269,6 +278,49 @@ function SectionEditor({
         ))}
         <button
           onClick={() => onChange([...items, ""])}
+          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+        >
+          <Plus className="w-3 h-3" /> Ekle
+        </button>
+      </div>
+    );
+  }
+
+  if (type === "stat_list") {
+    const items: { value: string; label: string }[] = Array.isArray(value) ? value : [];
+    return (
+      <div className="space-y-2">
+        {items.map((item, i) => (
+          <div key={i} className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Değer (örn: 500+)"
+              value={item.value}
+              onChange={(e) => {
+                const next = [...items];
+                next[i] = { ...item, value: e.target.value };
+                onChange(next);
+              }}
+              className="w-24 h-10 text-sm px-3 border border-border rounded-lg bg-background"
+            />
+            <input
+              type="text"
+              placeholder="Etiket (örn: Ürün Çeşidi)"
+              value={item.label}
+              onChange={(e) => {
+                const next = [...items];
+                next[i] = { ...item, label: e.target.value };
+                onChange(next);
+              }}
+              className="flex-1 h-10 text-sm px-3 border border-border rounded-lg bg-background"
+            />
+            <button onClick={() => onChange(items.filter((_, j) => j !== i))} className="text-destructive p-2">
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        ))}
+        <button
+          onClick={() => onChange([...items, { value: "", label: "" }])}
           className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
         >
           <Plus className="w-3 h-3" /> Ekle

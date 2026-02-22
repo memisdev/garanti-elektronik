@@ -4,6 +4,8 @@ import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
 import { usePageContent } from "@/hooks/usePageContent";
 import { Building2, Users, Award, Wrench } from "lucide-react";
 
+const STAT_ICONS = [Building2, Users, Award, Wrench];
+
 const defaults = {
   hero_subtitle: "2010'dan beri Türkiye'nin dört bir yanındaki teknik servislere güvenilir TV yedek parça tedariki sağlıyoruz.",
   intro: "Garanti Elektronik, TV yedek parça ve anakart sektöründe uzun yıllara dayanan tecrübesiyle hizmet vermektedir. Samsung, LG, Vestel, Philips, Arçelik, Sony ve Toshiba başta olmak üzere tüm büyük markaların orijinal ve muadil parçalarını tedarik etmekteyiz.\n\nMüşterilerimizin %90'ından fazlası profesyonel teknik servislerdir. Bu bize sektörün ihtiyaçlarını yakından tanıma ve stok planlamasını buna göre yapma avantajı sağlamaktadır.",
@@ -25,6 +27,12 @@ const defaults = {
     "Hızlı ve güvenilir kargo",
     "Teknik destek ve danışmanlık",
   ],
+  stats: [
+    { value: "14+", label: "Yıllık Tecrübe" },
+    { value: "5.000+", label: "Teknik Servis Müşterisi" },
+    { value: "500+", label: "Ürün Çeşidi" },
+    { value: "7+", label: "Desteklenen Marka" },
+  ],
 };
 
 const About = () => {
@@ -36,6 +44,7 @@ const About = () => {
   const milestones = content.milestones as { year: string; event: string }[];
   const team = content.team as { role: string; count: string; desc: string }[];
   const values = content.values as string[];
+  const aboutStats = content.stats as { value: string; label: string }[];
   const introParas = (content.intro as string).split("\n\n");
 
   return (
@@ -67,18 +76,16 @@ const About = () => {
 
           {/* Stats row */}
           <div className="reveal-on-scroll delay-1 grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
-            {[
-              { icon: Building2, value: "14+", label: "Yıllık Tecrübe" },
-              { icon: Users, value: "5.000+", label: "Teknik Servis Müşterisi" },
-              { icon: Award, value: "500+", label: "Ürün Çeşidi" },
-              { icon: Wrench, value: "7+", label: "Desteklenen Marka" },
-            ].map((stat) => (
-              <div key={stat.label} className="bg-card rounded-2xl p-5 border border-border text-center">
-                <stat.icon className="w-5 h-5 text-accent mx-auto mb-2" aria-hidden="true" />
-                <p className="text-xl font-black text-foreground">{stat.value}</p>
-                <p className="text-[12px] text-muted-foreground mt-1">{stat.label}</p>
-              </div>
-            ))}
+            {aboutStats.map((stat, i) => {
+              const Icon = STAT_ICONS[i % STAT_ICONS.length];
+              return (
+                <div key={i} className="bg-card rounded-2xl p-5 border border-border text-center">
+                  <Icon className="w-5 h-5 text-accent mx-auto mb-2" aria-hidden="true" />
+                  <p className="text-xl font-black text-foreground">{stat.value}</p>
+                  <p className="text-[12px] text-muted-foreground mt-1">{stat.label}</p>
+                </div>
+              );
+            })}
           </div>
 
           {/* Mission */}
