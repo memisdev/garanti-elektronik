@@ -71,7 +71,7 @@ function ProductInlineCard({ data, push }: {data: ProductCardData;push: (path: s
   return (
     <div className="my-3 bg-card rounded-xl border border-border/40 p-4 flex gap-4 items-start hover:border-accent/30 transition-colors">
       {data.image &&
-      <Image src={data.image} alt={data.name} width={64} height={64} className="w-16 h-16 object-contain rounded-lg bg-background flex-shrink-0" />
+      <Image src={data.image} alt={data.name} width={64} height={64} className="w-16 h-16 object-contain mix-blend-multiply rounded-lg bg-background flex-shrink-0" />
       }
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
@@ -432,7 +432,7 @@ const PartFinder = () => {
                       width={363}
                       height={272}
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-700 relative z-10" />
+                      className="max-h-full max-w-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-700 relative z-10" />
 
                     }
                         </div>

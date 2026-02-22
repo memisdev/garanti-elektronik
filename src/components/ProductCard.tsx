@@ -27,7 +27,7 @@ const ProductCard = memo(({ product, onDetail }: ProductCardProps) => {
             height={272}
             loading="lazy"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-700 relative z-10"
+            className="max-h-full max-w-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-700 relative z-10"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground/30 text-xs">Görsel yok</div>

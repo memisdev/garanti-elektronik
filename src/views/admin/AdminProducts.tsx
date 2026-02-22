@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { toast } from "@/hooks/use-toast";
@@ -48,64 +48,7 @@ const AdminProducts = () => {
   const [specKey, setSpecKey] = useState("");
   const [specVal, setSpecVal] = useState("");
   const [processingImages, setProcessingImages] = useState<Set<string>>(new Set());
-  const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
   const { log } = useAuditLog();
-
-  // Cleanup in-flight requests on unmount or dialog close
-  useEffect(() => {
-    if (!dialogOpen) {
-      abortControllersRef.current.forEach((c) => c.abort());
-      abortControllersRef.current.clear();
-      setProcessingImages(new Set());
-    }
-  }, [dialogOpen]);
-
-  useEffect(() => {
-    return () => {
-      abortControllersRef.current.forEach((c) => c.abort());
-      abortControllersRef.current.clear();
-    };
-  }, []);
-
-  const processImageInBackground = (imageUrl: string) => {
-    const match = imageUrl.match(/product-images\/(.+)$/);
-    if (!match) return;
-    const imagePath = decodeURIComponent(match[1]);
-
-    // Skip if already processed
-    if (imagePath.startsWith("processed/")) return;
-
-    const controller = new AbortController();
-    abortControllersRef.current.set(imageUrl, controller);
-    setProcessingImages((prev) => new Set(prev).add(imageUrl));
-
-    fetch("/api/admin/process-image", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ imagePath }),
-      signal: controller.signal,
-    })
-      .then((resp) => resp.json().then((data) => ({ ok: resp.ok, data })))
-      .then(({ ok, data }) => {
-        if (ok && data?.processedUrl) {
-          setForm((prev) => ({
-            ...prev,
-            images: prev.images.map((img) => (img === imageUrl ? data.processedUrl : img)),
-          }));
-        }
-      })
-      .catch((err) => {
-        if (err.name !== "AbortError") console.error("Auto process error:", err);
-      })
-      .finally(() => {
-        abortControllersRef.current.delete(imageUrl);
-        setProcessingImages((prev) => {
-          const next = new Set(prev);
-          next.delete(imageUrl);
-          return next;
-        });
-      });
-  };
 
   const removeBackground = async (imageUrl: string) => {
     const match = imageUrl.match(/product-images\/(.+)$/);
@@ -208,10 +151,6 @@ const AdminProducts = () => {
     }
     setForm((prev) => ({ ...prev, images: [...prev.images, ...uploadedUrls] }));
     setUploading(false);
-    // Fire-and-forget background processing for each uploaded image
-    for (const url of uploadedUrls) {
-      processImageInBackground(url);
-    }
   };
 
   const removeImage = (idx: number) => {

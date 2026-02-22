@@ -63,7 +63,7 @@ const ProductPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
             <div className="reveal-on-scroll aspect-square bg-card rounded-2xl relative overflow-hidden border border-border/40">
               {product.images[0] ? (
-                <Image src={product.images[0]} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-contain p-12" />
+                <Image src={product.images[0]} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-contain mix-blend-multiply p-12" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">Görsel yok</div>
               )}

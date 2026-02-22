@@ -123,7 +123,7 @@ const Index = () => {
                         width={490}
                         height={490}
                         sizes="(max-width: 768px) 90vw, 45vw"
-                        className="max-h-[280px] md:max-h-[380px] max-w-full object-contain hero-product-image relative z-10"
+                        className="max-h-[280px] md:max-h-[380px] max-w-full object-contain mix-blend-multiply hero-product-image relative z-10"
                       />
                     )}
                   </div>
