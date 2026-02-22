@@ -40,3 +40,7 @@ keys.txt
 
 # Lovable (legacy)
 .lovable/
+
+# Source assets
+garanti logo.jpeg
+*:Zone.Identifier
