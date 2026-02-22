@@ -28,3 +28,11 @@ export function getImageConfig(): AIConfig {
     model: (process.env.AI_IMAGE_MODEL ?? "gemini-2.5-flash").trim(),
   };
 }
+
+export function getIconGenerationConfig(): AIConfig {
+  return {
+    url: `${BASE_URL}/chat/completions`,
+    apiKey: getApiKey(),
+    model: (process.env.AI_ICON_MODEL ?? "gemini-2.5-flash").trim(),
+  };
+}

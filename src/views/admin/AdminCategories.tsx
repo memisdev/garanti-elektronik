@@ -6,7 +6,7 @@ import { useAuditLog } from "@/hooks/useAuditLog";
 import { toast } from "@/hooks/use-toast";
 import { slugify } from "@/lib/slugify";
 import Image from "next/image";
-import { Plus, Pencil, Trash2, Loader2, Upload, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Upload, X, Wand2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
@@ -27,6 +27,7 @@ const AdminCategories = () => {
   const [productCount, setProductCount] = useState(0);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [generatingIcon, setGeneratingIcon] = useState(false);
   const [form, setForm] = useState({ name: "", slug: "", description: "", image_url: "" });
   const { log } = useAuditLog();
 
@@ -57,6 +58,32 @@ const AdminCategories = () => {
     }
     setUploading(false);
     e.target.value = "";
+  };
+
+  const generateIcon = async () => {
+    if (!form.name.trim()) {
+      toast({ title: "Önce kategori adını girin.", variant: "destructive" });
+      return;
+    }
+    setGeneratingIcon(true);
+    try {
+      const res = await fetch("/api/admin/generate-category-icon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ categoryName: form.name, categoryDescription: form.description || undefined }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast({ title: "Hata", description: data.error || "İkon üretilemedi.", variant: "destructive" });
+      } else {
+        setForm((prev) => ({ ...prev, image_url: data.iconUrl }));
+        toast({ title: "İkon başarıyla oluşturuldu" });
+      }
+    } catch {
+      toast({ title: "Hata", description: "İkon üretimi sırasında bir hata oluştu.", variant: "destructive" });
+    } finally {
+      setGeneratingIcon(false);
+    }
   };
 
   const openDelete = async (c: Category) => {
@@ -167,21 +194,32 @@ const AdminCategories = () => {
               <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em] block mb-2">Kategori Görseli</label>
               {form.image_url ? (
                 <div className="relative inline-block">
-                  <Image src={form.image_url} alt="Kategori görseli" width={120} height={120} className="w-[120px] h-[120px] rounded-xl object-cover border border-border" />
+                  <Image src={form.image_url} alt="Kategori görseli" width={120} height={120} className="w-[120px] h-[120px] rounded-xl object-contain border border-border bg-muted/20" />
                   <button type="button" onClick={() => setForm({ ...form, image_url: "" })} className="absolute -top-2 -right-2 w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center hover:opacity-90 transition-opacity">
                     <X className="w-3 h-3" />
                   </button>
                 </div>
               ) : (
-                <label className="flex items-center justify-center gap-2 w-full h-24 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-foreground/30 transition-colors">
-                  {uploading ? <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /> : (
-                    <>
-                      <Upload className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">Görsel yükle</span>
-                    </>
-                  )}
-                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageUpload} className="hidden" disabled={uploading} />
-                </label>
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={generateIcon}
+                    disabled={generatingIcon || uploading}
+                    className="flex items-center justify-center gap-2 w-full h-11 bg-accent text-accent-foreground text-[13px] font-semibold rounded-xl hover:opacity-90 transition-opacity disabled:opacity-60"
+                  >
+                    {generatingIcon ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                    {generatingIcon ? "Oluşturuluyor..." : "AI ile İkon Oluştur"}
+                  </button>
+                  <label className="flex items-center justify-center gap-2 w-full h-11 border border-border rounded-xl cursor-pointer hover:border-foreground/30 transition-colors">
+                    {uploading ? <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" /> : (
+                      <>
+                        <Upload className="w-3.5 h-3.5 text-muted-foreground" />
+                        <span className="text-[12px] text-muted-foreground">veya görsel yükle</span>
+                      </>
+                    )}
+                    <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageUpload} className="hidden" disabled={uploading || generatingIcon} />
+                  </label>
+                </div>
               )}
             </div>
             <div>

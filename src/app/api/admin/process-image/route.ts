@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import sharp from "sharp";
 import { verifyAdminRole, createServiceClient } from "@/lib/supabase/admin";
 import { getImageConfig } from "@/lib/ai/client";
+import { extractImageFromResponse } from "@/lib/ai/extract-image";
+
+const TARGET_SIZE = 800;
+const CONTENT_SIZE = 700;
 
 const requestSchema = z.object({
   imagePath: z
@@ -99,7 +104,7 @@ export async function POST(req: NextRequest) {
 
     // Call Gemini to remove background
     const prompt =
-      "Remove the background from this product image completely. Keep only the product itself with a transparent background. Output a clean PNG with transparency. Maintain the original quality and details of the product.";
+      "Remove the background from this product image completely. Keep only the product itself with a transparent background. Output a clean PNG with transparency. Maintain the original quality and details of the product. Do not add any shadows, reflections, or visual effects.";
 
     const config = getImageConfig();
 
@@ -150,26 +155,7 @@ export async function POST(req: NextRequest) {
     const aiData = await aiResponse.json();
 
     // Extract image from response
-    const choices = aiData.choices || [];
-    let base64Image: string | null = null;
-
-    for (const choice of choices) {
-      const content = choice.message?.content;
-      if (Array.isArray(content)) {
-        for (const part of content) {
-          if (part.type === "image_url" && part.image_url?.url) {
-            const imgUrl: string = part.image_url.url;
-            if (imgUrl.startsWith("data:")) {
-              base64Image = imgUrl.split(",")[1];
-            } else {
-              base64Image = imgUrl;
-            }
-            break;
-          }
-        }
-      }
-      if (base64Image) break;
-    }
+    const base64Image = extractImageFromResponse(aiData);
 
     if (!base64Image) {
       console.error(
@@ -182,15 +168,37 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Decode and upload
-    const bytes = Buffer.from(base64Image, "base64");
+    // Decode, normalize to 800x800 canvas, convert to WebP, and upload
+    const rawBytes = Buffer.from(base64Image, "base64");
+    const trimmed = await sharp(rawBytes)
+      .trim()
+      .resize(CONTENT_SIZE, CONTENT_SIZE, {
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .toBuffer();
 
-    const processedPath = `processed/${imagePath.replace(/\.[^.]+$/, "")}.png`;
+    const { width = 0, height = 0 } = await sharp(trimmed).metadata();
+    const padX = Math.round((TARGET_SIZE - width) / 2);
+    const padY = Math.round((TARGET_SIZE - height) / 2);
+
+    const bytes = await sharp(trimmed)
+      .extend({
+        top: padY,
+        bottom: TARGET_SIZE - height - padY,
+        left: padX,
+        right: TARGET_SIZE - width - padX,
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .webp({ quality: 85, alphaQuality: 100 })
+      .toBuffer();
+
+    const processedPath = `processed/${imagePath.replace(/\.[^.]+$/, "")}.webp`;
 
     const { error: uploadError } = await adminClient.storage
       .from("product-images")
       .upload(processedPath, bytes, {
-        contentType: "image/png",
+        contentType: "image/webp",
         upsert: true,
       });
 
