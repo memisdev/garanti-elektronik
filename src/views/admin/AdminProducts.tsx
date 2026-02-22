@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { toast } from "@/hooks/use-toast";
@@ -47,11 +47,67 @@ const AdminProducts = () => {
   const [form, setForm] = useState({ name: "", slug: "", code: "", brand_id: "", category_id: "", compatibility: "", images: [] as string[], specs: {} as Record<string, string> });
   const [specKey, setSpecKey] = useState("");
   const [specVal, setSpecVal] = useState("");
-  const [processingImages, setProcessingImages] = useState<Set<number>>(new Set());
+  const [processingImages, setProcessingImages] = useState<Set<string>>(new Set());
+  const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
   const { log } = useAuditLog();
 
-  const removeBackground = async (imageUrl: string, index: number) => {
-    // Extract storage path from full URL
+  // Cleanup in-flight requests on unmount or dialog close
+  useEffect(() => {
+    if (!dialogOpen) {
+      abortControllersRef.current.forEach((c) => c.abort());
+      abortControllersRef.current.clear();
+      setProcessingImages(new Set());
+    }
+  }, [dialogOpen]);
+
+  useEffect(() => {
+    return () => {
+      abortControllersRef.current.forEach((c) => c.abort());
+      abortControllersRef.current.clear();
+    };
+  }, []);
+
+  const processImageInBackground = (imageUrl: string) => {
+    const match = imageUrl.match(/product-images\/(.+)$/);
+    if (!match) return;
+    const imagePath = decodeURIComponent(match[1]);
+
+    // Skip if already processed
+    if (imagePath.startsWith("processed/")) return;
+
+    const controller = new AbortController();
+    abortControllersRef.current.set(imageUrl, controller);
+    setProcessingImages((prev) => new Set(prev).add(imageUrl));
+
+    fetch("/api/admin/process-image", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imagePath }),
+      signal: controller.signal,
+    })
+      .then((resp) => resp.json().then((data) => ({ ok: resp.ok, data })))
+      .then(({ ok, data }) => {
+        if (ok && data?.processedUrl) {
+          setForm((prev) => ({
+            ...prev,
+            images: prev.images.map((img) => (img === imageUrl ? data.processedUrl : img)),
+          }));
+        }
+      })
+      .catch((err) => {
+        if (err.name !== "AbortError") console.error("Auto process error:", err);
+      })
+      .finally(() => {
+        abortControllersRef.current.delete(imageUrl);
+        setProcessingImages((prev) => {
+          const next = new Set(prev);
+          next.delete(imageUrl);
+          return next;
+        });
+      });
+  };
+
+  const removeBackground = async (imageUrl: string) => {
     const match = imageUrl.match(/product-images\/(.+)$/);
     if (!match) {
       toast({ title: "Geçersiz görsel URL'si", variant: "destructive" });
@@ -59,7 +115,7 @@ const AdminProducts = () => {
     }
     const imagePath = decodeURIComponent(match[1]);
 
-    setProcessingImages((prev) => new Set(prev).add(index));
+    setProcessingImages((prev) => new Set(prev).add(imageUrl));
     try {
       const resp = await fetch("/api/admin/process-image", {
         method: "POST",
@@ -75,9 +131,10 @@ const AdminProducts = () => {
       }
 
       if (data?.processedUrl) {
-        const newImages = [...form.images];
-        newImages[index] = data.processedUrl;
-        setForm({ ...form, images: newImages });
+        setForm((prev) => ({
+          ...prev,
+          images: prev.images.map((img) => (img === imageUrl ? data.processedUrl : img)),
+        }));
         toast({ title: "Arka plan kaldırıldı", description: "Görsel güncellendi." });
       }
     } catch (err) {
@@ -86,7 +143,7 @@ const AdminProducts = () => {
     } finally {
       setProcessingImages((prev) => {
         const next = new Set(prev);
-        next.delete(index);
+        next.delete(imageUrl);
         return next;
       });
     }
@@ -133,18 +190,22 @@ const AdminProducts = () => {
     const files = e.target.files;
     if (!files) return;
     setUploading(true);
-    const newImages = [...form.images];
+    const uploadedUrls: string[] = [];
     for (const file of Array.from(files)) {
       const ext = file.name.split(".").pop();
       const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
       const { error } = await supabase.storage.from("product-images").upload(path, file);
       if (!error) {
         const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(path);
-        newImages.push(urlData.publicUrl);
+        uploadedUrls.push(urlData.publicUrl);
       }
     }
-    setForm({ ...form, images: newImages });
+    setForm((prev) => ({ ...prev, images: [...prev.images, ...uploadedUrls] }));
     setUploading(false);
+    // Fire-and-forget background processing for each uploaded image
+    for (const url of uploadedUrls) {
+      processImageInBackground(url);
+    }
   };
 
   const removeImage = (idx: number) => {
@@ -337,9 +398,9 @@ const AdminProducts = () => {
               <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em] block mb-2">Görseller</label>
               <div className="flex flex-wrap gap-2 mb-2">
                 {form.images.map((img, i) => {
-                  const isProcessingImg = processingImages.has(i);
+                  const isProcessingImg = processingImages.has(img);
                   return (
-                    <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden border border-border group">
+                    <div key={img} className="relative w-16 h-16 rounded-lg overflow-hidden border border-border group">
                       <img src={img} alt="" className="w-full h-full object-cover" />
                       {isProcessingImg && (
                         <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
@@ -347,7 +408,7 @@ const AdminProducts = () => {
                         </div>
                       )}
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-1 transition-opacity">
-                        <button onClick={() => removeBackground(img, i)} disabled={isProcessingImg} title="Arka Plan Kaldır">
+                        <button onClick={() => removeBackground(img)} disabled={isProcessingImg} title="Arka Plan Kaldır">
                           <Wand2 className="w-3 h-3 text-white" />
                         </button>
                         <button onClick={() => removeImage(i)} title="Kaldır">
@@ -358,6 +419,9 @@ const AdminProducts = () => {
                   );
                 })}
               </div>
+              {processingImages.size > 0 && (
+                <p className="text-xs text-muted-foreground animate-pulse">{processingImages.size} gorsel isleniyor...</p>
+              )}
               <label className="inline-flex items-center gap-2 text-[13px] text-muted-foreground bg-surface px-4 h-9 rounded-lg cursor-pointer hover:bg-accent transition-colors">
                 {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Görsel Ekle
                 <input type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
