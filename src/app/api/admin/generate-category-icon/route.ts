@@ -61,11 +61,11 @@ export async function POST(req: NextRequest) {
       : "";
 
     const prompt = `Create a minimal, modern icon for the electronic component category '${categoryName}'.${descHint}
-Style: flat design, clean lines, no gradients.
-Use ONLY dark navy blue color (#1a1f2e) on transparent background.
-Simple recognizable silhouette of the component.
-Centered, fills ~70% of canvas. No text, no shadows, no 3D.
-Consistent line weight. Square aspect ratio. PNG with transparency.`;
+Style: solid dark icon on pure white background, high contrast, flat design.
+Use ONLY a single dark color (#1a1a1a) for the icon. Background must be pure white (#ffffff).
+Simple recognizable silhouette of the component, bold and clearly visible.
+Centered, fills ~80% of canvas. No text, no shadows, no 3D, no gradients.
+Consistent thick line weight. Square aspect ratio. 256x256px.`;
 
     const config = getIconGenerationConfig();
     const controller = new AbortController();
@@ -138,11 +138,12 @@ Consistent line weight. Square aspect ratio. PNG with transparency.`;
       );
     }
 
-    // Convert to 256x256 WebP
+    // Convert to 256x256 WebP with clean white background
     const rawBytes = Buffer.from(base64Image, "base64");
     const bytes = await sharp(rawBytes)
-      .resize(ICON_SIZE, ICON_SIZE, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
-      .webp({ quality: 90, alphaQuality: 100 })
+      .flatten({ background: { r: 255, g: 255, b: 255 } })
+      .resize(ICON_SIZE, ICON_SIZE, { fit: "contain", background: { r: 255, g: 255, b: 255 } })
+      .webp({ quality: 90 })
       .toBuffer();
 
     // Upload to Supabase Storage
