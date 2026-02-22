@@ -67,7 +67,7 @@ const Index = () => {
                   href={`/urunler?category=${cat.slug}`}
                   className={`reveal-on-scroll delay-${Math.min(i + 1, 4)} group flex flex-col items-center flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 rounded-xl`}
                 >
-                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-border/40 group-hover:border-accent group-hover:scale-105 transition-all duration-300 bg-white flex items-center justify-center shadow-sm dark:shadow-none dark:border-border/20">
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-border/40 group-hover:border-accent group-hover:scale-105 transition-all duration-300 bg-white flex items-center justify-center shadow-sm">
                     <Image
                       src={cat.firstImage || "/placeholder.svg"}
                       alt={cat.name}
