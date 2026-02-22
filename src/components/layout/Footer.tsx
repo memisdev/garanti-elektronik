@@ -1,8 +1,8 @@
 import Link from "next/link";
+import Image from "next/image";
 // Note: Footer is server-compatible (no state/effects). No "use client" needed.
 import { MessageCircle } from "lucide-react";
 import { siteConfig } from "@/config/site";
-import Logo from "@/components/Logo";
 
 const Footer = () => {
   return (
@@ -12,7 +12,7 @@ const Footer = () => {
           {/* Company */}
           <div className="md:col-span-1">
             <Link href="/" className="flex items-center gap-2 font-bold text-lg mb-6" aria-label="Garanti Elektronik Ana Sayfa">
-              <Logo className="w-7 h-7 text-primary-foreground" darkInner />
+              <Image src="/logo.png" alt="Garanti Elektronik" width={44} height={40} className="h-7 w-auto" />
               {siteConfig.name}
             </Link>
             <p className="text-sm text-primary-foreground/70 leading-relaxed max-w-xs">

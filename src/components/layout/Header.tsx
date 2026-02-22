@@ -2,9 +2,9 @@
 
 import { useState, useEffect, lazy, Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, Search, X, ArrowRight } from "lucide-react";
-import Logo from "@/components/Logo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const SearchBar = lazy(() => import("@/components/SearchBar"));
@@ -69,7 +69,7 @@ const Header = () => {
         <div className="container mx-auto flex items-center justify-between h-[72px] px-6">
           {/* Left: Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
-            <Logo className={`w-8 h-8 transition-all duration-500 group-hover:scale-105 ${isOverlay ? "text-primary-foreground" : "text-foreground"}`} darkInner={isOverlay} />
+            <Image src="/logo.png" alt="Garanti Elektronik" width={44} height={40} className="h-8 w-auto transition-all duration-500 group-hover:scale-105" priority />
             <div className="hidden sm:flex flex-col leading-none">
               <span className={`text-[15px] font-bold tracking-tight transition-colors duration-500 ${isOverlay ? "text-primary-foreground" : "text-foreground"}`}>Garanti Elektronik</span>
             </div>
@@ -142,7 +142,7 @@ const Header = () => {
               <SheetContent side="left" className="w-[320px] p-0 border-r border-border/40">
                 <div className="p-8 pt-10">
                   <Link href="/" className="flex items-center gap-2.5 mb-14" onClick={() => setMobileOpen(false)}>
-                    <Logo className="w-8 h-8 text-foreground" />
+                    <Image src="/logo.png" alt="Garanti Elektronik" width={44} height={40} className="h-8 w-auto" />
                     <span className="text-[15px] font-bold tracking-tight">Garanti Elektronik</span>
                   </Link>
 
