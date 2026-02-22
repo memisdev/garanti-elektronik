@@ -36,9 +36,6 @@ const Index = () => {
   const { product: selectedProduct } = useProduct(selectedSlug ?? undefined);
   const handleDetail = useCallback((slug: string) => setSelectedSlug(slug), []);
 
-  const featuredIds = new Set(featuredProducts.map((p) => p.id));
-  const filteredRecent = recentProducts.filter((p) => !featuredIds.has(p.id));
-
   const featuredRef = useRevealOnScroll();
   const categoriesRef = useRevealOnScroll();
   const ctaRef = useRevealOnScroll();
@@ -206,7 +203,7 @@ const Index = () => {
 
       {/* ===== Recent Products (lazy) ===== */}
       <div ref={lazyRecentRef}>
-        {recentVisible && filteredRecent.length > 0 && (
+        {recentVisible && recentProducts.length > 0 && (
           <section ref={recentRef} className="bg-background border-t border-border/40">
             <div className="container mx-auto px-6 py-20 md:py-28">
               <div className="reveal-on-scroll flex items-end justify-between mb-12">
@@ -221,7 +218,7 @@ const Index = () => {
                 </Link>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredRecent.map((product, i) => (
+                {recentProducts.map((product, i) => (
                   <div key={product.id} className={`reveal-on-scroll delay-${Math.min(i + 1, 4)}`}>
                     <ProductCard product={product} onDetail={handleDetail} />
                   </div>

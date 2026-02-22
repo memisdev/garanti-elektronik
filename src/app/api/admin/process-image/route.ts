@@ -7,6 +7,8 @@ import { extractImageFromResponse } from "@/lib/ai/extract-image";
 
 const TARGET_SIZE = 800;
 const CONTENT_SIZE = 700;
+const TIMEOUT_MS = 30_000;
+const PAD = Math.round((TARGET_SIZE - CONTENT_SIZE) / 2);
 
 const requestSchema = z.object({
   imagePath: z
@@ -103,23 +105,41 @@ export async function POST(req: NextRequest) {
 
     // Call Gemini to remove background (native API)
     const prompt =
-      "Remove the background from this product image completely. Keep only the product itself with a transparent background. Output a clean PNG with transparency. Maintain the original quality and details of the product. Do not add any shadows, reflections, or visual effects.";
+      "Remove the background completely from this product image. Return ONLY the product with a fully transparent background (PNG with alpha). Preserve all original detail, color, and sharpness. No shadows, no reflections, no glow, no visual effects. Output a clean cutout.";
 
     const config = getImageConfig();
 
-    const aiResponse = await fetch(`${config.url}?key=${config.apiKey}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{
-          parts: [
-            { text: prompt },
-            { inlineData: { mimeType: detectedMime, data: b64 } },
-          ],
-        }],
-        generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
-      }),
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+    let aiResponse: Response;
+    try {
+      aiResponse = await fetch(`${config.url}?key=${config.apiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { text: prompt },
+              { inlineData: { mimeType: detectedMime, data: b64 } },
+            ],
+          }],
+          generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
+        }),
+        signal: controller.signal,
+      });
+    } catch (err) {
+      clearTimeout(timeout);
+      if (err instanceof DOMException && err.name === "AbortError") {
+        return NextResponse.json(
+          { error: "AI isteği zaman aşımına uğradı (30s)" },
+          { status: 504 },
+        );
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeout);
+    }
 
     if (!aiResponse.ok) {
       const errText = await aiResponse.text();
@@ -162,30 +182,27 @@ export async function POST(req: NextRequest) {
 
     // Decode, normalize to 800x800 canvas, convert to WebP, and upload
     const rawBytes = Buffer.from(base64Image, "base64");
-    const trimmed = await sharp(rawBytes)
-      .trim()
+
+    const bytes = await sharp(rawBytes)
+      .trim({ threshold: 10 })
+      .ensureAlpha()
       .resize(CONTENT_SIZE, CONTENT_SIZE, {
-        fit: "inside",
-        withoutEnlargement: true,
+        fit: "contain",
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
       })
-      .toBuffer();
-
-    const { width = 0, height = 0 } = await sharp(trimmed).metadata();
-    const padX = Math.round((TARGET_SIZE - width) / 2);
-    const padY = Math.round((TARGET_SIZE - height) / 2);
-
-    const bytes = await sharp(trimmed)
       .extend({
-        top: padY,
-        bottom: TARGET_SIZE - height - padY,
-        left: padX,
-        right: TARGET_SIZE - width - padX,
+        top: PAD,
+        bottom: TARGET_SIZE - CONTENT_SIZE - PAD,
+        left: PAD,
+        right: TARGET_SIZE - CONTENT_SIZE - PAD,
         background: { r: 0, g: 0, b: 0, alpha: 0 },
       })
       .webp({ quality: 85, alphaQuality: 100 })
       .toBuffer();
 
-    const processedPath = `processed/${imagePath.replace(/\.[^.]+$/, "")}.webp`;
+    // Prevent double processed/ prefix (server-side defense)
+    const baseImagePath = imagePath.replace(/^(processed\/)+/, "");
+    const processedPath = `processed/${baseImagePath.replace(/\.[^.]+$/, "")}.webp`;
 
     const { error: uploadError } = await adminClient.storage
       .from("product-images")

@@ -115,6 +115,12 @@ const AdminProducts = () => {
     }
     const imagePath = decodeURIComponent(match[1]);
 
+    // Skip if already processed
+    if (imagePath.startsWith("processed/")) {
+      toast({ title: "Bu görsel zaten işlenmiş", description: "Arka plan daha önce kaldırıldı." });
+      return;
+    }
+
     setProcessingImages((prev) => new Set(prev).add(imageUrl));
     try {
       const resp = await fetch("/api/admin/process-image", {
