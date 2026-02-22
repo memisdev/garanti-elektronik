@@ -23,7 +23,7 @@
     --muted: 220 12% 95%;
     --muted-foreground: 220 8% 46%;
 
-    --accent: 38 92% 50%;
+    --accent: 357 85% 44%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -37,8 +37,8 @@
 
     --surface: 220 14% 97%;
     --surface-dark: 220 20% 8%;
-    --accent-orange: 38 92% 50%;
-    --accent-orange-hover: 38 92% 44%;
+    --accent-orange: 357 85% 44%;
+    --accent-orange-hover: 357 85% 38%;
     --whatsapp: 142 72% 42%;
     --whatsapp-hover: 142 72% 36%;
 
@@ -66,7 +66,7 @@
     --secondary-foreground: 0 0% 96%;
     --muted: 220 15% 14%;
     --muted-foreground: 220 8% 55%;
-    --accent: 38 92% 50%;
+    --accent: 357 85% 44%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 100%;
@@ -75,8 +75,8 @@
     --ring: 0 0% 90%;
     --surface: 220 18% 10%;
     --surface-dark: 220 20% 5%;
-    --accent-orange: 38 92% 50%;
-    --accent-orange-hover: 38 92% 60%;
+    --accent-orange: 357 85% 44%;
+    --accent-orange-hover: 357 85% 54%;
     --whatsapp: 142 72% 42%;
     --whatsapp-hover: 142 72% 48%;
     --sidebar-background: 220 20% 5%;
