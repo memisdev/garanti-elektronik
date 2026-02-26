@@ -1,4 +1,5 @@
 import { siteConfig } from "@/config/site";
+import type { Product } from "@/types/product";
 
 /** Escape </script> sequences to prevent XSS in JSON-LD blocks */
 function safeJsonLd(schema: object): string {
@@ -36,32 +37,48 @@ export const OrganizationJsonLd = () => {
 };
 
 interface ProductJsonLdProps {
-  name: string;
+  product: Product;
   description: string;
-  image: string;
-  sku?: string;
-  brand: string;
+}
+
+export const ProductJsonLd = ({ product, description }: ProductJsonLdProps) => {
+  const schema: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description,
+    image: product.images[0] ?? undefined,
+    sku: product.code ?? undefined,
+    brand: { "@type": "Brand", name: product.brand },
+    url: `${siteConfig.url}/urun/${product.slug}`,
+    category: product.categories?.name ?? undefined,
+    itemCondition: "https://schema.org/RefurbishedCondition",
+    seller: { "@type": "Organization", name: siteConfig.name },
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
+    />
+  );
+};
+
+interface BreadcrumbItem {
+  name: string;
   url: string;
 }
 
-export const ProductJsonLd = ({ name, description, image, sku, brand, url }: ProductJsonLdProps) => {
+export const BreadcrumbJsonLd = ({ items }: { items: BreadcrumbItem[] }) => {
   const schema = {
     "@context": "https://schema.org",
-    "@type": "Product",
-    name,
-    description,
-    image,
-    sku,
-    brand: { "@type": "Brand", name: brand },
-    url,
-    offers: {
-      "@type": "Offer",
-      availability: "https://schema.org/InStock",
-      priceCurrency: "TRY",
-      price: "0",
-      priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-      seller: { "@type": "Organization", name: siteConfig.name },
-    },
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      item: item.url,
+    })),
   };
 
   return (

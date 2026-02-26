@@ -2,22 +2,25 @@
 
 import { memo } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { MessageCircle } from "lucide-react";
 import type { Product } from "@/types/product";
 import { siteConfig } from "@/config/site";
 
 interface ProductCardProps {
   product: Product;
-  onDetail?: (slug: string) => void;
 }
 
-const ProductCard = memo(({ product, onDetail }: ProductCardProps) => {
+const ProductCard = memo(({ product }: ProductCardProps) => {
+  const router = useRouter();
   const categoryLabel = product.categories?.name ?? product.category;
   const whatsappMessage = siteConfig.whatsapp.defaultMessage(product.name, product.code ?? undefined);
+  const productUrl = `/urun/${product.slug}`;
 
-  const handleCardClick = () => onDetail?.(product.slug);
+  const handleCardClick = () => router.push(productUrl);
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") onDetail?.(product.slug);
+    if (e.key === "Enter") router.push(productUrl);
   };
 
   return (
@@ -55,13 +58,14 @@ const ProductCard = memo(({ product, onDetail }: ProductCardProps) => {
           <p className="text-[11px] text-muted-foreground/70 font-mono bg-muted/60 inline-block px-2.5 py-1 rounded-md mb-4">{product.code}</p>
         )}
         <div className="flex gap-2 mt-auto pt-2">
-          <button
-            onClick={() => onDetail?.(product.slug)}
+          <Link
+            href={productUrl}
+            onClick={(e) => e.stopPropagation()}
             className="flex-1 text-[13px] font-semibold text-center py-2.5 text-foreground hover:bg-foreground hover:text-primary-foreground rounded-lg transition-all duration-300 border border-border focus:outline-none focus:ring-2 focus:ring-foreground/20"
             aria-label={`${product.name} detaylarını görüntüle`}
           >
             Detay
-          </button>
+          </Link>
           <a
             href={siteConfig.social.whatsappUrl(whatsappMessage)}
             target="_blank"

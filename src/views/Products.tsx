@@ -6,9 +6,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { useBrands } from "@/hooks/useBrands";
 import { useCategories } from "@/hooks/useCategories";
 import ProductCard from "@/components/ProductCard";
-import ProductDrawer from "@/components/ProductDrawer";
 import EmptyState from "@/components/EmptyState";
-import { useProduct } from "@/hooks/useProduct";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
 import { Filter, X } from "lucide-react";
 import {
@@ -125,13 +123,8 @@ const Products = () => {
   const { brands } = useBrands();
   const { categories } = useCategories();
 
-  const [drawerSlug, setDrawerSlug] = useState<string | null>(null);
-  const { product: drawerProduct } = useProduct(drawerSlug ?? undefined);
   const [sheetOpen, setSheetOpen] = useState(false);
   const gridRef = useRevealOnScroll();
-
-  const handleDetail = useCallback((slug: string) => setDrawerSlug(slug), []);
-  const handleCloseDrawer = useCallback(() => setDrawerSlug(null), []);
 
   const setParam = useCallback(
     (key: string, value: string) => {
@@ -327,7 +320,7 @@ const Products = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                     {products.map((product, i) => (
                       <div key={product.id} className={`reveal-on-scroll delay-${Math.min(i + 1, 4)}`}>
-                        <ProductCard product={product} onDetail={handleDetail} />
+                        <ProductCard product={product} />
                       </div>
                     ))}
                   </div>
@@ -373,7 +366,6 @@ const Products = () => {
         </div>
       </section>
 
-      <ProductDrawer product={drawerProduct} open={!!drawerSlug} onClose={handleCloseDrawer} />
     </div>
   );
 };

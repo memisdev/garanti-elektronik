@@ -2,21 +2,16 @@
 
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
 import { useBrands } from "@/hooks/useBrands";
 import { useProducts } from "@/hooks/useProducts";
-import { useProduct } from "@/hooks/useProduct";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
 import ProductCard from "@/components/ProductCard";
-import ProductDrawer from "@/components/ProductDrawer";
 
 const BrandPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { brands, loading: brandsLoading } = useBrands();
   const brand = brands.find((b) => b.slug === slug);
   const { products, loading: productsLoading } = useProducts({ brand: brand?.name });
-  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
-  const { product: selectedProduct } = useProduct(selectedSlug ?? undefined);
   const gridRef = useRevealOnScroll();
 
   if (brandsLoading) {
@@ -64,15 +59,13 @@ const BrandPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
               {products.map((p, i) => (
                 <div key={p.id} className={`reveal-on-scroll delay-${Math.min(i + 1, 4)}`}>
-                  <ProductCard product={p} onDetail={(s) => setSelectedSlug(s)} />
+                  <ProductCard product={p} />
                 </div>
               ))}
             </div>
           )}
         </div>
       </section>
-
-      <ProductDrawer product={selectedProduct} open={!!selectedSlug} onClose={() => setSelectedSlug(null)} />
     </div>
   );
 };

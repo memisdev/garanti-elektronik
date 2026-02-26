@@ -13,6 +13,7 @@
 - [x] Phase 8: API Routes & Server Actions (contact form, audit log, part-finder AI, process-image)
 - [x] Phase 9: SEO & Performance (canonical URLs, ISR, generateStaticParams, image sizes, caching headers, bundle analyzer, web vitals)
 - [x] Phase 10: Security, QA & Final Audit (security headers, Zod validation, rate limit cleanup, brute-force protection, CORS, env docs)
+- [x] Phase 11: SEO-friendly product detail pages (drawer→page, JSON-LD fix, breadcrumbs, FAQ, related products, mobile sticky CTA)
 
 ## Decisions Log
 
@@ -52,6 +53,17 @@
 | Server-side login with brute-force protection (Phase 10) | `/api/auth/login` rate limits 5 attempts per 15min per IP |
 | CORS headers on API routes (Phase 10) | Restricted to `garantielektronik.com` origin |
 | Cookie-free Supabase client for build-time (Phase 10) | `createStaticClient()` avoids `cookies()` call in `generateStaticParams` |
+| ProductCard navigates to `/urun/[slug]` (Phase 11) | Replaced drawer with `router.push` + `<Link>` for SEO-crawlable product detail pages |
+| Deleted ProductDrawer (Phase 11) | Product cards across all pages navigate to dedicated product detail page |
+| Product detail page as server component (Phase 11) | Full SSR with breadcrumbs, specs, FAQ accordion, related products, mobile sticky CTA |
+| Removed `generateStaticParams` from product page (Phase 11) | Scalability for 1000+ products; uses `dynamicParams = true` with ISR `revalidate = 3600` |
+| Fixed Product JSON-LD: removed `price: "0"` (Phase 11) | Violates Google structured data guidelines; replaced with `itemCondition: RefurbishedCondition` + `seller` |
+| BreadcrumbJsonLd + FAQPageJsonLd on product pages (Phase 11) | Rich results in Google SERPs; breadcrumb trail + template FAQ questions |
+| Product meta includes twitter card + code in title (Phase 11) | `summary_large_image` card, OG image dimensions, product code in `<title>` |
+| Sitemap uses `siteConfig.url` + `lastModified` on static pages (Phase 11) | Consistent URL source, better freshness signals |
+| Robots.txt disallows `/api/` (Phase 11) | API routes should not be crawled by search engines |
+| `safe-area-pb` CSS utility (Phase 11) | iPhone notch support for mobile sticky bar via `env(safe-area-inset-bottom)` |
+| Product section components in `src/components/product/` (Phase 11) | Modular architecture: Hero, Detail, Specs, Description, Compatibility, FAQ, RelatedProducts, MobileStickyBar |
 
 ## Key Directories
 

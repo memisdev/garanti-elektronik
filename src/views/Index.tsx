@@ -3,15 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, MessageCircle } from "lucide-react";
-import { useState, useCallback, lazy, Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { useBrands } from "@/hooks/useBrands";
-import { useProduct } from "@/hooks/useProduct";
 import { useFeaturedProducts } from "@/hooks/useFeaturedProducts";
 import { useRecentProducts } from "@/hooks/useRecentProducts";
 import { useCategories } from "@/hooks/useCategories";
 import { siteConfig } from "@/config/site";
 import ProductCard from "@/components/ProductCard";
-const ProductDrawer = lazy(() => import("@/components/ProductDrawer"));
 import HeroSection from "@/components/home/HeroSection";
 import BrandMarquee from "@/components/home/BrandMarquee";
 import { OrganizationJsonLd } from "@/components/seo/JsonLd";
@@ -32,9 +30,6 @@ const Index = () => {
   const { products: featuredProducts } = useFeaturedProducts();
   const { products: recentProducts } = useRecentProducts();
   const { categories } = useCategories();
-  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
-  const { product: selectedProduct } = useProduct(selectedSlug ?? undefined);
-  const handleDetail = useCallback((slug: string) => setSelectedSlug(slug), []);
 
   const featuredRef = useRevealOnScroll();
   const categoriesRef = useRevealOnScroll();
@@ -106,13 +101,10 @@ const Index = () => {
 
             {heroProduct && (
               <div className="reveal-on-scroll delay-1 mb-8">
-                <article
-                  onClick={() => setSelectedSlug(heroProduct.slug)}
-                  className="group cursor-pointer bg-card rounded-2xl overflow-hidden border border-border/40 hover:border-accent/20 transition-all duration-500 flex flex-col md:flex-row hover-glow card-hover-lift"
-                  role="button"
-                  tabIndex={0}
+                <Link
+                  href={`/urun/${heroProduct.slug}`}
+                  className="group cursor-pointer bg-card rounded-2xl overflow-hidden border border-border/40 hover:border-accent/20 transition-all duration-500 flex flex-col md:flex-row hover-glow card-hover-lift block"
                   aria-label={`${heroProduct.name} detaylarını görüntüle`}
-                  onKeyDown={(e) => e.key === "Enter" && setSelectedSlug(heroProduct.slug)}
                 >
                   <div className="aspect-[4/3] md:aspect-auto md:w-1/2 bg-muted/30 flex items-center justify-center p-12 md:p-20 overflow-hidden relative">
                     <div className="absolute inset-0 bg-gradient-to-br from-muted/30 to-transparent" />
@@ -143,26 +135,28 @@ const Index = () => {
                        <span className="inline-flex items-center justify-center text-[13px] font-semibold py-3 px-7 text-foreground border border-border rounded-lg group-hover:bg-foreground group-hover:text-primary-foreground transition-all duration-300">
                         Detay
                       </span>
-                      <a
-                        href={siteConfig.social.whatsappUrl(whatsappMessage)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
+                      <span
+                        role="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          window.open(siteConfig.social.whatsappUrl(whatsappMessage), "_blank");
+                        }}
                         className="inline-flex items-center gap-1.5 text-[13px] font-bold text-primary-foreground bg-whatsapp hover:bg-whatsapp-hover py-3 px-7 rounded-lg transition-all duration-300"
                       >
                         <MessageCircle className="w-3.5 h-3.5" aria-hidden="true" />
                         WhatsApp
-                      </a>
+                      </span>
                     </div>
                   </div>
-                </article>
+                </Link>
               </div>
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {restProducts.map((product, i) => (
                 <div key={product.id} className={`reveal-on-scroll delay-${i + 2}`}>
-                  <ProductCard product={product} onDetail={handleDetail} />
+                  <ProductCard product={product} />
                 </div>
               ))}
             </div>
@@ -220,7 +214,7 @@ const Index = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {recentProducts.map((product, i) => (
                   <div key={product.id} className={`reveal-on-scroll delay-${Math.min(i + 1, 4)}`}>
-                    <ProductCard product={product} onDetail={handleDetail} />
+                    <ProductCard product={product} />
                   </div>
                 ))}
               </div>
@@ -228,14 +222,6 @@ const Index = () => {
           </section>
         )}
       </div>
-
-      <Suspense fallback={null}>
-        <ProductDrawer
-          product={selectedProduct}
-          open={!!selectedSlug}
-          onClose={() => setSelectedSlug(null)}
-        />
-      </Suspense>
     </div>
   );
 };

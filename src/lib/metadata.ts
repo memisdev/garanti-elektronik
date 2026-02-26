@@ -1,20 +1,39 @@
 import type { Metadata } from "next";
 import type { Product } from "@/types/product";
+import { generateProductDescription } from "@/lib/product-utils";
 
 export function getProductMeta(product?: Product): Metadata {
+  if (!product) {
+    return {
+      title: "Ürün",
+      description: "Ürün detayları",
+    };
+  }
+
+  const description = generateProductDescription(product);
+  const title = product.code
+    ? `${product.name} (${product.code})`
+    : product.name;
+
   return {
-    title: product ? product.name : "Ürün",
-    description: product ? `${product.name} - ${product.compatibility}` : "Ürün detayları",
+    title,
+    description,
     alternates: {
-      canonical: product ? `/urun/${product.slug}` : undefined,
+      canonical: `/urun/${product.slug}`,
     },
-    openGraph: product
-      ? {
-          title: product.name,
-          description: `${product.name} - ${product.compatibility}`,
-          images: product.images[0] ? [{ url: product.images[0] }] : [],
-        }
-      : undefined,
+    openGraph: {
+      title,
+      description,
+      images: product.images[0]
+        ? [{ url: product.images[0], width: 800, height: 600 }]
+        : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: product.images[0] ? [product.images[0]] : [],
+    },
   };
 }
 
