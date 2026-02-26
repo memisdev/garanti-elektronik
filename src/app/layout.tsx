@@ -64,8 +64,12 @@ export default function RootLayout({
   return (
     <html lang="tr" className={inter.variable} suppressHydrationWarning>
       <head>
-        <link rel="dns-prefetch" href="https://vacerlceqblpygsdjpeq.supabase.co" />
-        <link rel="preconnect" href="https://vacerlceqblpygsdjpeq.supabase.co" crossOrigin="anonymous" />
+        {process.env.NEXT_PUBLIC_SUPABASE_URL && (
+          <>
+            <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
+            <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} crossOrigin="anonymous" />
+          </>
+        )}
       </head>
       <body>
         <Providers>{children}</Providers>

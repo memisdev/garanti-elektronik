@@ -4,7 +4,7 @@
  */
 export function slugify(text: string): string {
   return text
-    .toLowerCase()
+    .toLocaleLowerCase("tr")
     .replace(/ğ/g, "g")
     .replace(/ü/g, "u")
     .replace(/ş/g, "s")

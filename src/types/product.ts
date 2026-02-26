@@ -25,7 +25,7 @@ export interface ProductRow {
  * Shape returned by Supabase `.select("*, brands(name, slug), categories(name, slug)")`.
  * Accepts the actual query result without requiring `as unknown as` casts.
  */
-export type ProductQueryRow = Record<string, unknown> & {
+export type ProductQueryRow = {
   id: string;
   name: string;
   slug: string;
@@ -96,9 +96,11 @@ export function normalizeProduct(row: ProductRow | ProductQueryRow): Product {
     brand_id: row.brand_id,
     category_id: row.category_id,
     images: row.images ?? [],
-    specs: (row.specs && typeof row.specs === "object" && !Array.isArray(row.specs)
-      ? row.specs
-      : {}) as Record<string, string>,
+    specs: Object.fromEntries(
+      Object.entries(
+        row.specs && typeof row.specs === "object" && !Array.isArray(row.specs) ? (row.specs as Record<string, unknown>) : {}
+      ).filter((entry): entry is [string, string] => typeof entry[1] === "string")
+    ),
     compatibility: row.compatibility,
     description: row.description ?? null,
     faq: parseFaq(row.faq),

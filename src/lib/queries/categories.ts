@@ -21,13 +21,13 @@ export async function fetchCategories(): Promise<Category[]> {
 
   // Single query via the category_stats view (replaces N+1 pattern)
   const { data: stats } = await supabase
-    .from("category_stats" as "categories")
+    .from("category_stats")
     .select("category_id, product_count, first_product_image");
 
   const statsMap = new Map(
-    (stats as { category_id: string; product_count: number; first_product_image: string | null }[] | null)?.map(
+    (stats ?? []).map(
       (s) => [s.category_id, s] as const
-    ) ?? []
+    )
   );
 
   return categories.map((cat) => {

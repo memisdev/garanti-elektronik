@@ -6,7 +6,7 @@ import productTconBoard from "@/assets/product-tcon-board.jpg";
 import productInverterBoard from "@/assets/product-inverter-board.jpg";
 import productPowerSupply from "@/assets/product-power-supply.jpg";
 
-export interface Product {
+export interface StaticProduct {
   id: string;
   slug: string;
   name: string;
@@ -18,7 +18,7 @@ export interface Product {
   compatibility: string;
 }
 
-export const products: Product[] = [
+export const products: StaticProduct[] = [
   {
     id: "1", slug: "samsung-bn44-00932b", name: "Samsung BN44-00932B Power Board",
     brand: "Samsung", category: "tv-parca", code: "BN44-00932B",

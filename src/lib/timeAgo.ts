@@ -3,6 +3,7 @@
  */
 export function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
+  if (isNaN(diff)) return "Bilinmiyor";
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return "Az önce";
   if (mins < 60) return `${mins} dk önce`;

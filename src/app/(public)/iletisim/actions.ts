@@ -53,13 +53,13 @@ export async function submitContactForm(
 
   // Insert into Supabase
   const supabase = await createClient();
-  const { error: dbError } = await supabase.from("contact_messages").insert({
+  const { data: inserted, error: dbError } = await supabase.from("contact_messages").insert({
     name,
     email,
     message,
-  });
+  }).select("id").single();
 
-  if (dbError) {
+  if (dbError || !inserted) {
     console.error("Contact form DB error:", dbError);
     return { success: false, error: "Mesaj gönderilemedi. Lütfen tekrar deneyin." };
   }
@@ -72,11 +72,9 @@ export async function submitContactForm(
     // Record the email failure in contact_messages so admin can see it
     await supabase
       .from("contact_messages")
-      .update({ email_sent: false } as Record<string, unknown>)
-      .eq("email", email)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .then(() => {}, () => {});
+      .update({ email_sent: false } as Record<string, boolean>)
+      .eq("id", inserted.id)
+      .then(() => { }, () => { });
   }
 
   return { success: true };

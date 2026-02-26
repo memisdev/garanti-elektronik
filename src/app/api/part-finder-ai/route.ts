@@ -289,18 +289,36 @@ ${productListJson}`;
 
     const config = getChatConfig();
 
-    const aiResponse = await fetch(config.url, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${config.apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: config.model,
-        messages,
-        stream: true,
-      }),
-    });
+    const controller = new AbortController();
+    const chatTimeout = setTimeout(() => controller.abort(), 60_000);
+
+    let aiResponse: Response;
+    try {
+      aiResponse = await fetch(config.url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${config.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: config.model,
+          messages,
+          stream: true,
+        }),
+        signal: controller.signal,
+      });
+    } catch (err) {
+      clearTimeout(chatTimeout);
+      if (err instanceof DOMException && err.name === "AbortError") {
+        return NextResponse.json(
+          { error: "AI isteği zaman aşımına uğradı, lütfen tekrar deneyin." },
+          { status: 504 },
+        );
+      }
+      throw err;
+    } finally {
+      clearTimeout(chatTimeout);
+    }
 
     if (!aiResponse.ok) {
       if (aiResponse.status === 429) {
@@ -315,8 +333,8 @@ ${productListJson}`;
           { status: 402 },
         );
       }
-      const t = await aiResponse.text();
-      console.error("AI gateway error:", aiResponse.status, t.slice(0, 500));
+      await aiResponse.text(); // drain response body
+      console.error("AI gateway error:", aiResponse.status);
       return NextResponse.json(
         { error: "AI servisi şu an kullanılamıyor." },
         { status: 500 },

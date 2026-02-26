@@ -8,6 +8,9 @@ const withBundleAnalyzer = bundleAnalyzer({
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
+  serverActions: {
+    allowedOrigins: ["garantielektronik.net", "www.garantielektronik.net"],
+  },
   images: {
     remotePatterns: [
       {
