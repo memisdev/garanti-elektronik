@@ -7,6 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { escapeIlike } from "@/lib/escapeIlike";
 import { slugify } from "@/lib/slugify";
 import { MAX_FEATURED_PRODUCTS } from "@/config/site";
+import { PRODUCT_STATUS_OPTIONS, DEFAULT_STATUS } from "@/lib/product-utils";
 import { Search, Plus, Pencil, Trash2, Loader2, ChevronLeft, ChevronRight, Star, Wand2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -19,6 +20,9 @@ interface Product {
   brand_id: string | null;
   category_id: string | null;
   compatibility: string | null;
+  description: string | null;
+  faq: unknown;
+  status: string | null;
   images: string[] | null;
   specs: unknown;
   is_featured: boolean;
@@ -44,9 +48,11 @@ const AdminProducts = () => {
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [form, setForm] = useState({ name: "", slug: "", code: "", brand_id: "", category_id: "", compatibility: "", images: [] as string[], specs: {} as Record<string, string> });
+  const [form, setForm] = useState({ name: "", slug: "", code: "", brand_id: "", category_id: "", compatibility: "", description: "", status: DEFAULT_STATUS, faq: [] as Array<{ q: string; a: string }>, images: [] as string[], specs: {} as Record<string, string> });
   const [specKey, setSpecKey] = useState("");
   const [specVal, setSpecVal] = useState("");
+  const [faqQuestion, setFaqQuestion] = useState("");
+  const [faqAnswer, setFaqAnswer] = useState("");
   const [processingImages, setProcessingImages] = useState<Set<string>>(new Set());
   const { log } = useAuditLog();
 
@@ -120,9 +126,20 @@ const AdminProducts = () => {
     });
   }, []);
 
+  const addFaq = () => {
+    if (!faqQuestion.trim() || !faqAnswer.trim()) return;
+    setForm({ ...form, faq: [...form.faq, { q: faqQuestion, a: faqAnswer }] });
+    setFaqQuestion("");
+    setFaqAnswer("");
+  };
+
+  const removeFaq = (idx: number) => {
+    setForm({ ...form, faq: form.faq.filter((_, i) => i !== idx) });
+  };
+
   const openCreate = () => {
     setEditing(null);
-    setForm({ name: "", slug: "", code: "", brand_id: "", category_id: "", compatibility: "", images: [], specs: {} });
+    setForm({ name: "", slug: "", code: "", brand_id: "", category_id: "", compatibility: "", description: "", status: DEFAULT_STATUS, faq: [], images: [], specs: {} });
     setDialogOpen(true);
   };
 
@@ -130,7 +147,9 @@ const AdminProducts = () => {
     setEditing(p);
     setForm({
       name: p.name, slug: p.slug, code: p.code || "", brand_id: p.brand_id || "", category_id: p.category_id || "",
-      compatibility: p.compatibility || "", images: p.images || [], specs: (p.specs && typeof p.specs === "object" && !Array.isArray(p.specs) ? p.specs : {}) as Record<string, string>,
+      compatibility: p.compatibility || "", description: p.description || "", status: p.status || DEFAULT_STATUS,
+      faq: Array.isArray(p.faq) ? p.faq : [],
+      images: p.images || [], specs: (p.specs && typeof p.specs === "object" && !Array.isArray(p.specs) ? p.specs : {}) as Record<string, string>,
     });
     setDialogOpen(true);
   };
@@ -177,7 +196,9 @@ const AdminProducts = () => {
     const payload = {
       name: form.name, slug, code: form.code || null,
       brand_id: form.brand_id || null, category_id: form.category_id || null,
-      compatibility: form.compatibility || null, images: form.images, specs: form.specs,
+      compatibility: form.compatibility || null, description: form.description || null,
+      status: form.status || null, faq: form.faq.length > 0 ? form.faq : null,
+      images: form.images, specs: form.specs,
     };
 
     if (editing) {
@@ -336,6 +357,43 @@ const AdminProducts = () => {
               <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em] block mb-2">Uyumluluk</label>
               <textarea rows={2} value={form.compatibility} onChange={(e) => setForm({ ...form, compatibility: e.target.value })}
                 className="w-full text-sm p-4 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10 resize-none" placeholder="Uyumlu TV modelleri..." />
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em] block mb-2">Açıklama</label>
+              <textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
+                className="w-full text-sm p-4 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10 resize-none" placeholder="Ürün açıklaması (boş bırakılırsa otomatik oluşturulur)..." />
+            </div>
+
+            {/* Status */}
+            <div>
+              <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em] block mb-2">Durum</label>
+              <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}
+                className="w-full h-11 text-sm px-4 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10">
+                {PRODUCT_STATUS_OPTIONS.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+              </select>
+            </div>
+
+            {/* FAQ */}
+            <div>
+              <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em] block mb-2">SSS (Sıkça Sorulan Sorular)</label>
+              {form.faq.map((item, i) => (
+                <div key={i} className="flex items-start gap-2 mb-1.5">
+                  <div className="text-xs bg-surface px-3 py-1.5 rounded-lg flex-1">
+                    <span className="font-medium text-foreground">S:</span> {item.q}
+                    <br />
+                    <span className="font-medium text-foreground">C:</span> {item.a}
+                  </div>
+                  <button onClick={() => removeFaq(i)} className="text-muted-foreground hover:text-destructive mt-1"><Trash2 className="w-3 h-3" /></button>
+                </div>
+              ))}
+              <div className="space-y-2 mt-2">
+                <input type="text" value={faqQuestion} onChange={(e) => setFaqQuestion(e.target.value)} placeholder="Soru" className="w-full h-9 text-xs px-3 border border-border rounded-lg bg-background" />
+                <input type="text" value={faqAnswer} onChange={(e) => setFaqAnswer(e.target.value)} placeholder="Cevap" className="w-full h-9 text-xs px-3 border border-border rounded-lg bg-background" />
+                <button onClick={addFaq} className="h-9 px-3 bg-surface rounded-lg text-xs font-medium hover:bg-accent transition-colors">Ekle</button>
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1">Boş bırakılırsa otomatik SSS oluşturulur</p>
             </div>
 
             {/* Images */}

@@ -1,5 +1,6 @@
 import { siteConfig } from "@/config/site";
 import type { Product } from "@/types/product";
+import { getItemCondition, getItemAvailability } from "@/lib/product-utils";
 
 /** Escape </script> sequences to prevent XSS in JSON-LD blocks */
 function safeJsonLd(schema: object): string {
@@ -39,9 +40,10 @@ export const OrganizationJsonLd = () => {
 interface ProductJsonLdProps {
   product: Product;
   description: string;
+  status?: string | null;
 }
 
-export const ProductJsonLd = ({ product, description }: ProductJsonLdProps) => {
+export const ProductJsonLd = ({ product, description, status }: ProductJsonLdProps) => {
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -52,8 +54,13 @@ export const ProductJsonLd = ({ product, description }: ProductJsonLdProps) => {
     brand: { "@type": "Brand", name: product.brand },
     url: `${siteConfig.url}/urun/${product.slug}`,
     category: product.categories?.name ?? undefined,
-    itemCondition: "https://schema.org/RefurbishedCondition",
+    itemCondition: getItemCondition(status ?? null),
     seller: { "@type": "Organization", name: siteConfig.name },
+    offers: {
+      "@type": "Offer",
+      availability: getItemAvailability(status ?? null),
+      seller: { "@type": "Organization", name: siteConfig.name },
+    },
   };
 
   return (

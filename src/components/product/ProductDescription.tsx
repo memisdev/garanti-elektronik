@@ -1,14 +1,10 @@
-import type { Product } from "@/types/product";
-import { generateProductDescription } from "@/lib/product-utils";
-
 interface ProductDescriptionProps {
-  product: Product;
+  description: string;
 }
 
 export default function ProductDescription({
-  product,
+  description,
 }: ProductDescriptionProps) {
-  const description = generateProductDescription(product);
 
   return (
     <section className="mt-16">

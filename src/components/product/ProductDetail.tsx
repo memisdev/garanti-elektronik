@@ -2,6 +2,7 @@ import Image from "next/image";
 import { MessageCircle, Phone } from "lucide-react";
 import type { Product } from "@/types/product";
 import { siteConfig } from "@/config/site";
+import { getStatusBadgeStyle } from "@/lib/product-utils";
 
 interface ProductDetailProps {
   product: Product;
@@ -37,10 +38,15 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       <div>
         {/* Status badge */}
         <div className="mb-6">
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 rounded-full px-3 py-1">
-            <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-            Test Edilmiş - Çalışır Durumda
-          </span>
+          {(() => {
+            const badge = getStatusBadgeStyle(product.status);
+            return (
+              <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${badge.textClass} ${badge.bgClass} border ${badge.borderClass} rounded-full px-3 py-1`}>
+                <span className={`w-1.5 h-1.5 ${badge.dotClass} rounded-full`} />
+                {badge.text}
+              </span>
+            );
+          })()}
         </div>
 
         {/* Compatibility box */}

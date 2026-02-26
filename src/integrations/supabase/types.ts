@@ -192,6 +192,8 @@ export type Database = {
           code: string | null
           compatibility: string | null
           created_at: string
+          description: string | null
+          faq: Json | null
           featured_order: number
           id: string
           images: string[] | null
@@ -199,6 +201,7 @@ export type Database = {
           name: string
           slug: string
           specs: Json | null
+          status: string | null
           updated_at: string
         }
         Insert: {
@@ -207,6 +210,8 @@ export type Database = {
           code?: string | null
           compatibility?: string | null
           created_at?: string
+          description?: string | null
+          faq?: Json | null
           featured_order?: number
           id?: string
           images?: string[] | null
@@ -214,6 +219,7 @@ export type Database = {
           name: string
           slug: string
           specs?: Json | null
+          status?: string | null
           updated_at?: string
         }
         Update: {
@@ -222,6 +228,8 @@ export type Database = {
           code?: string | null
           compatibility?: string | null
           created_at?: string
+          description?: string | null
+          faq?: Json | null
           featured_order?: number
           id?: string
           images?: string[] | null
@@ -229,6 +237,7 @@ export type Database = {
           name?: string
           slug?: string
           specs?: Json | null
+          status?: string | null
           updated_at?: string
         }
         Relationships: [

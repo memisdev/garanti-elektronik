@@ -10,7 +10,7 @@ export function getProductMeta(product?: Product): Metadata {
     };
   }
 
-  const description = generateProductDescription(product);
+  const description = product.description || generateProductDescription(product);
   const title = product.code
     ? `${product.name} (${product.code})`
     : product.name;

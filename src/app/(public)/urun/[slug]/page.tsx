@@ -105,8 +105,8 @@ export default async function ProductDetailPage({
   }
 
   const normalizedRelated = relatedProducts.map(normalizeProduct);
-  const description = generateProductDescription(product);
-  const faqs = generateProductFAQs(product);
+  const description = product.description || generateProductDescription(product);
+  const faqs = product.faq ?? generateProductFAQs(product);
 
   const breadcrumbItems = [
     { name: "Ana Sayfa", url: siteConfig.url },
@@ -125,7 +125,7 @@ export default async function ProductDetailPage({
 
   return (
     <div className="pb-20 md:pb-0">
-      <ProductJsonLd product={product} description={description} />
+      <ProductJsonLd product={product} description={description} status={product.status} />
       <BreadcrumbJsonLd items={breadcrumbItems} />
       <FAQPageJsonLd faqs={faqs} />
 
@@ -135,7 +135,7 @@ export default async function ProductDetailPage({
         <div className="container mx-auto px-6 py-16 md:py-24">
           <ProductDetail product={product} />
           <ProductSpecs product={product} />
-          <ProductDescription product={product} />
+          <ProductDescription description={description} />
           <ProductCompatibility product={product} />
           <ProductFAQ faqs={faqs} />
           <RelatedProducts products={normalizedRelated} />

@@ -10,6 +10,9 @@ export interface ProductRow {
   images: string[] | null;
   specs: Json | null;
   compatibility: string | null;
+  description: string | null;
+  faq: Json | null;
+  status: string | null;
   is_featured: boolean;
   featured_order: number;
   created_at: string;
@@ -32,6 +35,9 @@ export type ProductQueryRow = Record<string, unknown> & {
   images: string[] | null;
   specs: Json | null;
   compatibility: string | null;
+  description: string | null;
+  faq: Json | null;
+  status: string | null;
   is_featured: boolean;
   featured_order: number;
   created_at: string;
@@ -39,6 +45,11 @@ export type ProductQueryRow = Record<string, unknown> & {
   brands?: { name: string; slug: string } | null;
   categories?: { name: string; slug: string } | null;
 };
+
+export interface ProductFAQItem {
+  q: string;
+  a: string;
+}
 
 /** Normalized product used across public pages */
 export interface Product {
@@ -51,6 +62,9 @@ export interface Product {
   images: string[];
   specs: Record<string, string>;
   compatibility: string | null;
+  description: string | null;
+  faq: ProductFAQItem[] | null;
+  status: string | null;
   is_featured: boolean;
   featured_order: number;
   created_at: string;
@@ -59,6 +73,18 @@ export interface Product {
   // Computed convenience fields
   brand: string;
   category: string;
+}
+
+function parseFaq(raw: unknown): ProductFAQItem[] | null {
+  if (!Array.isArray(raw)) return null;
+  const valid = raw.filter(
+    (item): item is ProductFAQItem =>
+      typeof item === "object" &&
+      item !== null &&
+      typeof (item as Record<string, unknown>).q === "string" &&
+      typeof (item as Record<string, unknown>).a === "string"
+  );
+  return valid.length > 0 ? valid : null;
 }
 
 export function normalizeProduct(row: ProductRow | ProductQueryRow): Product {
@@ -74,6 +100,9 @@ export function normalizeProduct(row: ProductRow | ProductQueryRow): Product {
       ? row.specs
       : {}) as Record<string, string>,
     compatibility: row.compatibility,
+    description: row.description ?? null,
+    faq: parseFaq(row.faq),
+    status: row.status ?? null,
     is_featured: row.is_featured ?? false,
     featured_order: row.featured_order ?? 0,
     created_at: row.created_at,
