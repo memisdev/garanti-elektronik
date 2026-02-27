@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { verifyAdminRole } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { getChatConfig } from "@/lib/ai/client";
+import { chatCompletion, AIError } from "@/lib/ai/client";
 import { sanitizeAIOutput } from "@/lib/ai/sanitize";
 import { rateLimit } from "@/lib/rate-limit";
 import {
@@ -20,11 +20,11 @@ const requestSchema = z.object({
   existingDescription: z.string().max(2000).optional(),
 });
 
-const TIMEOUT_MS = 30_000;
 const CONTEXT_DESCRIPTIONS_COUNT = 20;
 const CONTEXT_DESCRIPTION_MAX_CHARS = 150;
 
 export async function POST(req: NextRequest) {
+  // --- Auth ---
   const authResult = await verifyAdminRole(["admin", "editor"]);
   if ("error" in authResult) {
     return NextResponse.json(
@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // --- Rate limit ---
   const rl = rateLimit("gen-product-desc", authResult.user.id, {
     windowMs: 60_000,
     maxRequests: 20,
@@ -44,26 +45,21 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // --- Parse body ---
+  let body: unknown;
   try {
-    let body: unknown;
-    try {
-      body = await req.json();
-    } catch {
-      return NextResponse.json(
-        { error: "Geçersiz istek formatı" },
-        { status: 400 },
-      );
-    }
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Geçersiz istek formatı" }, { status: 400 });
+  }
 
-    const parsed = requestSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: "Ürün adı zorunludur." },
-        { status: 400 },
-      );
-    }
+  const parsed = requestSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Ürün adı zorunludur." }, { status: 400 });
+  }
 
-    // Fetch recent descriptions for uniqueness context
+  try {
+    // --- Fetch recent descriptions for uniqueness ---
     const supabase = await createClient();
     const { data: recentProducts } = await supabase
       .from("products")
@@ -76,91 +72,93 @@ export async function POST(req: NextRequest) {
       .map((p) => p.description?.slice(0, CONTEXT_DESCRIPTION_MAX_CHARS))
       .filter(Boolean);
 
-    // Build system prompt with uniqueness context
     let systemPrompt = PRODUCT_DESCRIPTION_SYSTEM_PROMPT;
     if (existingSnippets.length > 0) {
       systemPrompt += `\n\nMEVCUT AÇIKLAMA ÖRNEKLERİ (bunları taklit etme):\n${existingSnippets.map((s, i) => `${i + 1}. "${s}..."`).join("\n")}`;
     }
 
-    const userPrompt = buildDescriptionUserPrompt(parsed.data);
-    const config = getChatConfig();
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    // --- Call AI ---
+    const result = await chatCompletion({
+      systemPrompt,
+      userPrompt: buildDescriptionUserPrompt(parsed.data),
+      temperature: 0.75,
+      maxCompletionTokens: 4096,
+      timeoutMs: 30_000,
+    });
 
-    let aiResponse: Response;
-    try {
-      aiResponse = await fetch(config.url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${config.apiKey}`,
-        },
-        body: JSON.stringify({
-          model: config.model,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt },
-          ],
-          temperature: 0.75,
-          // Use max_completion_tokens (not max_tokens) — Gemini thinking models
-          // count thinking tokens against max_tokens budget, leaving almost nothing
-          // for visible output. max_completion_tokens only caps visible output.
-          max_completion_tokens: 4096,
-        }),
-        signal: controller.signal,
-      });
-    } catch (err) {
-      clearTimeout(timeout);
-      if (err instanceof DOMException && err.name === "AbortError") {
-        return NextResponse.json(
-          { error: "AI isteği zaman aşımına uğradı" },
-          { status: 504 },
-        );
-      }
-      throw err;
-    } finally {
-      clearTimeout(timeout);
-    }
+    console.log(
+      "[generate-product-description] finish:", result.finishReason,
+      "tokens:", result.usage.completionTokens,
+      "length:", result.content.length,
+    );
 
-    if (!aiResponse.ok) {
-      const errText = await aiResponse.text();
-      console.error("AI product description error:", aiResponse.status, errText);
-
-      if (aiResponse.status === 429) {
-        return NextResponse.json(
-          { error: "AI istek limiti aşıldı. Lütfen daha sonra tekrar deneyin." },
-          { status: 429 },
-        );
-      }
-
+    // --- Truncation guard ---
+    if (result.finishReason === "length") {
       return NextResponse.json(
-        { error: `AI istek hatası (${aiResponse.status})` },
+        { error: "AI yanıtı kesildi (token limiti). Lütfen tekrar deneyin." },
         { status: 500 },
       );
     }
 
-    const data = await aiResponse.json();
-    const raw = data?.choices?.[0]?.message?.content ?? "";
+    // --- Post-processing ---
+    const description = sanitizeAIOutput(result.content);
 
-    console.log("[generate-product-description] raw AI response length:", raw.length, "finish:", data?.choices?.[0]?.finish_reason);
-
-    const description = sanitizeAIOutput(raw);
-
-    // Minimum quality check — reject truncated or empty output
+    // --- Minimum quality ---
     if (!description || description.length < 100) {
-      console.error("[generate-product-description] Output too short:", description.length, "raw:", JSON.stringify(raw).slice(0, 200));
       return NextResponse.json(
         { error: "AI çok kısa bir açıklama üretti. Lütfen tekrar deneyin." },
         { status: 500 },
       );
     }
 
-    return NextResponse.json({ description });
+    // --- Quality: verify key inputs appear in output ---
+    const qualityWarnings: string[] = [];
+
+    // Check part codes
+    const inputCodes = extractCodes(parsed.data.code);
+    for (const code of inputCodes) {
+      if (!description.toUpperCase().includes(code.toUpperCase())) {
+        qualityWarnings.push(`Parça kodu eksik: ${code}`);
+      }
+    }
+
+    // Check brand
+    if (
+      parsed.data.brand &&
+      !description.toUpperCase().includes(parsed.data.brand.toUpperCase())
+    ) {
+      qualityWarnings.push(`Marka eksik: ${parsed.data.brand}`);
+    }
+
+    if (qualityWarnings.length > 0) {
+      console.warn(
+        "[generate-product-description] Quality warnings:",
+        qualityWarnings,
+      );
+    }
+
+    return NextResponse.json({ description, qualityWarnings });
   } catch (e) {
+    if (e instanceof AIError) {
+      return NextResponse.json({ error: e.message }, { status: e.statusCode });
+    }
     console.error("generate-product-description error:", e);
     return NextResponse.json(
       { error: "Ürün açıklaması oluşturulurken bir hata oluştu" },
       { status: 500 },
     );
   }
+}
+
+/**
+ * Extract distinct part codes from a comma/space-separated code string.
+ * Strips version markers like "(0)" and whitespace.
+ */
+function extractCodes(raw?: string): string[] {
+  if (!raw) return [];
+  return raw
+    .replace(/\(\d+\)/g, "")
+    .split(/[,;]+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length >= 3);
 }

@@ -262,7 +262,11 @@ const AdminProducts = () => {
         return;
       }
       setForm((prev) => ({ ...prev, description: data.description }));
-      toast({ title: isNewVersion ? "Yeni versiyon oluşturuldu" : "Açıklama oluşturuldu" });
+      if (data.qualityWarnings?.length > 0) {
+        toast({ title: isNewVersion ? "Yeni versiyon oluşturuldu" : "Açıklama oluşturuldu", description: `Uyarı: ${data.qualityWarnings.join(", ")}` });
+      } else {
+        toast({ title: isNewVersion ? "Yeni versiyon oluşturuldu" : "Açıklama oluşturuldu" });
+      }
     } catch {
       toast({ title: "Bağlantı hatası", variant: "destructive" });
     } finally {

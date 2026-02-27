@@ -65,7 +65,9 @@
 | Robots.txt disallows `/api/` (Phase 11) | API routes should not be crawled by search engines |
 | `safe-area-pb` CSS utility (Phase 11) | iPhone notch support for mobile sticky bar via `env(safe-area-inset-bottom)` |
 | Product section components in `src/components/product/` (Phase 11) | Modular architecture: Hero, Detail, Specs, Description, Compatibility, FAQ, RelatedProducts, MobileStickyBar |
-| AI product name/description via existing `getChatConfig()` (Phase 12) | Raw `fetch()` to Gemini OpenAI-compatible endpoint; no new SDK, consistent with existing AI infra |
+| Shared `chatCompletion()` helper with retry+fallback (Phase 12) | DRY: replaces ~200 lines of duplicated fetch boilerplate; handles retries on 429/5xx, AbortController timeout, `AIError` class |
+| `finish_reason:"length"` truncation guard (Phase 12) | Rejects AI output if Gemini signals truncation; prevents half-sentences from reaching users |
+| Output quality validation — missing codes/brand check (Phase 12) | Name route auto-prepends missing part codes; description route returns `qualityWarnings[]` array |
 | System prompts in `src/lib/prompts/` (Phase 12) | Reusable, testable prompt files for name and description generation |
 | `sanitizeAIOutput()` shared utility (Phase 12) | Strips markdown/HTML from AI output; used by both API routes |
 | `max_completion_tokens` not `max_tokens` for Gemini thinking models (Phase 12) | `max_tokens` caps total budget including thinking; `max_completion_tokens` caps only visible output |

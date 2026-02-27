@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { verifyAdminRole } from "@/lib/supabase/admin";
-import { getChatConfig } from "@/lib/ai/client";
+import { chatCompletion, AIError } from "@/lib/ai/client";
 import { sanitizeAIOutput } from "@/lib/ai/sanitize";
 import { rateLimit } from "@/lib/rate-limit";
 import {
@@ -22,9 +22,8 @@ const requestSchema = z
     { message: "En az bir alan doldurulmalıdır" },
   );
 
-const TIMEOUT_MS = 15_000;
-
 export async function POST(req: NextRequest) {
+  // --- Auth ---
   const authResult = await verifyAdminRole(["admin", "editor"]);
   if ("error" in authResult) {
     return NextResponse.json(
@@ -33,6 +32,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // --- Rate limit ---
   const rl = rateLimit("gen-product-name", authResult.user.id, {
     windowMs: 60_000,
     maxRequests: 30,
@@ -44,119 +44,108 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // --- Parse body ---
+  let body: unknown;
   try {
-    let body: unknown;
-    try {
-      body = await req.json();
-    } catch {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Geçersiz istek formatı" }, { status: 400 });
+  }
+
+  const parsed = requestSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "En az bir alan (kod, marka, kategori veya uyumluluk) doldurulmalıdır." },
+      { status: 400 },
+    );
+  }
+
+  // --- Call AI ---
+  try {
+    const result = await chatCompletion({
+      systemPrompt: PRODUCT_NAME_SYSTEM_PROMPT,
+      userPrompt: buildNameUserPrompt(parsed.data),
+      temperature: 0.4,
+      maxCompletionTokens: 1024,
+      timeoutMs: 15_000,
+    });
+
+    console.log(
+      "[generate-product-name] finish:", result.finishReason,
+      "tokens:", result.usage.completionTokens,
+      "raw:", JSON.stringify(result.content).slice(0, 200),
+    );
+
+    // --- Truncation guard ---
+    if (result.finishReason === "length") {
       return NextResponse.json(
-        { error: "Geçersiz istek formatı" },
-        { status: 400 },
-      );
-    }
-
-    const parsed = requestSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: "En az bir alan (kod, marka, kategori veya uyumluluk) doldurulmalıdır." },
-        { status: 400 },
-      );
-    }
-
-    const userPrompt = buildNameUserPrompt(parsed.data);
-    const config = getChatConfig();
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-    let aiResponse: Response;
-    try {
-      aiResponse = await fetch(config.url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${config.apiKey}`,
-        },
-        body: JSON.stringify({
-          model: config.model,
-          messages: [
-            { role: "system", content: PRODUCT_NAME_SYSTEM_PROMPT },
-            { role: "user", content: userPrompt },
-          ],
-          temperature: 0.4,
-          // Use max_completion_tokens (not max_tokens) — Gemini thinking models
-          // count thinking tokens against max_tokens budget, leaving almost nothing
-          // for visible output. max_completion_tokens only caps visible output.
-          max_completion_tokens: 1024,
-        }),
-        signal: controller.signal,
-      });
-    } catch (err) {
-      clearTimeout(timeout);
-      if (err instanceof DOMException && err.name === "AbortError") {
-        return NextResponse.json(
-          { error: "AI isteği zaman aşımına uğradı" },
-          { status: 504 },
-        );
-      }
-      throw err;
-    } finally {
-      clearTimeout(timeout);
-    }
-
-    if (!aiResponse.ok) {
-      const errText = await aiResponse.text();
-      console.error("AI product name error:", aiResponse.status, errText);
-
-      if (aiResponse.status === 429) {
-        return NextResponse.json(
-          { error: "AI istek limiti aşıldı. Lütfen daha sonra tekrar deneyin." },
-          { status: 429 },
-        );
-      }
-
-      return NextResponse.json(
-        { error: `AI istek hatası (${aiResponse.status})` },
+        { error: "AI yanıtı kesildi (token limiti). Lütfen tekrar deneyin." },
         { status: 500 },
       );
     }
 
-    const data = await aiResponse.json();
-    const raw = data?.choices?.[0]?.message?.content ?? "";
-
-    console.log("[generate-product-name] raw AI response:", JSON.stringify(raw));
-
-    // Post-processing: take first line, strip markdown/quotes artifacts
-    let name = sanitizeAIOutput(raw)
-      .split("\n")[0] // Only first line (model may add explanations)
-      .replace(/^["'`]+|["'`]+$/g, "") // surrounding quotes/backticks
-      .replace(/^\*+|\*+$/g, "") // markdown bold markers
-      .replace(/^#+\s*/, "") // markdown headings
-      .replace(/^[-•]\s*/, "") // list markers
-      .replace(/\s+/g, " ") // collapse whitespace
-      .replace(/,\s*$/, "") // trailing comma
-      .replace(/\s*\(0\)/g, "") // strip version "(0)" — no SEO value
+    // --- Post-processing ---
+    let name = sanitizeAIOutput(result.content)
+      .split("\n")[0]
+      .replace(/^["'`]+|["'`]+$/g, "")
+      .replace(/^\*+|\*+$/g, "")
+      .replace(/^#+\s*/, "")
+      .replace(/^[-•]\s*/, "")
+      .replace(/\s+/g, " ")
+      .replace(/,\s*$/, "")
+      .replace(/\s*\(0\)/g, "")
       .trim();
 
-    // Minimum quality check — reject ultra-short output (thinking model token starvation)
+    // --- Minimum length ---
     if (!name || name.length < 10) {
-      console.error("[generate-product-name] Output too short:", JSON.stringify(name), "raw:", JSON.stringify(raw));
       return NextResponse.json(
         { error: "AI çok kısa bir ad üretti. Lütfen tekrar deneyin." },
         { status: 500 },
       );
     }
 
-    // Allow longer names for products with multiple codes (SEO-critical)
-    if (name.length > 180) {
-      name = name.slice(0, 180).replace(/\s+\S*$/, "").trim();
+    // --- Quality: verify input codes appear in output ---
+    const inputCodes = extractCodes(parsed.data.code);
+    const missingCodes = inputCodes.filter(
+      (code) => !name.toUpperCase().includes(code.toUpperCase()),
+    );
+    if (missingCodes.length > 0) {
+      console.warn(
+        "[generate-product-name] Missing codes in output:",
+        missingCodes,
+        "output:", name,
+      );
+      // Don't reject — append missing codes at the start
+      name = [...missingCodes, name].join(" ");
+    }
+
+    // --- Max length (generous for multi-code SEO names) ---
+    if (name.length > 200) {
+      name = name.slice(0, 200).replace(/\s+\S*$/, "").trim();
     }
 
     return NextResponse.json({ name });
   } catch (e) {
+    if (e instanceof AIError) {
+      return NextResponse.json({ error: e.message }, { status: e.statusCode });
+    }
     console.error("generate-product-name error:", e);
     return NextResponse.json(
       { error: "Ürün adı oluşturulurken bir hata oluştu" },
       { status: 500 },
     );
   }
+}
+
+/**
+ * Extract distinct part codes from a comma/space-separated code string.
+ * Strips version markers like "(0)" and whitespace.
+ */
+function extractCodes(raw?: string): string[] {
+  if (!raw) return [];
+  return raw
+    .replace(/\(\d+\)/g, "") // strip "(0)", "(1)" etc.
+    .split(/[,;]+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length >= 3); // ignore tiny fragments
 }
