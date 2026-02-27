@@ -341,5 +341,5 @@ section:nth-of-type(3) .reveal-on-scroll {
 
 /* ===== Safe area padding for iPhone notch ===== */
 .safe-area-pb {
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
 }

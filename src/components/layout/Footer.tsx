@@ -25,7 +25,7 @@ const FOOTER_BRANDS = [
 
 const Footer = () => {
   return (
-    <footer className="bg-foreground text-primary-foreground" role="contentinfo">
+    <footer className="bg-foreground text-primary-foreground safe-area-pb" role="contentinfo">
       <div className="container mx-auto px-6 py-20 md:py-24">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-12 lg:gap-8">
           {/* Company */}
