@@ -134,6 +134,7 @@ export async function POST(req: NextRequest) {
       .replace(/^[-•]\s*/, "") // list markers
       .replace(/\s+/g, " ") // collapse whitespace
       .replace(/,\s*$/, "") // trailing comma
+      .replace(/\s*\(0\)/g, "") // strip version "(0)" — no SEO value
       .trim();
 
     // Minimum quality check — reject ultra-short output (thinking model token starvation)
@@ -145,9 +146,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Enforce max length
-    if (name.length > 120) {
-      name = name.slice(0, 120).replace(/\s+\S*$/, "").trim();
+    // Allow longer names for products with multiple codes (SEO-critical)
+    if (name.length > 180) {
+      name = name.slice(0, 180).replace(/\s+\S*$/, "").trim();
     }
 
     return NextResponse.json({ name });
