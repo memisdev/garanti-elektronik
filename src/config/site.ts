@@ -4,7 +4,7 @@ export const siteConfig = {
   name: "Garanti Elektronik",
   shortName: "GE",
   description:
-    "Samsung, LG, Vestel ve daha fazlası için orijinal TV yedek parça ve anakart tedariki. Profesyonel teknik servisler için güvenilir çözüm ortağı.",
+    "Samsung, LG, Vestel ve daha fazlası için orijinal TV yedek parça ve anakart tedariği. Profesyonel teknik servisler için güvenilir çözüm ortağı.",
   url: "https://garantielektronik.net",
   whatsapp: {
     number: "905465125035",

@@ -74,7 +74,7 @@ export function generateProductDescription(product: Product): string {
 
   parts.push("Test edilmiş, çalışır durumda gönderilmektedir.");
   parts.push(
-    "Garanti Elektronik güvencesiyle orijinal ve kaliteli yedek parça tedariki."
+    "Garanti Elektronik güvencesiyle orijinal ve kaliteli yedek parça tedariği."
   );
 
   return parts.join(" ");

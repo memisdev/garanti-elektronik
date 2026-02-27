@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     absolute: "TV Yedek Parça ve Anakart | Garanti Elektronik",
   },
   description:
-    "Samsung, LG, Vestel ve daha fazlası için orijinal TV yedek parça ve anakart tedariki. 500+ ürün, aynı gün kargo, teknik destek.",
+    "Samsung, LG, Vestel ve daha fazlası için orijinal TV yedek parça ve anakart tedariği. 500+ ürün, aynı gün kargo, teknik destek.",
   alternates: { canonical: "/" },
 };
 

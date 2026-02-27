@@ -9,7 +9,7 @@ import { usePageContent } from "@/hooks/usePageContent";
 const defaults = {
   title_light: "Orijinal TV parçaları,",
   title_bold: "güvenilir tedarikçiniz.",
-  subtitle: "Samsung, LG, Vestel ve daha fazlası için orijinal yedek parça ve anakart tedariki.\nProfesyonel teknik servisler için güvenilir çözüm ortağı.",
+  subtitle: "Samsung, LG, Vestel ve daha fazlası için orijinal yedek parça ve anakart tedariği.\nProfesyonel teknik servisler için güvenilir çözüm ortağı.",
 };
 
 const HeroSection = () => {

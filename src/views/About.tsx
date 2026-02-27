@@ -7,7 +7,7 @@ import { Building2, Users, Award, Wrench } from "lucide-react";
 const STAT_ICONS = [Building2, Users, Award, Wrench];
 
 const defaults = {
-  hero_subtitle: "2010'dan beri Türkiye'nin dört bir yanındaki teknik servislere güvenilir TV yedek parça tedariki sağlıyoruz.",
+  hero_subtitle: "2014'den beri Türkiye'nin dört bir yanındaki teknik servislere güvenilir TV yedek parça tedariği sağlıyoruz.",
   intro: "Garanti Elektronik, TV yedek parça ve anakart sektöründe uzun yıllara dayanan tecrübesiyle hizmet vermektedir. Samsung, LG, Vestel, Philips, Arçelik, Sony ve Toshiba başta olmak üzere tüm büyük markaların orijinal ve muadil parçalarını tedarik etmekteyiz.\n\nMüşterilerimizin %90'ından fazlası profesyonel teknik servislerdir. Bu bize sektörün ihtiyaçlarını yakından tanıma ve stok planlamasını buna göre yapma avantajı sağlamaktadır.",
   mission: "Müşterilerimize en kaliteli elektronik yedek parçaları, uygun fiyatlarla ve hızlı teslimatla sunmak. Teknik destek ve uyumluluk danışmanlığı ile doğru parçayı bulmanızı sağlamak.",
   milestones: [

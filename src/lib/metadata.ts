@@ -69,7 +69,7 @@ export function getIndexMeta(): Metadata {
   return {
     title: "TV Yedek Parça ve Anakart | Garanti Elektronik",
     description:
-      "Samsung, LG, Vestel ve daha fazlası için orijinal TV yedek parça ve anakart tedariki. 500+ ürün, aynı gün kargo, teknik destek.",
+      "Samsung, LG, Vestel ve daha fazlası için orijinal TV yedek parça ve anakart tedariği. 500+ ürün, aynı gün kargo, teknik destek.",
     alternates: { canonical: "/" },
   };
 }
@@ -90,7 +90,7 @@ export function getProductsMeta(): Metadata {
 export function getAboutMeta(): Metadata {
   const title = "Hakkımızda";
   const description =
-    "2010'dan beri TV yedek parça tedarikinde güvenilir isim. Samsung, LG, Vestel ve daha fazlası.";
+    "2014'den beri TV yedek parça tedariğinde güvenilir isim. Samsung, LG, Vestel ve daha fazlası.";
   return {
     title,
     description,
