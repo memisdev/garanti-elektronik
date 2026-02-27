@@ -8,7 +8,7 @@ import { escapeIlike } from "@/lib/escapeIlike";
 import { slugify } from "@/lib/slugify";
 import { MAX_FEATURED_PRODUCTS } from "@/config/site";
 import { PRODUCT_STATUS_OPTIONS, DEFAULT_STATUS } from "@/lib/product-utils";
-import { Search, Plus, Pencil, Trash2, Loader2, ChevronLeft, ChevronRight, Star, Wand2 } from "lucide-react";
+import { Search, Plus, Pencil, Trash2, Loader2, ChevronLeft, ChevronRight, Star, Wand2, Sparkles } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
@@ -54,6 +54,8 @@ const AdminProducts = () => {
   const [faqQuestion, setFaqQuestion] = useState("");
   const [faqAnswer, setFaqAnswer] = useState("");
   const [processingImages, setProcessingImages] = useState<Set<string>>(new Set());
+  const [generatingName, setGeneratingName] = useState(false);
+  const [generatingDesc, setGeneratingDesc] = useState(false);
   const { log } = useAuditLog();
 
   const removeBackground = async (imageUrl: string) => {
@@ -189,6 +191,85 @@ const AdminProducts = () => {
     setForm({ ...form, specs: newSpecs });
   };
 
+  const generateProductName = async () => {
+    const brandName = brands.find((b) => b.id === form.brand_id)?.name;
+    const categoryName = categories.find((c) => c.id === form.category_id)?.name;
+
+    if (!form.code && !brandName && !categoryName && !form.compatibility) {
+      toast({ title: "AI için en az bir bilgi gerekli", description: "Kod, marka, kategori veya uyumluluk alanlarından birini doldurun.", variant: "destructive" });
+      return;
+    }
+
+    setGeneratingName(true);
+    try {
+      const resp = await fetch("/api/admin/generate-product-name", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: form.code || undefined,
+          brand: brandName || undefined,
+          category: categoryName || undefined,
+          compatibility: form.compatibility || undefined,
+          currentName: form.name || undefined,
+        }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        toast({ title: "AI hatası", description: data.error, variant: "destructive" });
+        return;
+      }
+      setForm((prev) => ({
+        ...prev,
+        name: data.name,
+        slug: editing ? prev.slug : slugify(data.name),
+      }));
+      toast({ title: "Ürün adı oluşturuldu" });
+    } catch {
+      toast({ title: "Bağlantı hatası", variant: "destructive" });
+    } finally {
+      setGeneratingName(false);
+    }
+  };
+
+  const generateProductDescription = async (isNewVersion: boolean) => {
+    if (!form.name.trim()) {
+      toast({ title: "Önce ürün adı gerekli", description: "Açıklama oluşturmak için ürün adını doldurun.", variant: "destructive" });
+      return;
+    }
+
+    const brandName = brands.find((b) => b.id === form.brand_id)?.name;
+    const categoryName = categories.find((c) => c.id === form.category_id)?.name;
+    const specsStr = Object.entries(form.specs).map(([k, v]) => `${k}: ${v}`).join(", ");
+
+    setGeneratingDesc(true);
+    try {
+      const resp = await fetch("/api/admin/generate-product-description", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          code: form.code || undefined,
+          brand: brandName || undefined,
+          category: categoryName || undefined,
+          compatibility: form.compatibility || undefined,
+          specs: specsStr || undefined,
+          existingDescription: isNewVersion ? form.description || undefined : undefined,
+        }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        toast({ title: "AI hatası", description: data.error, variant: "destructive" });
+        return;
+      }
+      setForm((prev) => ({ ...prev, description: data.description }));
+      toast({ title: isNewVersion ? "Yeni versiyon oluşturuldu" : "Açıklama oluşturuldu" });
+    } catch {
+      toast({ title: "Bağlantı hatası", variant: "destructive" });
+    } finally {
+      setGeneratingDesc(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!form.name.trim()) { toast({ title: "Ürün adı zorunludur.", variant: "destructive" }); return; }
     setSaving(true);
@@ -319,8 +400,15 @@ const AdminProducts = () => {
           <div className="space-y-4 py-2">
             <div>
               <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em] block mb-2">Ürün Adı *</label>
-              <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value, slug: editing ? form.slug : slugify(e.target.value) })}
-                className="w-full h-11 text-sm px-4 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10" />
+              <div className="flex gap-2">
+                <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value, slug: editing ? form.slug : slugify(e.target.value) })}
+                  className="flex-1 h-11 text-sm px-4 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10" />
+                <button type="button" onClick={generateProductName} disabled={generatingName}
+                  title="AI ile ürün adı oluştur"
+                  className="h-11 w-11 shrink-0 border border-border rounded-xl flex items-center justify-center hover:bg-accent transition-colors disabled:opacity-50">
+                  {generatingName ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -361,9 +449,23 @@ const AdminProducts = () => {
 
             {/* Description */}
             <div>
-              <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em] block mb-2">Açıklama</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em]">Açıklama</label>
+                <div className="flex items-center gap-1.5">
+                  <button type="button" onClick={() => generateProductDescription(false)} disabled={generatingDesc}
+                    className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground border border-border rounded-lg px-2.5 h-7 transition-colors disabled:opacity-50">
+                    {generatingDesc ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />} Oluştur
+                  </button>
+                  {form.description && (
+                    <button type="button" onClick={() => generateProductDescription(true)} disabled={generatingDesc}
+                      className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground border border-border rounded-lg px-2.5 h-7 transition-colors disabled:opacity-50">
+                      {generatingDesc ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />} Yeni Versiyon
+                    </button>
+                  )}
+                </div>
+              </div>
               <textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
-                className="w-full text-sm p-4 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10 resize-none" placeholder="Ürün açıklaması (boş bırakılırsa otomatik oluşturulur)..." />
+                className="w-full text-sm p-4 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10 resize-none" placeholder="Ürün açıklaması..." />
             </div>
 
             {/* Status */}

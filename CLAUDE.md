@@ -14,6 +14,7 @@
 - [x] Phase 9: SEO & Performance (canonical URLs, ISR, generateStaticParams, image sizes, caching headers, bundle analyzer, web vitals)
 - [x] Phase 10: Security, QA & Final Audit (security headers, Zod validation, rate limit cleanup, brute-force protection, CORS, env docs)
 - [x] Phase 11: SEO-friendly product detail pages (drawer→page, JSON-LD fix, breadcrumbs, FAQ, related products, mobile sticky CTA)
+- [x] Phase 12: AI product name & description generator (admin form AI buttons, batch processing page, system prompts, sanitizer)
 
 ## Decisions Log
 
@@ -64,6 +65,13 @@
 | Robots.txt disallows `/api/` (Phase 11) | API routes should not be crawled by search engines |
 | `safe-area-pb` CSS utility (Phase 11) | iPhone notch support for mobile sticky bar via `env(safe-area-inset-bottom)` |
 | Product section components in `src/components/product/` (Phase 11) | Modular architecture: Hero, Detail, Specs, Description, Compatibility, FAQ, RelatedProducts, MobileStickyBar |
+| AI product name/description via existing `getChatConfig()` (Phase 12) | Raw `fetch()` to Gemini OpenAI-compatible endpoint; no new SDK, consistent with existing AI infra |
+| System prompts in `src/lib/prompts/` (Phase 12) | Reusable, testable prompt files for name and description generation |
+| `sanitizeAIOutput()` shared utility (Phase 12) | Strips markdown/HTML from AI output; used by both API routes |
+| Temperature 0.3 for names, 0.8 for descriptions (Phase 12) | Low temp = consistent formatting; high temp = variety/uniqueness |
+| Client-side sequential loop for batch (Phase 12) | Avoids serverless function timeouts; supports pause/cancel; 500ms delay between requests |
+| Batch page admin-only via `adminOnly: true` (Phase 12) | Editors cannot run bulk AI operations; only visible for admin role |
+| Uniqueness via last 20 descriptions context (Phase 12) | Appends recent description snippets to system prompt to prevent repetitive output |
 
 ## Key Directories
 

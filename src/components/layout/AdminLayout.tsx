@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, Tag, FolderTree, Search as SearchIcon, FileEdit, Image, Users, ScrollText, LogOut, Tv, MessageSquare, Menu, X, FileText } from "lucide-react";
+import { LayoutDashboard, Package, Tag, FolderTree, Search as SearchIcon, FileEdit, Image, Users, ScrollText, LogOut, Tv, MessageSquare, Menu, X, FileText, Wand2 } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +19,7 @@ const sidebarItems: { label: string; href: string; icon: typeof LayoutDashboard;
   { label: "İşlem Kaydı", href: "/admin/islem-kaydi", icon: ScrollText },
   { label: "TV Modelleri", href: "/admin/tv-modelleri", icon: Tv },
   { label: "Sayfa İçerikleri", href: "/admin/sayfa-icerikleri", icon: FileText },
+  { label: "Toplu AI", href: "/admin/toplu-ai", icon: Wand2, adminOnly: true },
 ];
 
 const UNREAD_CACHE_TTL = 30_000; // 30 seconds
