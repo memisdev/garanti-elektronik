@@ -82,8 +82,11 @@ export async function POST(req: NextRequest) {
             { role: "system", content: PRODUCT_NAME_SYSTEM_PROMPT },
             { role: "user", content: userPrompt },
           ],
-          temperature: 0.3,
-          max_tokens: 100,
+          temperature: 0.4,
+          // Use max_completion_tokens (not max_tokens) — Gemini thinking models
+          // count thinking tokens against max_tokens budget, leaving almost nothing
+          // for visible output. max_completion_tokens only caps visible output.
+          max_completion_tokens: 1024,
         }),
         signal: controller.signal,
       });
@@ -120,16 +123,24 @@ export async function POST(req: NextRequest) {
     const data = await aiResponse.json();
     const raw = data?.choices?.[0]?.message?.content ?? "";
 
-    // Sanitize + post-processing
+    console.log("[generate-product-name] raw AI response:", JSON.stringify(raw));
+
+    // Post-processing: take first line, strip markdown/quotes artifacts
     let name = sanitizeAIOutput(raw)
-      .replace(/^["']+|["']+$/g, "") // strip surrounding quotes
+      .split("\n")[0] // Only first line (model may add explanations)
+      .replace(/^["'`]+|["'`]+$/g, "") // surrounding quotes/backticks
+      .replace(/^\*+|\*+$/g, "") // markdown bold markers
+      .replace(/^#+\s*/, "") // markdown headings
+      .replace(/^[-•]\s*/, "") // list markers
+      .replace(/\s+/g, " ") // collapse whitespace
       .replace(/,\s*$/, "") // trailing comma
-      .replace(/ {2,}/g, " ") // double spaces
       .trim();
 
-    if (!name) {
+    // Minimum quality check — reject ultra-short output (thinking model token starvation)
+    if (!name || name.length < 10) {
+      console.error("[generate-product-name] Output too short:", JSON.stringify(name), "raw:", JSON.stringify(raw));
       return NextResponse.json(
-        { error: "AI bir ürün adı oluşturamadı" },
+        { error: "AI çok kısa bir ad üretti. Lütfen tekrar deneyin." },
         { status: 500 },
       );
     }

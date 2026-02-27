@@ -20,7 +20,7 @@ const requestSchema = z.object({
   existingDescription: z.string().max(2000).optional(),
 });
 
-const TIMEOUT_MS = 20_000;
+const TIMEOUT_MS = 30_000;
 const CONTEXT_DESCRIPTIONS_COUNT = 20;
 const CONTEXT_DESCRIPTION_MAX_CHARS = 150;
 
@@ -101,8 +101,11 @@ export async function POST(req: NextRequest) {
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
           ],
-          temperature: 0.8,
-          max_tokens: 800,
+          temperature: 0.75,
+          // Use max_completion_tokens (not max_tokens) — Gemini thinking models
+          // count thinking tokens against max_tokens budget, leaving almost nothing
+          // for visible output. max_completion_tokens only caps visible output.
+          max_completion_tokens: 4096,
         }),
         signal: controller.signal,
       });
@@ -139,11 +142,15 @@ export async function POST(req: NextRequest) {
     const data = await aiResponse.json();
     const raw = data?.choices?.[0]?.message?.content ?? "";
 
+    console.log("[generate-product-description] raw AI response length:", raw.length, "finish:", data?.choices?.[0]?.finish_reason);
+
     const description = sanitizeAIOutput(raw);
 
-    if (!description) {
+    // Minimum quality check — reject truncated or empty output
+    if (!description || description.length < 100) {
+      console.error("[generate-product-description] Output too short:", description.length, "raw:", JSON.stringify(raw).slice(0, 200));
       return NextResponse.json(
-        { error: "AI bir ürün açıklaması oluşturamadı" },
+        { error: "AI çok kısa bir açıklama üretti. Lütfen tekrar deneyin." },
         { status: 500 },
       );
     }

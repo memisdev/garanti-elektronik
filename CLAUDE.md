@@ -68,7 +68,10 @@
 | AI product name/description via existing `getChatConfig()` (Phase 12) | Raw `fetch()` to Gemini OpenAI-compatible endpoint; no new SDK, consistent with existing AI infra |
 | System prompts in `src/lib/prompts/` (Phase 12) | Reusable, testable prompt files for name and description generation |
 | `sanitizeAIOutput()` shared utility (Phase 12) | Strips markdown/HTML from AI output; used by both API routes |
-| Temperature 0.3 for names, 0.8 for descriptions (Phase 12) | Low temp = consistent formatting; high temp = variety/uniqueness |
+| `max_completion_tokens` not `max_tokens` for Gemini thinking models (Phase 12) | `max_tokens` caps total budget including thinking; `max_completion_tokens` caps only visible output |
+| Token budgets: 1024 for names, 4096 for descriptions (Phase 12) | Gemini thinking model uses ~200-900 thinking tokens; low budgets cause truncation |
+| Temperature 0.4 for names, 0.75 for descriptions (Phase 12) | Slightly higher than initial for better name variety; slightly lower for descriptions to stay on-topic |
+| Minimum output length validation: 10 chars (name), 100 chars (desc) (Phase 12) | Catches thinking-model token starvation producing ultra-short garbage |
 | Client-side sequential loop for batch (Phase 12) | Avoids serverless function timeouts; supports pause/cancel; 500ms delay between requests |
 | Batch page admin-only via `adminOnly: true` (Phase 12) | Editors cannot run bulk AI operations; only visible for admin role |
 | Uniqueness via last 20 descriptions context (Phase 12) | Appends recent description snippets to system prompt to prevent repetitive output |
