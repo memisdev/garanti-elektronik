@@ -28,9 +28,13 @@ const defaults = {
   items: defaultFaqs,
 };
 
-const FAQ = () => {
+interface FAQProps {
+  initialContent?: Record<string, unknown>;
+}
+
+const FAQ = ({ initialContent }: FAQProps) => {
   const contentRef = useRevealOnScroll<HTMLDivElement>();
-  const { content } = usePageContent("faq", defaults);
+  const { content } = usePageContent("faq", defaults, { initialData: initialContent });
   const faqs = content.items as { q: string; a: string }[];
 
   return (

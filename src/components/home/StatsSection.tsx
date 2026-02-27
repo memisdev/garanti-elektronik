@@ -12,9 +12,13 @@ const defaultStats = {
   ],
 };
 
-const StatsSection = () => {
+interface StatsSectionProps {
+  initialContent?: Record<string, unknown>;
+}
+
+const StatsSection = ({ initialContent }: StatsSectionProps) => {
   const sectionRef = useRevealOnScroll<HTMLElement>();
-  const { content } = usePageContent("home_stats", defaultStats);
+  const { content } = usePageContent("home_stats", defaultStats, { initialData: initialContent });
   const stats = content.stats as { value: string; label: string }[];
 
   return (
@@ -24,9 +28,8 @@ const StatsSection = () => {
           {stats.map((stat, i) => (
             <div
               key={i}
-              className={`reveal-on-scroll delay-${i + 1} text-center relative ${
-                i < stats.length - 1 ? 'md:border-r md:border-border/50' : ''
-              }`}
+              className={`reveal-on-scroll delay-${i + 1} text-center relative ${i < stats.length - 1 ? 'md:border-r md:border-border/50' : ''
+                }`}
             >
               <p className="text-4xl sm:text-5xl md:text-[3.5rem] font-black text-foreground tracking-[-0.03em] stat-number mb-3">
                 {stat.value}

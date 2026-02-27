@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 import About from "@/views/About";
 import { getAboutMeta } from "@/lib/metadata";
+import { fetchPageContentServer } from "@/lib/queries/pageContentServer";
 
 export const revalidate = 86400;
 
-const meta = getAboutMeta();
-export const metadata: Metadata = {
-  title: "Hakkımızda",
-  description: meta.description,
-};
+export const metadata: Metadata = getAboutMeta();
 
-export default function AboutPage() {
-  return <About />;
+export default async function AboutPage() {
+  const initialContent = await fetchPageContentServer("about");
+  return <About initialContent={initialContent} />;
 }

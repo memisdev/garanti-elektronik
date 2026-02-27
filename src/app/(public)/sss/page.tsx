@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 import FAQ from "@/views/FAQ";
 import { getFAQMeta } from "@/lib/metadata";
+import { fetchPageContentServer } from "@/lib/queries/pageContentServer";
 
 export const revalidate = 86400;
 
-const meta = getFAQMeta();
-export const metadata: Metadata = {
-  title: "Sıkça Sorulan Sorular",
-  description: meta.description,
-};
+export const metadata: Metadata = getFAQMeta();
 
-export default function FAQPage() {
-  return <FAQ />;
+export default async function FAQPage() {
+  const initialContent = await fetchPageContentServer("faq");
+  return <FAQ initialContent={initialContent} />;
 }

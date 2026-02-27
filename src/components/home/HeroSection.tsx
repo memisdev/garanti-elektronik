@@ -12,9 +12,13 @@ const defaults = {
   subtitle: "Samsung, LG, Vestel ve daha fazlası için orijinal yedek parça ve anakart tedariği.\nProfesyonel teknik servisler için güvenilir çözüm ortağı.",
 };
 
-const HeroSection = () => {
+interface HeroSectionProps {
+  initialContent?: Record<string, unknown>;
+}
+
+const HeroSection = ({ initialContent }: HeroSectionProps) => {
   const sectionRef = useRevealOnScroll<HTMLElement>();
-  const { content } = usePageContent("home_hero", defaults);
+  const { content } = usePageContent("home_hero", defaults, { initialData: initialContent });
 
   return (
     <section ref={sectionRef} className="relative min-h-[90vh] bg-foreground overflow-hidden grain-overlay">

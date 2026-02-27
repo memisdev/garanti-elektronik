@@ -8,30 +8,38 @@ import { ArrowRight, Shield, RotateCcw, AlertTriangle, CheckCircle } from "lucid
 const icons = [Shield, RotateCcw, AlertTriangle, CheckCircle];
 
 const defaultSections = [
-  { title: "Garanti Koşulları", items: [
-    "Orijinal ürünlerde 6 ay, muadil ürünlerde 3 ay garanti süresi uygulanır.",
-    "Garanti süresi, ürünün kargo ile teslim edildiği tarihten itibaren başlar.",
-    "Garanti kapsamında arızalı ürünler ücretsiz olarak değiştirilir.",
-    "Garanti belgesi ve fatura muhafaza edilmelidir.",
-  ]},
-  { title: "İade Koşulları", items: [
-    "Ürün teslim tarihinden itibaren 14 gün içinde iade talebi oluşturulabilir.",
-    "İade edilecek ürün kullanılmamış, orijinal ambalajında ve hasarsız olmalıdır.",
-    "İade kargo ücreti alıcıya aittir, hatalı/arızalı gönderimlerde kargo tarafımızca karşılanır.",
-    "İade tutarı, ürünün tarafımıza ulaşmasından itibaren 3 iş günü içinde iade edilir.",
-  ]},
-  { title: "Garanti Dışı Durumlar", items: [
-    "Kullanıcı hatası veya yanlış montajdan kaynaklanan arızalar.",
-    "Fiziksel darbe, su teması veya elektrik dalgalanmasından kaynaklanan hasarlar.",
-    "Yetkisiz müdahale görmüş ürünler.",
-    "Garanti süresi dolmuş ürünler.",
-  ]},
-  { title: "Değişim Süreci", items: [
-    "WhatsApp veya İletişim formu üzerinden iade/değişim talebinizi iletin.",
-    "Ürün fotoğrafı ve fatura bilgisi paylaşın.",
-    "Onay sonrası ürünü belirtilen adrese kargolayın.",
-    "Yeni ürün, iade ürünün tarafımıza ulaşmasından sonra 1-2 iş günü içinde gönderilir.",
-  ]},
+  {
+    title: "Garanti Koşulları", items: [
+      "Orijinal ürünlerde 6 ay, muadil ürünlerde 3 ay garanti süresi uygulanır.",
+      "Garanti süresi, ürünün kargo ile teslim edildiği tarihten itibaren başlar.",
+      "Garanti kapsamında arızalı ürünler ücretsiz olarak değiştirilir.",
+      "Garanti belgesi ve fatura muhafaza edilmelidir.",
+    ]
+  },
+  {
+    title: "İade Koşulları", items: [
+      "Ürün teslim tarihinden itibaren 14 gün içinde iade talebi oluşturulabilir.",
+      "İade edilecek ürün kullanılmamış, orijinal ambalajında ve hasarsız olmalıdır.",
+      "İade kargo ücreti alıcıya aittir, hatalı/arızalı gönderimlerde kargo tarafımızca karşılanır.",
+      "İade tutarı, ürünün tarafımıza ulaşmasından itibaren 3 iş günü içinde iade edilir.",
+    ]
+  },
+  {
+    title: "Garanti Dışı Durumlar", items: [
+      "Kullanıcı hatası veya yanlış montajdan kaynaklanan arızalar.",
+      "Fiziksel darbe, su teması veya elektrik dalgalanmasından kaynaklanan hasarlar.",
+      "Yetkisiz müdahale görmüş ürünler.",
+      "Garanti süresi dolmuş ürünler.",
+    ]
+  },
+  {
+    title: "Değişim Süreci", items: [
+      "WhatsApp veya İletişim formu üzerinden iade/değişim talebinizi iletin.",
+      "Ürün fotoğrafı ve fatura bilgisi paylaşın.",
+      "Onay sonrası ürünü belirtilen adrese kargolayın.",
+      "Yeni ürün, iade ürünün tarafımıza ulaşmasından sonra 1-2 iş günü içinde gönderilir.",
+    ]
+  },
 ];
 
 const defaults = {
@@ -39,9 +47,13 @@ const defaults = {
   sections: defaultSections,
 };
 
-const WarrantyReturn = () => {
+interface WarrantyReturnProps {
+  initialContent?: Record<string, unknown>;
+}
+
+const WarrantyReturn = ({ initialContent }: WarrantyReturnProps) => {
   const contentRef = useRevealOnScroll<HTMLDivElement>();
-  const { content } = usePageContent("warranty", defaults);
+  const { content } = usePageContent("warranty", defaults, { initialData: initialContent });
   const sections = content.sections as { title: string; items: string[] }[];
 
   return (

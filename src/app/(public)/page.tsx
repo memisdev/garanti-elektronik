@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import Index from "@/views/Index";
+import Index, { type IndexPageContent } from "@/views/Index";
 import { WebSiteJsonLd } from "@/components/seo/JsonLd";
+import { fetchPageContentServer } from "@/lib/queries/pageContentServer";
 
 export const revalidate = 3600;
 
@@ -13,11 +14,25 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [home_hero, home_cta, home_stats, home_features] = await Promise.all([
+    fetchPageContentServer("home_hero"),
+    fetchPageContentServer("home_cta"),
+    fetchPageContentServer("home_stats"),
+    fetchPageContentServer("home_features"),
+  ]);
+
+  const initialPageContent: IndexPageContent = {
+    home_hero,
+    home_cta,
+    home_stats,
+    home_features,
+  };
+
   return (
     <>
       <WebSiteJsonLd />
-      <Index />
+      <Index initialPageContent={initialPageContent} />
     </>
   );
 }

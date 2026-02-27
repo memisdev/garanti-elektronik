@@ -25,7 +25,18 @@ const ctaDefaults = {
   subtitle: "500+ ürün portföyümüzle aradığınız parçayı hızlıca temin ediyoruz.\nUzman ekibimiz her zaman yanınızda.",
 };
 
-const Index = () => {
+export interface IndexPageContent {
+  home_hero?: Record<string, unknown>;
+  home_cta?: Record<string, unknown>;
+  home_stats?: Record<string, unknown>;
+  home_features?: Record<string, unknown>;
+}
+
+interface IndexProps {
+  initialPageContent?: IndexPageContent;
+}
+
+const Index = ({ initialPageContent }: IndexProps) => {
   const { brands } = useBrands();
   const { products: featuredProducts } = useFeaturedProducts();
   const { products: recentProducts } = useRecentProducts();
@@ -35,7 +46,9 @@ const Index = () => {
   const categoriesRef = useRevealOnScroll();
   const ctaRef = useRevealOnScroll();
   const recentRef = useRevealOnScroll();
-  const { content: ctaContent } = usePageContent("home_cta", ctaDefaults);
+  const { content: ctaContent } = usePageContent("home_cta", ctaDefaults, {
+    initialData: initialPageContent?.home_cta as typeof ctaDefaults | undefined,
+  });
 
   const heroProduct = featuredProducts[0];
   const restProducts = featuredProducts.slice(1);
@@ -48,7 +61,7 @@ const Index = () => {
   return (
     <div>
       <OrganizationJsonLd />
-      <HeroSection />
+      <HeroSection initialContent={initialPageContent?.home_hero as Parameters<typeof HeroSection>[0]["initialContent"]} />
       <BrandMarquee brands={brands} />
 
       {/* ===== Circular Categories ===== */}
@@ -131,8 +144,8 @@ const Index = () => {
                         {heroProduct.code}
                       </p>
                     )}
-                     <div className="flex gap-2.5">
-                       <span className="inline-flex items-center justify-center text-[13px] font-semibold py-3 px-7 text-foreground border border-border rounded-lg group-hover:bg-foreground group-hover:text-primary-foreground transition-all duration-300">
+                    <div className="flex gap-2.5">
+                      <span className="inline-flex items-center justify-center text-[13px] font-semibold py-3 px-7 text-foreground border border-border rounded-lg group-hover:bg-foreground group-hover:text-primary-foreground transition-all duration-300">
                         Detay
                       </span>
                       <span
@@ -168,8 +181,8 @@ const Index = () => {
       <div ref={lazyFeaturesRef}>
         {featuresVisible && (
           <Suspense fallback={null}>
-            <FeaturesSection />
-            <StatsSection />
+            <FeaturesSection initialContent={initialPageContent?.home_features as Parameters<typeof FeaturesSection>[0]["initialContent"]} />
+            <StatsSection initialContent={initialPageContent?.home_stats as Parameters<typeof StatsSection>[0]["initialContent"]} />
           </Suspense>
         )}
       </div>

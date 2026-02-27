@@ -26,7 +26,11 @@ const defaults = {
   hero_subtitle: "Sorularınız, teknik destek talepleriniz veya sipariş bilgisi için bize ulaşın. En kısa sürede dönüş yapacağız.",
 };
 
-const Contact = () => {
+interface ContactProps {
+  initialContent?: Record<string, unknown>;
+}
+
+const Contact = ({ initialContent }: ContactProps) => {
   const [submitting, setSubmitting] = useState(false);
   const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
@@ -35,7 +39,7 @@ const Contact = () => {
   const infoRef = useRevealOnScroll<HTMLElement>();
   const formRef = useRevealOnScroll<HTMLDivElement>();
   const mapRef = useRevealOnScroll<HTMLDivElement>();
-  const { content } = usePageContent("contact", defaults);
+  const { content } = usePageContent("contact", defaults, { initialData: initialContent });
 
   const onSubmit = async (data: ContactFormData) => {
     setSubmitting(true);

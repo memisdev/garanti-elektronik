@@ -35,11 +35,15 @@ const defaults = {
   ],
 };
 
-const About = () => {
+interface AboutProps {
+  initialContent?: Record<string, unknown>;
+}
+
+const About = ({ initialContent }: AboutProps) => {
   const contentRef = useRevealOnScroll();
   const timelineRef = useRevealOnScroll();
   const teamRef = useRevealOnScroll();
-  const { content } = usePageContent("about", defaults);
+  const { content } = usePageContent("about", defaults, { initialData: initialContent });
 
   const milestones = content.milestones as { year: string; event: string }[];
   const team = content.team as { role: string; count: string; desc: string }[];

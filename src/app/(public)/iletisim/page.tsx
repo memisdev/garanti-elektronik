@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 import Contact from "@/views/Contact";
 import { getContactMeta } from "@/lib/metadata";
+import { fetchPageContentServer } from "@/lib/queries/pageContentServer";
 
 export const revalidate = 86400;
 
-const meta = getContactMeta();
-export const metadata: Metadata = {
-  title: "İletişim",
-  description: meta.description,
-};
+export const metadata: Metadata = getContactMeta();
 
-export default function ContactPage() {
-  return <Contact />;
+export default async function ContactPage() {
+  const initialContent = await fetchPageContentServer("contact");
+  return <Contact initialContent={initialContent} />;
 }

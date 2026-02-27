@@ -10,9 +10,13 @@ const defaults = {
   manage: "Tarayıcı ayarlarınızdan çerezleri devre dışı bırakabilir veya silebilirsiniz. Ancak bu durumda sitenin bazı özellikleri düzgün çalışmayabilir.",
 };
 
-const CookiePolicy = () => {
+interface CookiePolicyProps {
+  initialContent?: Record<string, unknown>;
+}
+
+const CookiePolicy = ({ initialContent }: CookiePolicyProps) => {
   const contentRef = useRevealOnScroll();
-  const { content } = usePageContent("cookie", defaults);
+  const { content } = usePageContent("cookie", defaults, { initialData: initialContent });
 
   return (
     <div>

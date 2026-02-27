@@ -10,9 +10,13 @@ const defaults = {
   rights: "KVKK kapsamında kişisel verilerinizin işlenip işlenmediğini öğrenme, düzeltilmesini isteme, silinmesini talep etme haklarına sahipsiniz. Bu haklarınızı kullanmak için info@garantielektronik.net adresinden bizimle iletişime geçebilirsiniz.",
 };
 
-const PrivacyKVKK = () => {
+interface PrivacyKVKKProps {
+  initialContent?: Record<string, unknown>;
+}
+
+const PrivacyKVKK = ({ initialContent }: PrivacyKVKKProps) => {
   const contentRef = useRevealOnScroll();
-  const { content } = usePageContent("privacy", defaults);
+  const { content } = usePageContent("privacy", defaults, { initialData: initialContent });
 
   return (
     <div>

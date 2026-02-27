@@ -19,9 +19,13 @@ const defaults = {
   features: defaultFeatures,
 };
 
-const FeaturesSection = () => {
+interface FeaturesSectionProps {
+  initialContent?: Record<string, unknown>;
+}
+
+const FeaturesSection = ({ initialContent }: FeaturesSectionProps) => {
   const sectionRef = useRevealOnScroll<HTMLElement>();
-  const { content } = usePageContent("home_features", defaults);
+  const { content } = usePageContent("home_features", defaults, { initialData: initialContent });
 
   const featureItems = (content.features as string[]).map((f, i) => {
     const [title, desc] = typeof f === "string" ? f.split("|") : [f, ""];
