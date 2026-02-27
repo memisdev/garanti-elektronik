@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -56,14 +57,23 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const nonce = (await headers()).get("x-nonce") ?? "";
+
   return (
     <html lang="tr" className={inter.variable} suppressHydrationWarning>
       <head>
+        {/* Trusted Types default policy — must run before any DOM manipulation */}
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{
+            __html: `if(window.trustedTypes&&trustedTypes.createPolicy){trustedTypes.createPolicy('default',{createHTML:s=>s,createScriptURL:s=>s,createScript:s=>s})}`,
+          }}
+        />
         {process.env.NEXT_PUBLIC_SUPABASE_URL && (
           <>
             <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />

@@ -1,6 +1,24 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+function buildCspHeader(nonce: string): string {
+  return [
+    "default-src 'self'",
+    // 'unsafe-inline' and https: are fallbacks for browsers without strict-dynamic support
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline' https:`,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: https://*.supabase.co",
+    "font-src 'self'",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://generativelanguage.googleapis.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",
+    "frame-src 'self' https://www.google.com",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "require-trusted-types-for 'script'",
+    "trusted-types default",
+  ].join("; ");
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -17,12 +35,24 @@ export async function middleware(request: NextRequest) {
     });
   }
 
-  let supabaseResponse = NextResponse.next({ request });
+  // Generate a unique nonce per request for CSP
+  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  const cspHeader = buildCspHeader(nonce);
+
+  // Pass nonce to server components via request headers
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-nonce", nonce);
+
+  let supabaseResponse = NextResponse.next({
+    request: { headers: requestHeaders },
+  });
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!supabaseUrl || !supabaseKey) {
-    return NextResponse.next({ request });
+    supabaseResponse.headers.set("Content-Security-Policy", cspHeader);
+    supabaseResponse.headers.set("x-nonce", nonce);
+    return supabaseResponse;
   }
 
   const supabase = createServerClient(
@@ -37,7 +67,9 @@ export async function middleware(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
-          supabaseResponse = NextResponse.next({ request });
+          supabaseResponse = NextResponse.next({
+            request: { headers: requestHeaders },
+          });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options),
           );
@@ -58,6 +90,10 @@ export async function middleware(request: NextRequest) {
     loginUrl.search = "";
     return NextResponse.redirect(loginUrl);
   }
+
+  // Set CSP on the final response (after Supabase may have recreated it)
+  supabaseResponse.headers.set("Content-Security-Policy", cspHeader);
+  supabaseResponse.headers.set("x-nonce", nonce);
 
   return supabaseResponse;
 }

@@ -75,6 +75,11 @@
 | Temperature 0.4 for names, 0.75 for descriptions (Phase 12) | Slightly higher than initial for better name variety; slightly lower for descriptions to stay on-topic |
 | Minimum output length validation: 10 chars (name), 100 chars (desc) (Phase 12) | Catches thinking-model token starvation producing ultra-short garbage |
 | Client-side sequential loop for batch (Phase 12) | Avoids serverless function timeouts; supports pause/cancel; 500ms delay between requests |
+| Nonce-based CSP with `strict-dynamic` (Phase 13) | Middleware generates per-request nonce; `'unsafe-inline'` + `https:` kept as fallback for older browsers (ignored when `strict-dynamic` active) |
+| `Cross-Origin-Opener-Policy: same-origin` (Phase 13) | Isolates browsing context from cross-origin popups; prevents Spectre-type side-channel attacks |
+| Trusted Types default policy (Phase 13) | `require-trusted-types-for 'script'` in CSP; permissive default policy in `<head>` handles React/library DOM sinks; infrastructure for future tightening |
+| CSP moved from `next.config.ts` to middleware (Phase 13) | Dynamic per-request nonce requires middleware; static headers in next.config can't generate nonces |
+| Root layout `async` with `headers()` (Phase 13) | Reads `x-nonce` from middleware; makes layout dynamic (fresh nonce per request); child pages still support ISR |
 | Batch page admin-only via `adminOnly: true` (Phase 12) | Editors cannot run bulk AI operations; only visible for admin role |
 | Uniqueness via last 20 descriptions context (Phase 12) | Appends recent description snippets to system prompt to prevent repetitive output |
 
