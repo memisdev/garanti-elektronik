@@ -43,8 +43,10 @@ export async function POST(request: NextRequest) {
       email_confirm: true,
     });
 
-  if (createError) {
-    console.error("invite-user createUser error:", createError.message);
+  if (createError || !newUser?.user) {
+    if (createError) {
+      console.error("invite-user createUser error:", createError.message);
+    }
     return NextResponse.json(
       { error: "Kullanıcı oluşturulurken bir hata oluştu" },
       { status: 400 },
@@ -58,9 +60,10 @@ export async function POST(request: NextRequest) {
 
   if (roleError) {
     console.error("invite-user role assignment error:", roleError.message);
+    await serviceClient.auth.admin.deleteUser(newUser.user.id);
     return NextResponse.json(
-      { error: "Rol atanırken bir hata oluştu" },
-      { status: 400 },
+      { error: "Rol atanırken bir hata oluştu. Kullanıcı geri alındı." },
+      { status: 500 },
     );
   }
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/admin";
 import { getChatConfig } from "@/lib/ai/client";
 import { rateLimit } from "@/lib/rate-limit";
+import { buildRateLimitKey } from "@/lib/client-ip";
 
 // Cache product catalog in memory with 5-minute TTL.
 // Note: In serverless (Vercel), each function instance has its own cache.
@@ -39,9 +40,7 @@ async function getProductList(): Promise<string> {
 
 export async function POST(req: NextRequest) {
   // Rate limiting
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  const limit = rateLimit("part-finder-ai", ip, {
+  const limit = rateLimit("part-finder-ai", buildRateLimitKey(req.headers), {
     windowMs: 60 * 1000,
     maxRequests: 10,
   });

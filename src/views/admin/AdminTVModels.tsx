@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,7 +74,7 @@ const AdminTVModels = () => {
   const [productSearch, setProductSearch] = useState("");
   const [addingProduct, setAddingProduct] = useState(false);
 
-  const fetchModels = async () => {
+  const fetchModels = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase.from("tv_models").select("*, brands(name)").order("model_number");
     if (error) { toast({ title: "Hata", description: "Modeller yüklenemedi.", variant: "destructive" }); }
@@ -82,21 +82,21 @@ const AdminTVModels = () => {
       setModels((data as TvModelQueryRow[]).map((d) => ({ ...d, brand_name: d.brands?.name })));
     }
     setLoading(false);
-  };
+  }, [toast]);
 
-  const fetchBrands = async () => {
+  const fetchBrands = useCallback(async () => {
     const { data, error } = await supabase.from("brands").select("id, name").order("name");
     if (error) { console.error("Failed to fetch brands:", error); }
     if (data) setBrands(data);
-  };
+  }, []);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     const { data, error } = await supabase.from("products").select("id, name, code").order("name");
     if (error) { console.error("Failed to fetch products:", error); }
     if (data) setProducts(data);
-  };
+  }, []);
 
-  const fetchCompatibilities = async (modelId: string) => {
+  const fetchCompatibilities = useCallback(async (modelId: string) => {
     setCompLoading(true);
     const { data, error } = await supabase
       .from("model_product_compatibility")
@@ -115,17 +115,17 @@ const AdminTVModels = () => {
       );
     }
     setCompLoading(false);
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchModels();
     fetchBrands();
     fetchProducts();
-  }, []);
+  }, [fetchModels, fetchBrands, fetchProducts]);
 
   useEffect(() => {
     if (selectedModel) fetchCompatibilities(selectedModel.id);
-  }, [selectedModel?.id]);
+  }, [selectedModel, fetchCompatibilities]);
 
   const handleSaveModel = async () => {
     if (!formData.model_number.trim()) return;

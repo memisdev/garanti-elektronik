@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/rate-limit";
 import { headers } from "next/headers";
+import { buildRateLimitKey } from "@/lib/client-ip";
 
 const contactSchema = z.object({
   name: z.string().min(2, "İsim en az 2 karakter olmalıdır."),
@@ -27,9 +28,7 @@ export async function submitContactForm(
 
   // IP-based rate limiting
   const headerStore = await headers();
-  const ip =
-    headerStore.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  const limit = rateLimit("contact-form", ip, {
+  const limit = rateLimit("contact-form", buildRateLimitKey(headerStore), {
     windowMs: 5 * 60 * 1000,
     maxRequests: 3,
   });
@@ -70,11 +69,13 @@ export async function submitContactForm(
   } catch (err) {
     console.error("Resend email error:", err);
     // Record the email failure in contact_messages so admin can see it
-    await supabase
+    const { error: updateError } = await supabase
       .from("contact_messages")
       .update({ email_sent: false } as Record<string, boolean>)
-      .eq("id", inserted.id)
-      .then(() => { }, () => { });
+      .eq("id", inserted.id);
+    if (updateError) {
+      console.error("Contact form email_sent update error:", updateError);
+    }
   }
 
   return { success: true };

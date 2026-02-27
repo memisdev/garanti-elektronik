@@ -28,36 +28,39 @@ const AdminMedia = () => {
 
     // Find subdirectories and list their contents
     const folders = (rootData || []).filter((f) => f.id === null || (f.metadata === null && !f.id));
-    const subFiles: MediaFile[] = [];
-    for (const folder of folders) {
-      const { data: subData } = await supabase.storage.from("product-images").list(folder.name, { limit: 200, sortBy: { column: "created_at", order: "desc" } });
-      if (subData) {
-        for (const sf of subData) {
-          if (sf.name !== ".emptyFolderPlaceholder") {
-            subFiles.push({ ...sf, name: `${folder.name}/${sf.name}` } as MediaFile);
-          }
-        }
-      }
-    }
+    const subListings = await Promise.all(
+      folders.map((folder) =>
+        supabase.storage
+          .from("product-images")
+          .list(folder.name, { limit: 200, sortBy: { column: "created_at", order: "desc" } })
+          .then(({ data }) => ({ folderName: folder.name, data: data ?? [] })),
+      ),
+    );
+
+    const subFiles: MediaFile[] = subListings.flatMap(({ folderName, data }) =>
+      data
+        .filter((sf) => sf.name !== ".emptyFolderPlaceholder")
+        .map((sf) => ({ ...sf, name: `${folderName}/${sf.name}` } as MediaFile)),
+    );
 
     const actualRootFiles = rootFiles.filter((f) => f.id !== null && f.metadata !== null);
     const allFiles = [...actualRootFiles, ...subFiles];
     setFiles(allFiles);
 
     // Check which files have processed versions
-    const processedNames = new Set<string>();
-    for (const f of allFiles) {
-      if (f.name.startsWith("processed/")) {
-        // Find the original name this corresponds to
-        const origName = f.name.replace("processed/", "").replace(/\.png$/, "");
-        // Match against original files (strip extension for comparison)
-        for (const of of allFiles) {
-          if (!of.name.startsWith("processed/") && of.name.replace(/\.[^.]+$/, "") === origName) {
-            processedNames.add(of.name);
-          }
-        }
-      }
-    }
+    const processedBaseNames = new Set(
+      allFiles
+        .filter((f) => f.name.startsWith("processed/"))
+        .map((f) => f.name.replace("processed/", "").replace(/\.[^.]+$/, "")),
+    );
+
+    const processedNames = new Set(
+      allFiles
+        .filter((f) => !f.name.startsWith("processed/"))
+        .filter((f) => processedBaseNames.has(f.name.replace(/\.[^.]+$/, "")))
+        .map((f) => f.name),
+    );
+
     setProcessedFiles(processedNames);
     setLoading(false);
   };

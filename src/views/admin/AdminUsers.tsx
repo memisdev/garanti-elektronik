@@ -82,17 +82,30 @@ const AdminUsers = () => {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    const { error } = await supabase.from("user_roles").delete().eq("id", deleteTarget.id);
-    if (error) { toast({ title: "Hata", description: error.message, variant: "destructive" }); return; }
+    const res = await fetch("/api/admin/remove-user-role", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ roleId: deleteTarget.id }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      toast({ title: "Hata", description: data?.error || "Rol kaldırılamadı.", variant: "destructive" });
+      return;
+    }
     toast({ title: "Kullanıcı rolü kaldırıldı" });
     setDeleteTarget(null);
     fetchUsers();
   };
 
   const changeRole = async (userRole: UserRole, newRole: "admin" | "editor") => {
-    const { error } = await supabase.from("user_roles").update({ role: newRole }).eq("id", userRole.id);
-    if (error) {
-      toast({ title: "Hata", description: error.message, variant: "destructive" });
+    const res = await fetch("/api/admin/update-user-role", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ roleId: userRole.id, role: newRole }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      toast({ title: "Hata", description: data?.error || "Rol güncellenemedi.", variant: "destructive" });
       return;
     }
     toast({ title: "Rol güncellendi" });

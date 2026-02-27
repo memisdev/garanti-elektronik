@@ -111,8 +111,7 @@ const AdminPageContents = () => {
   const [formData, setFormData] = useState<SectionData>({});
   const queryClient = useQueryClient();
 
-  const pageDef = PAGE_DEFS.find((p) => p.key === activePage);
-  if (!pageDef) return null;
+  const pageDef = PAGE_DEFS.find((p) => p.key === activePage) ?? PAGE_DEFS[0];
 
   const { data: dbRows, isLoading } = useQuery({
     queryKey: ["admin-page-contents", activePage],

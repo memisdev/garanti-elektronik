@@ -85,7 +85,7 @@ export default async function ProductDetailPage({
     const remaining = 4 - relatedProducts.length;
     const excludeIds = [product.id, ...relatedIds];
 
-    let query = supabase
+    const query = supabase
       .from("products")
       .select("*, brands(name, slug), categories(name, slug)")
       .eq("category_id", product.category_id)

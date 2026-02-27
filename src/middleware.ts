@@ -1,11 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-function buildCspHeader(nonce: string): string {
+function buildCspHeader(): string {
   return [
     "default-src 'self'",
-    // 'unsafe-inline' and https: are fallbacks for browsers without strict-dynamic support
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline' https:`,
+    "script-src 'self' 'unsafe-inline' https:",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://*.supabase.co",
     "font-src 'self'",
@@ -35,23 +34,16 @@ export async function middleware(request: NextRequest) {
     });
   }
 
-  // Generate a unique nonce per request for CSP
-  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
-  const cspHeader = buildCspHeader(nonce);
-
-  // Pass nonce to server components via request headers
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-nonce", nonce);
+  const cspHeader = buildCspHeader();
 
   let supabaseResponse = NextResponse.next({
-    request: { headers: requestHeaders },
+    request: { headers: request.headers },
   });
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!supabaseUrl || !supabaseKey) {
     supabaseResponse.headers.set("Content-Security-Policy", cspHeader);
-    supabaseResponse.headers.set("x-nonce", nonce);
     return supabaseResponse;
   }
 
@@ -68,7 +60,7 @@ export async function middleware(request: NextRequest) {
             request.cookies.set(name, value),
           );
           supabaseResponse = NextResponse.next({
-            request: { headers: requestHeaders },
+            request: { headers: request.headers },
           });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options),
@@ -93,7 +85,6 @@ export async function middleware(request: NextRequest) {
 
   // Set CSP on the final response (after Supabase may have recreated it)
   supabaseResponse.headers.set("Content-Security-Policy", cspHeader);
-  supabaseResponse.headers.set("x-nonce", nonce);
 
   return supabaseResponse;
 }

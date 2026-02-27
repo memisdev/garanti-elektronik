@@ -41,7 +41,7 @@ if (!SUPABASE_URL || !SERVICE_KEY || !AI_API_KEY) {
 const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
 const ICON_SIZE = 256;
 const BRAND_R = 0x14, BRAND_G = 0x18, BRAND_B = 0x1f;
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${AI_ICON_MODEL}:generateContent?key=${AI_API_KEY}`;
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${AI_ICON_MODEL}:generateContent`;
 
 function extractBase64Image(aiData) {
   const candidates = aiData.candidates;
@@ -71,7 +71,10 @@ Consistent thick line weight. Square aspect ratio. 256x256px.`;
   console.log(`  Calling Gemini for "${categoryName}"...`);
   const res = await fetch(GEMINI_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": AI_API_KEY,
+    },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: { responseModalities: ["TEXT", "IMAGE"] },

@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
     console.log(
       "[generate-product-name] finish:", result.finishReason,
       "tokens:", result.usage.completionTokens,
-      "raw:", JSON.stringify(result.content).slice(0, 200),
+      "length:", result.content.length,
     );
 
     // --- Truncation guard ---
