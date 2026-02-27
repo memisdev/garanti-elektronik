@@ -67,82 +67,118 @@ export function getIndexMeta(): Metadata {
 }
 
 export function getProductsMeta(): Metadata {
+  const title = "Ürünler";
+  const description =
+    "TV yedek parça, anakart, power board, T-Con board ve daha fazlası. Tüm markalarda orijinal ve muadil parçalar.";
   return {
-    title: "Ürünler",
-    description:
-      "TV yedek parça, anakart, power board, T-Con board ve daha fazlası. Tüm markalarda orijinal ve muadil parçalar.",
+    title,
+    description,
     alternates: { canonical: "/urunler" },
+    openGraph: { title, description },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 
 export function getAboutMeta(): Metadata {
+  const title = "Hakkımızda";
+  const description =
+    "2010'dan beri TV yedek parça tedarikinde güvenilir isim. Samsung, LG, Vestel ve daha fazlası.";
   return {
-    title: "Hakkımızda",
-    description:
-      "2010'dan beri TV yedek parça tedarikinde güvenilir isim. Samsung, LG, Vestel ve daha fazlası.",
+    title,
+    description,
     alternates: { canonical: "/hakkimizda" },
+    openGraph: { title, description },
+    twitter: { card: "summary", title, description },
   };
 }
 
 export function getContactMeta(): Metadata {
+  const title = "İletişim";
+  const description =
+    "Garanti Elektronik ile iletişime geçin. Adres, telefon, e-posta ve WhatsApp bilgileri.";
   return {
-    title: "İletişim",
-    description:
-      "Garanti Elektronik ile iletişime geçin. Adres, telefon, e-posta ve WhatsApp bilgileri.",
+    title,
+    description,
     alternates: { canonical: "/iletisim" },
+    openGraph: { title, description },
+    twitter: { card: "summary", title, description },
   };
 }
 
 export function getFAQMeta(): Metadata {
+  const title = "Sıkça Sorulan Sorular";
+  const description =
+    "TV yedek parça siparişi, kargo, iade ve garanti hakkında sıkça sorulan sorular ve yanıtları.";
   return {
-    title: "Sıkça Sorulan Sorular",
-    description:
-      "TV yedek parça siparişi, kargo, iade ve garanti hakkında sıkça sorulan sorular ve yanıtları.",
+    title,
+    description,
     alternates: { canonical: "/sss" },
+    openGraph: { title, description },
+    twitter: { card: "summary", title, description },
   };
 }
 
 export function getCargoTrackingMeta(): Metadata {
+  const title = "Kargo Takip";
+  const description =
+    "Siparişinizin kargo durumunu takip edin. Yurtiçi, Aras, MNG, PTT ve Sürat kargo sorgulaması.";
   return {
-    title: "Kargo Takip",
-    description:
-      "Siparişinizin kargo durumunu takip edin. Yurtiçi, Aras, MNG, PTT ve Sürat kargo sorgulaması.",
+    title,
+    description,
     alternates: { canonical: "/kargo-takip" },
+    openGraph: { title, description },
+    twitter: { card: "summary", title, description },
   };
 }
 
 export function getWarrantyMeta(): Metadata {
+  const title = "Garanti ve İade Koşulları";
+  const description =
+    "Orijinal parçalarda 6 ay, muadil parçalarda 3 ay garanti. 14 gün içinde iade imkânı.";
   return {
-    title: "Garanti ve İade Koşulları",
-    description:
-      "Orijinal parçalarda 6 ay, muadil parçalarda 3 ay garanti. 14 gün içinde iade imkânı.",
+    title,
+    description,
     alternates: { canonical: "/garanti-iade" },
+    openGraph: { title, description },
+    twitter: { card: "summary", title, description },
   };
 }
 
 export function getPrivacyMeta(): Metadata {
+  const title = "Gizlilik ve KVKK Politikası";
+  const description =
+    "Kişisel verilerin korunması ve KVKK kapsamındaki haklarınız hakkında bilgilendirme.";
   return {
-    title: "Gizlilik ve KVKK Politikası",
-    description:
-      "Kişisel verilerin korunması ve KVKK kapsamındaki haklarınız hakkında bilgilendirme.",
+    title,
+    description,
     alternates: { canonical: "/gizlilik-kvkk" },
+    openGraph: { title, description },
+    twitter: { card: "summary", title, description },
   };
 }
 
 export function getCookieMeta(): Metadata {
+  const title = "Çerez Politikası";
+  const description =
+    "Web sitemizde kullanılan çerezler ve yönetim seçenekleri hakkında bilgi.";
   return {
-    title: "Çerez Politikası",
-    description:
-      "Web sitemizde kullanılan çerezler ve yönetim seçenekleri hakkında bilgi.",
+    title,
+    description,
     alternates: { canonical: "/cerez-politikasi" },
+    openGraph: { title, description },
+    twitter: { card: "summary", title, description },
   };
 }
 
 export function getPartFinderMeta(): Metadata {
+  const title = "TV Parça Bulucu";
+  const description =
+    "TV model numaranızı girin veya Garanti Asistan'a arızanızı anlatın, uyumlu yedek parçaları anında bulun.";
   return {
-    title: "TV Parça Bulucu",
-    description:
-      "TV model numaranızı girin veya Garanti Asistan'a arızanızı anlatın, uyumlu yedek parçaları anında bulun.",
+    title,
+    description,
     alternates: { canonical: "/parca-bulucu" },
+    openGraph: { title, description },
+    twitter: { card: "summary", title, description },
   };
 }
