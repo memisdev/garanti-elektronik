@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Index from "@/views/Index";
+import { WebSiteJsonLd } from "@/components/seo/JsonLd";
 
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Garanti Elektronik | Orijinal TV Yedek Parça ve Anakart Tedarikçisi",
+    absolute: "TV Yedek Parça ve Anakart | Garanti Elektronik",
   },
   description:
     "Samsung, LG, Vestel ve daha fazlası için orijinal TV yedek parça ve anakart tedariki. 500+ ürün, aynı gün kargo, teknik destek.",
@@ -13,5 +14,10 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  return <Index />;
+  return (
+    <>
+      <WebSiteJsonLd />
+      <Index />
+    </>
+  );
 }

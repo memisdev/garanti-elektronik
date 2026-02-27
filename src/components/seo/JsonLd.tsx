@@ -37,6 +37,27 @@ export const OrganizationJsonLd = () => {
   );
 };
 
+export const WebSiteJsonLd = () => {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: siteConfig.name,
+    url: siteConfig.url,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${siteConfig.url}/urunler?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
+    />
+  );
+};
+
 interface ProductJsonLdProps {
   product: Product;
   description: string;

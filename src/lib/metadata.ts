@@ -42,24 +42,32 @@ export function getBrandMeta(
   brandName?: string,
   description?: string | null,
 ): Metadata {
+  const title = brandName
+    ? `${brandName} TV Yedek Parça ve Anakart | Garanti Elektronik`
+    : "Marka";
+  const desc = description
+    ?? (brandName
+      ? `${brandName} televizyon yedek parça. ${brandName} anakart, mainboard, power board, led bar. Orijinal ve test edilmiş.`
+      : "Marka ürünleri");
+
   return {
-    title: brandName ? `${brandName} Ürünleri` : "Marka",
-    description: description ?? "Marka ürünleri",
+    title,
+    description: desc,
     alternates: {
       canonical: brandSlug ? `/marka/${brandSlug}` : undefined,
     },
     openGraph: brandName
-      ? {
-          title: `${brandName} Ürünleri`,
-          description: description ?? "Marka ürünleri",
-        }
+      ? { title, description: desc }
+      : undefined,
+    twitter: brandName
+      ? { card: "summary_large_image", title, description: desc }
       : undefined,
   };
 }
 
 export function getIndexMeta(): Metadata {
   return {
-    title: "Garanti Elektronik | Orijinal TV Yedek Parça ve Anakart Tedarikçisi",
+    title: "TV Yedek Parça ve Anakart | Garanti Elektronik",
     description:
       "Samsung, LG, Vestel ve daha fazlası için orijinal TV yedek parça ve anakart tedariki. 500+ ürün, aynı gün kargo, teknik destek.",
     alternates: { canonical: "/" },
@@ -67,9 +75,9 @@ export function getIndexMeta(): Metadata {
 }
 
 export function getProductsMeta(): Metadata {
-  const title = "Ürünler";
+  const title = "TV Yedek Parça Ürünleri | Garanti Elektronik";
   const description =
-    "TV yedek parça, anakart, power board, T-Con board ve daha fazlası. Tüm markalarda orijinal ve muadil parçalar.";
+    "Samsung, LG, Vestel, Arçelik ve 45+ marka için TV yedek parça. Anakart, power board, T-Con board, LED bar, kumanda ve daha fazlası. Orijinal ve muadil parçalar.";
   return {
     title,
     description,
@@ -93,9 +101,9 @@ export function getAboutMeta(): Metadata {
 }
 
 export function getContactMeta(): Metadata {
-  const title = "İletişim";
+  const title = "İletişim - TV Yedek Parça Siparişi | Garanti Elektronik";
   const description =
-    "Garanti Elektronik ile iletişime geçin. Adres, telefon, e-posta ve WhatsApp bilgileri.";
+    "TV yedek parça siparişi ve teknik destek için Garanti Elektronik ile iletişime geçin. Adres, telefon, e-posta ve WhatsApp bilgileri.";
   return {
     title,
     description,
@@ -106,7 +114,7 @@ export function getContactMeta(): Metadata {
 }
 
 export function getFAQMeta(): Metadata {
-  const title = "Sıkça Sorulan Sorular";
+  const title = "Sıkça Sorulan Sorular - TV Yedek Parça | Garanti Elektronik";
   const description =
     "TV yedek parça siparişi, kargo, iade ve garanti hakkında sıkça sorulan sorular ve yanıtları.";
   return {
@@ -171,7 +179,7 @@ export function getCookieMeta(): Metadata {
 }
 
 export function getPartFinderMeta(): Metadata {
-  const title = "TV Parça Bulucu";
+  const title = "TV Parça Bulucu - Uyumlu Yedek Parça Bul | Garanti Elektronik";
   const description =
     "TV model numaranızı girin veya Garanti Asistan'a arızanızı anlatın, uyumlu yedek parçaları anında bulun.";
   return {

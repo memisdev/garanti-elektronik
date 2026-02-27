@@ -9,6 +9,7 @@ import ProductCard from "@/components/ProductCard";
 import EmptyState from "@/components/EmptyState";
 import { useRevealOnScroll } from "@/hooks/useRevealOnScroll";
 import { Filter, X } from "lucide-react";
+import type { Product } from "@/types/product";
 import {
   Sheet,
   SheetContent,
@@ -95,7 +96,12 @@ function FilterControls({
   );
 }
 
-const Products = () => {
+interface ProductsProps {
+  initialProducts?: Product[];
+  initialTotal?: number;
+}
+
+const Products = ({ initialProducts, initialTotal }: ProductsProps) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -113,12 +119,19 @@ const Products = () => {
     setInputValue(q);
   }, [q]);
 
+  // Build initialData for SSR hydration (only for default first page with no filters)
+  const ssrInitialData =
+    initialProducts && !q && !cat && !br && page === 0
+      ? { products: initialProducts, total: initialTotal ?? initialProducts.length }
+      : undefined;
+
   const { products, total, isPlaceholderData } = useProducts({
     query: q,
     category: cat,
     brand: br,
     page,
     pageSize: PAGE_SIZE,
+    initialData: ssrInitialData,
   });
   const { brands } = useBrands();
   const { categories } = useCategories();

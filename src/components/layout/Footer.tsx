@@ -4,13 +4,32 @@ import Image from "next/image";
 import { MessageCircle } from "lucide-react";
 import { siteConfig } from "@/config/site";
 
+const FOOTER_CATEGORIES = [
+  { name: "Anakart / Mainboard", slug: "anakart-mainboard" },
+  { name: "Power Board", slug: "besleme-powerboard" },
+  { name: "Inverter Board", slug: "inverter-board" },
+  { name: "LED Driver", slug: "led-driver" },
+  { name: "T-CON Board", slug: "tcon" },
+  { name: "Uzaktan Kumanda", slug: "uzaktan-kumanda" },
+];
+
+const FOOTER_BRANDS = [
+  { name: "Samsung", slug: "samsung" },
+  { name: "LG", slug: "lg" },
+  { name: "Vestel", slug: "vestel" },
+  { name: "Arçelik", slug: "arcelik" },
+  { name: "Beko", slug: "beko" },
+  { name: "Philips", slug: "philips" },
+  { name: "Grundig", slug: "grundig" },
+];
+
 const Footer = () => {
   return (
     <footer className="bg-foreground text-primary-foreground" role="contentinfo">
       <div className="container mx-auto px-6 py-20 md:py-24">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-12 lg:gap-8">
           {/* Company */}
-          <div className="md:col-span-1">
+          <div className="sm:col-span-2 lg:col-span-2">
             <Link href="/" className="flex items-center gap-2 font-bold text-lg mb-6" aria-label="Garanti Elektronik Ana Sayfa">
               <Image src="/logo.png" alt="Garanti Elektronik" width={44} height={40} className="h-7 w-auto" />
               {siteConfig.name}
@@ -20,29 +39,48 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* Links */}
+          {/* Kategoriler */}
+          <nav aria-label="Kategoriler">
+            <h3 className="text-xs font-semibold text-primary-foreground/60 uppercase tracking-widest mb-6">Kategoriler</h3>
+            <ul className="space-y-3 text-sm">
+              {FOOTER_CATEGORIES.map((cat) => (
+                <li key={cat.slug}>
+                  <Link href={`/kategori/${cat.slug}`} className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">
+                    {cat.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Popüler Markalar */}
+          <nav aria-label="Popüler Markalar">
+            <h3 className="text-xs font-semibold text-primary-foreground/60 uppercase tracking-widest mb-6">Popüler Markalar</h3>
+            <ul className="space-y-3 text-sm">
+              {FOOTER_BRANDS.map((brand) => (
+                <li key={brand.slug}>
+                  <Link href={`/marka/${brand.slug}`} className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">
+                    {brand.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Sayfalar */}
           <nav aria-label="Sayfalar">
             <h3 className="text-xs font-semibold text-primary-foreground/60 uppercase tracking-widest mb-6">Sayfalar</h3>
             <ul className="space-y-3 text-sm">
               <li><Link href="/urunler" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Ürünler</Link></li>
+              <li><Link href="/parca-bulucu" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Parça Bulucu</Link></li>
               <li><Link href="/hakkimizda" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Hakkımızda</Link></li>
               <li><Link href="/iletisim" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">İletişim</Link></li>
-              <li><Link href="/kargo-takip" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Kargo Takip</Link></li>
-              <li><Link href="/sss" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Sıkça Sorulan Sorular</Link></li>
-            </ul>
-          </nav>
-
-          {/* Legal */}
-          <nav aria-label="Yasal">
-            <h3 className="text-xs font-semibold text-primary-foreground/60 uppercase tracking-widest mb-6">Yasal</h3>
-            <ul className="space-y-3 text-sm">
+              <li><Link href="/sss" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">S.S.S.</Link></li>
               <li><Link href="/garanti-iade" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Garanti ve İade</Link></li>
-              <li><Link href="/gizlilik-kvkk" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Gizlilik / KVKK</Link></li>
-              <li><Link href="/cerez-politikasi" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">Çerez Politikası</Link></li>
             </ul>
           </nav>
 
-          {/* Contact */}
+          {/* İletişim */}
           <div>
             <h3 className="text-xs font-semibold text-primary-foreground/60 uppercase tracking-widest mb-6">İletişim</h3>
             <address className="not-italic space-y-3 text-sm text-primary-foreground/70">
@@ -63,7 +101,7 @@ const Footer = () => {
         </div>
 
         <div className="mt-20 pt-6 border-t border-primary-foreground/10 text-center text-xs text-primary-foreground/60">
-        © {new Date().getFullYear()} {siteConfig.name}. Tüm hakları saklıdır. · Developed by{" "}
+          © {new Date().getFullYear()} {siteConfig.name}. Tüm hakları saklıdır. · Developed by{" "}
           <a href="https://github.com/memisdev" target="_blank" rel="noopener noreferrer" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">memisdev</a>
         </div>
       </div>

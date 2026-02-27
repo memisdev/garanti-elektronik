@@ -7,13 +7,11 @@ export const revalidate = 3600;
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createStaticClient();
 
-  const { data: products } = await supabase
-    .from("products")
-    .select("slug, updated_at");
-
-  const { data: brands } = await supabase
-    .from("brands")
-    .select("slug, updated_at");
+  const [{ data: products }, { data: brands }, { data: categories }] = await Promise.all([
+    supabase.from("products").select("slug, updated_at"),
+    supabase.from("brands").select("slug, updated_at"),
+    supabase.from("categories").select("slug, updated_at"),
+  ]);
 
   const staticLastModified = "2026-02-27";
 
@@ -41,8 +39,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${siteConfig.url}/marka/${b.slug}`,
     lastModified: b.updated_at,
     changeFrequency: "weekly" as const,
-    priority: 0.7,
+    priority: 0.8,
   }));
 
-  return [...staticPages, ...productPages, ...brandPages];
+  const categoryPages: MetadataRoute.Sitemap = (categories ?? []).map((c) => ({
+    url: `${siteConfig.url}/kategori/${c.slug}`,
+    lastModified: c.updated_at,
+    changeFrequency: "weekly" as const,
+    priority: 0.9,
+  }));
+
+  return [...staticPages, ...categoryPages, ...productPages, ...brandPages];
 }
