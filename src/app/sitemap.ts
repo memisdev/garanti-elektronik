@@ -15,7 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .from("brands")
     .select("slug, updated_at");
 
-  const staticLastModified = "2025-06-01";
+  const staticLastModified = "2026-02-27";
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: `${siteConfig.url}`, lastModified: staticLastModified, changeFrequency: "weekly", priority: 1.0 },
